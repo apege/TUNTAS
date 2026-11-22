@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-tuntas-950: #0B1C14;
+    --color-tuntas-900: #143324;
+    --color-tuntas-800: #1B4332;
+    --color-tuntas-700: #245640;
+    --color-tuntas-600: #2D6A4F;
+    --color-tuntas-500: #40916C;
+    --color-tuntas-400: #52B788;
+    --color-tuntas-300: #74C69D;
+    --color-tuntas-200: #95D5B2;
+    --color-tuntas-100: #D8F3DC;
+    --color-tuntas-bg: #EAE6DE;
+}
+
+/* ==========================================================================
+   Claymorphism + Neumorphism Hybrid Design System
+   Combines Neumorphic light-source directional shadows (soft embossed /
+   debossed depth) with Claymorphic puffy 3D volume, rounded geometry,
+   and inflated double-inner bevels.
+   ========================================================================== */
+
+/* Tactile Stone/Clay Base Canvas */
+.clay-bg {
+    background-color: #EAE6DE;
+    background-image: 
+        radial-gradient(at 10% 15%, rgba(255, 255, 255, 0.9) 0px, transparent 40%),
+        radial-gradient(at 90% 85%, rgba(200, 192, 178, 0.6) 0px, transparent 45%),
+        radial-gradient(at 50% 50%, rgba(240, 236, 228, 0.5) 0px, transparent 60%);
+}
+
+/* Left Panel: Deep Forest Green 3D Clay-Neumorphic Slab */
+.clay-panel-green {
+    background: linear-gradient(145deg, #22513D 0%, #173B2B 55%, #102B1F 100%);
+    border-radius: 32px;
+    box-shadow: 
+        18px 20px 42px rgba(175, 166, 150, 0.7),
+        -16px -16px 36px #FFFFFF,
+        inset 4px 4px 8px rgba(255, 255, 255, 0.24),
+        inset -6px -6px 14px rgba(8, 24, 16, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Right Card: Extruded Neumorphic-Clay Surface */
+.clay-card {
+    background: #EFECE5;
+    border-radius: 32px;
+    box-shadow: 
+        18px 20px 42px rgba(182, 172, 156, 0.65),
+        -16px -16px 36px #FFFFFF,
+        inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+        inset -4px -4px 8px rgba(185, 175, 159, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Input Fields: Sunken / Debossed Neumorphic Well with Clay Inset Volume */
+.clay-input {
+    background-color: #E5E1D7;
+    border-radius: 16px;
+    box-shadow: 
+        inset 6px 6px 12px rgba(175, 165, 149, 0.55),
+        inset -6px -6px 12px rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clay-input:focus {
+    outline: none;
+    background-color: #E2DDD3;
+    box-shadow: 
+        inset 6px 6px 12px rgba(170, 160, 144, 0.65),
+        inset -5px -5px 10px rgba(255, 255, 255, 0.95),
+        0 0 0 3px rgba(36, 86, 64, 0.25);
+    border-color: rgba(36, 86, 64, 0.4);
+}
+
+/* Action Button: Tactile Extruded Clay Button (with realistic physical press) */
+.clay-btn-green {
+    background: linear-gradient(145deg, #275D46 0%, #18412F 100%);
+    border-radius: 16px;
+    box-shadow: 
+        8px 10px 22px rgba(170, 160, 145, 0.6),
+        -6px -6px 16px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.35),
+        inset -3px -3px 6px rgba(10, 28, 18, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clay-btn-green:hover {
+    background: linear-gradient(145deg, #2F6F54 0%, #1D4B36 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        12px 14px 28px rgba(170, 160, 145, 0.7),
+        -8px -8px 20px #FFFFFF,
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.45),
+        inset -3px -3px 6px rgba(10, 28, 18, 0.4);
+}
+
+.clay-btn-green:active {
+    transform: translateY(2px);
+    box-shadow: 
+        inset 6px 6px 12px rgba(10, 28, 18, 0.6),
+        inset -3px -3px 8px rgba(255, 255, 255, 0.15);
+}
+
+/* Leaf Badge: Extruded Squircle on Dark Green Background */
+.clay-badge-leaf {
+    background-color: #EEF2EB;
+    border-radius: 18px;
+    box-shadow: 
+        6px 6px 14px rgba(10, 28, 18, 0.5),
+        -3px -3px 8px rgba(255, 255, 255, 0.12),
+        inset 2px 2px 4px #FFFFFF,
+        inset -2px -2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+/* Sunken Map Frame on Green Panel */
+.clay-sunken-frame {
+    background: #112B1F;
+    border-radius: 20px;
+    box-shadow: 
+        inset 8px 8px 18px rgba(5, 18, 11, 0.7),
+        inset -4px -4px 10px rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Pill / Subtle Icon Container */
+.clay-pill {
+    background-color: #E8E4DB;
+    border-radius: 9999px;
+    box-shadow: 
+        5px 5px 12px rgba(182, 172, 156, 0.6),
+        -4px -4px 10px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.95),
+        inset -1.5px -1.5px 3px rgba(182, 172, 156, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease;
+}
+
+.clay-pill:hover {
+    background-color: #E3DFD5;
+    transform: translateY(-1px);
+    box-shadow: 
+        6px 6px 14px rgba(182, 172, 156, 0.7),
+        -5px -5px 12px #FFFFFF;
+}
+
+.clay-pill:active {
+    transform: translateY(1px);
+    box-shadow: 
+        inset 3px 3px 6px rgba(175, 165, 149, 0.55),
+        inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+}
+
+/* Toggle Password Pill */
+.clay-btn-toggle {
+    background-color: #ECE8E0;
+    border-radius: 10px;
+    box-shadow: 
+        2px 2px 5px rgba(175, 165, 149, 0.4),
+        -2px -2px 5px #FFFFFF,
+        inset 1px 1px 2px rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    transition: all 0.15s ease;
+}
+
+.clay-btn-toggle:hover {
+    background-color: #E5E0D7;
+}
+
+.clay-btn-toggle:active {
+    box-shadow: 
+        inset 2px 2px 4px rgba(175, 165, 149, 0.5),
+        inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+}

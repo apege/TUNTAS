@@ -54,4 +54,28 @@ class Wilayah extends Model
     {
         return $this->hasMany(User::class, 'wilayah_id');
     }
+
+    /**
+     * Relasi ke Laporan di wilayah ini.
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class, 'wilayah_id');
+    }
+
+    /**
+     * Relasi ke Kasus di wilayah ini (tingkat RW).
+     */
+    public function cases(): HasMany
+    {
+        return $this->hasMany(Kasus::class, 'wilayah_id');
+    }
+
+    /**
+     * Relasi ke Pengumuman di wilayah ini.
+     */
+    public function pengumumans(): HasMany
+    {
+        return $this->hasMany(Pengumuman::class, 'wilayah_id');
+    }
 }

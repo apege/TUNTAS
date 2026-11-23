@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<main class="min-h-screen w-full flex items-center justify-center p-4 sm:p-5 lg:py-6 lg:px-8">
+<main class="min-h-[100dvh] w-full flex items-center justify-center p-3 sm:p-4 lg:py-6 lg:px-8">
     <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-stretch">
         
-        <!-- ================= LEFT PANEL: GREEN CLAY BANNER ================= -->
-        <section class="lg:col-span-6 clay-panel-green text-white p-6 sm:p-7 lg:p-8 flex flex-col justify-between relative overflow-hidden">
+        <!-- ================= LEFT PANEL: GREEN CLAY BANNER / MOBILE HERO ================= -->
+        <section class="lg:col-span-6 clay-panel-green text-white p-6 sm:p-7 lg:p-8 flex flex-col justify-between relative overflow-hidden min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100dvh-2rem)] lg:min-h-0">
             
             <!-- Ambient Glow Overlay -->
             <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none"></div>
@@ -41,7 +41,7 @@
             </div>
 
             <!-- Bottom Graphic: Isometric Map & Progress Illustration -->
-            <div class="relative z-10 mt-5 pt-2">
+            <div class="relative z-10 mt-5 pt-2 flex-1 flex flex-col justify-center">
                 <div class="w-full h-36 sm:h-40 lg:h-42 xl:h-44 relative clay-sunken-frame overflow-hidden flex items-center justify-center p-2.5">
                     
                     <!-- SVG Isometric Grid & Neighborhood Plot Map -->
@@ -109,28 +109,67 @@
                 </div>
             </div>
 
+            <!-- Mobile Only: Bottom CTA Button to trigger Slide-Up Login Sheet -->
+            <div class="lg:hidden mt-6 pt-1">
+                <button
+                    type="button"
+                    onclick="openLoginDrawer()"
+                    class="clay-btn-mobile w-full py-4 px-6 font-extrabold text-[#153828] text-base flex items-center justify-center gap-2.5 shadow-lg active:scale-[0.99] transition-transform cursor-pointer"
+                >
+                    <span>Masuk ke TUNTAS</span>
+                    <svg class="w-5 h-5 text-[#245640]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+
         </section>
 
-        <!-- ================= RIGHT PANEL: CLAYMORPHIC LOGIN CARD ================= -->
-        <section class="lg:col-span-6 flex flex-col justify-center">
-            <div class="clay-card p-6 sm:p-7 lg:p-8 relative">
+        <!-- ================= MOBILE BACKDROP OVERLAY ================= -->
+        <div 
+            id="drawerBackdrop" 
+            onclick="closeLoginDrawer()" 
+            class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity duration-300 opacity-0 pointer-events-none"
+            aria-hidden="true"
+        ></div>
+
+        <!-- ================= RIGHT PANEL: CLAYMORPHIC LOGIN CARD / MOBILE BOTTOM SHEET ================= -->
+        <section 
+            id="loginDrawer"
+            class="fixed inset-x-0 bottom-0 z-50 lg:static lg:z-auto lg:col-span-6 flex flex-col justify-center transition-transform duration-300 ease-out transform translate-y-full lg:translate-y-0"
+        >
+            <div id="drawerCard" class="clay-card p-4 sm:p-6 lg:p-8 relative rounded-t-[28px] sm:rounded-t-[32px] rounded-b-none lg:rounded-[32px] max-h-[90dvh] overflow-y-auto overscroll-contain pb-6 sm:pb-8">
                 
+                <!-- Mobile Handle Bar & Close Button -->
+                <div class="lg:hidden relative flex items-center justify-center pt-0.5 pb-2.5 -mt-0.5" id="drawerHeader">
+                    <div class="w-12 h-1.5 bg-[#CFC8BA] rounded-full"></div>
+                    <button 
+                        type="button" 
+                        onclick="closeLoginDrawer()" 
+                        class="absolute right-0 top-0 w-8 h-8 rounded-full clay-pill flex items-center justify-center text-[#55695F] hover:text-[#183B2C] text-xs font-bold shrink-0"
+                        aria-label="Tutup form login"
+                    >
+                        ✕
+                    </button>
+                </div>
+
                 <!-- Section Subtitle & Header -->
-                <div class="mb-5">
-                    <span class="inline-block text-[11px] font-bold tracking-widest text-[#2D6A4F] uppercase mb-1">
+                <div class="mb-3 sm:mb-5">
+                    <span class="inline-block text-[10px] sm:text-[11px] font-bold tracking-widest text-[#2D6A4F] uppercase mb-0.5 sm:mb-1">
                         AKSES AKUN
                     </span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-[#122A1E] tracking-tight">
+                    <h2 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#122A1E] tracking-tight">
                         Masuk ke TUNTAS
                     </h2>
-                    <p class="text-xs sm:text-sm text-[#54685E] mt-1 leading-normal">
+                    <p class="text-xs sm:text-sm text-[#54685E] mt-0.5 sm:mt-1 leading-normal">
                         Gunakan akun Anda untuk membuka ruang kerja sesuai peran.
                     </p>
                 </div>
 
                 <!-- Alert Messages -->
                 @if (session('status'))
-                    <div class="mb-4 p-3 rounded-2xl bg-[#E8F5E9] text-[#1B4332] text-xs font-medium border border-[#C8E6C9] flex items-center gap-2.5 shadow-sm">
+                    <div class="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-2xl bg-[#E8F5E9] text-[#1B4332] text-xs font-medium border border-[#C8E6C9] flex items-center gap-2.5 shadow-sm">
                         <svg class="w-4 h-4 shrink-0 text-[#2E7D32]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                             <polyline points="22 4 12 14.01 9 11.01"/>
@@ -140,7 +179,7 @@
                 @endif
 
                 @if ($errors->has('login_failed') || $errors->has('email') || $errors->has('password'))
-                    <div class="mb-4 p-3 rounded-2xl bg-[#FDE8E8] text-[#9B1C1C] text-xs font-medium border border-[#F8B4B4] flex items-start gap-2.5 shadow-sm" role="alert">
+                    <div class="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-2xl bg-[#FDE8E8] text-[#9B1C1C] text-xs font-medium border border-[#F8B4B4] flex items-start gap-2.5 shadow-sm" role="alert">
                         <svg class="w-4 h-4 shrink-0 mt-0.5 text-[#E02424]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
                             <line x1="12" y1="8" x2="12" y2="12"/>
@@ -161,7 +200,7 @@
                 @endif
 
                 <!-- Login Form -->
-                <form action="{{ route('login.store') }}" method="POST" class="space-y-4" novalidate>
+                <form action="{{ route('login.store') }}" method="POST" class="space-y-2.5 sm:space-y-4" novalidate>
                     @csrf
 
                     <!-- Email Field -->
@@ -178,7 +217,7 @@
                                 placeholder="nama@domain.id"
                                 required
                                 autocomplete="email"
-                                class="clay-input w-full px-3.5 py-2.5 sm:py-3 text-sm text-[#122A1E] placeholder:text-[#8D9B93] focus:ring-0"
+                                class="clay-input w-full px-3.5 py-2 sm:py-2.5 lg:py-3 text-sm text-[#122A1E] placeholder:text-[#8D9B93] focus:ring-0"
                             />
                         </div>
                     </div>
@@ -198,7 +237,7 @@
                                 placeholder="Masukkan kata sandi"
                                 required
                                 autocomplete="current-password"
-                                class="clay-input w-full pl-3.5 pr-24 py-2.5 sm:py-3 text-sm text-[#122A1E] placeholder:text-[#8D9B93] focus:ring-0"
+                                class="clay-input w-full pl-3.5 pr-24 py-2 sm:py-2.5 lg:py-3 text-sm text-[#122A1E] placeholder:text-[#8D9B93] focus:ring-0"
                             />
                             <!-- Toggle Show/Hide Password -->
                             <button
@@ -227,10 +266,10 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <div class="pt-1.5">
+                    <div class="pt-1">
                         <button
                             type="submit"
-                            class="clay-btn-green w-full py-3 sm:py-3.5 px-6 font-bold text-white text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                            class="clay-btn-green w-full py-2.5 sm:py-3.5 px-6 font-bold text-white text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer shadow-md"
                         >
                             <span>Masuk</span>
                             <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -242,8 +281,8 @@
                 </form>
 
                 <!-- Divider / Info Box -->
-                <div class="mt-5 pt-4 border-t border-[#DFDBD0] flex items-start gap-3 text-xs text-[#52645B]">
-                    <div class="clay-pill w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[#2D6A4F] mt-0.5">
+                <div class="mt-3.5 pt-3 sm:mt-5 sm:pt-4 border-t border-[#DFDBD0] flex items-start gap-2.5 text-xs text-[#52645B]">
+                    <div class="clay-pill w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0 text-[#2D6A4F] mt-0.5">
                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="18" height="18" x="3" y="3" rx="2"/>
                             <path d="M3 9h18"/>
@@ -252,7 +291,7 @@
                     </div>
                     <div class="space-y-0.5">
                         <p class="font-bold text-[#1F372B]">Belum memiliki akses?</p>
-                        <p class="leading-relaxed">Hubungi pengurus RT atau RW untuk informasi akun Anda.</p>
+                        <p class="leading-relaxed text-[11px] sm:text-xs">Hubungi pengurus RT atau RW untuk informasi akun Anda.</p>
                     </div>
                 </div>
 
@@ -275,5 +314,119 @@
             toggleBtn.textContent = 'Tampilkan';
         }
     }
+
+    function openLoginDrawer() {
+        const drawer = document.getElementById('loginDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        if (!drawer || !backdrop) return;
+
+        drawer.classList.remove('translate-y-full');
+        drawer.classList.add('translate-y-0');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100', 'pointer-events-auto');
+
+        // Prevent body scroll when drawer is open on mobile
+        document.body.style.overflow = 'hidden';
+
+        // Hanya auto-focus pada desktop agar keyboard ponsel tidak langsung menutupi kartu
+        if (window.innerWidth >= 1024) {
+            setTimeout(() => {
+                const emailInput = document.getElementById('email');
+                if (emailInput) emailInput.focus();
+            }, 320);
+        }
+    }
+
+    function closeLoginDrawer() {
+        const drawer = document.getElementById('loginDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        if (!drawer || !backdrop) return;
+
+        // Blur any focused input to collapse virtual keyboard
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'BUTTON')) {
+            document.activeElement.blur();
+        }
+
+        drawer.classList.add('translate-y-full');
+        drawer.classList.remove('translate-y-0');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+
+        document.body.style.overflow = '';
+    }
+
+    // Adaptasi dinamis saat virtual keyboard aktif di ponsel
+    (function handleVirtualKeyboard() {
+        const drawerCard = document.getElementById('drawerCard');
+        if (!drawerCard) return;
+
+        // Auto-scroll input ke tengah layar saat difokuskan di perangkat bergerak
+        const inputs = drawerCard.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                if (window.innerWidth < 1024) {
+                    setTimeout(() => {
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 200);
+                }
+            });
+        });
+
+        // Dukungan visualViewport untuk iOS Safari & Android Chrome
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                if (window.innerWidth < 1024) {
+                    const vpHeight = window.visualViewport.height;
+                    const screenHeight = window.innerHeight;
+                    
+                    // Jika tinggi visual viewport mengecil lebih dari 120px, tandanya keyboard terbuka
+                    if (screenHeight - vpHeight > 120) {
+                        drawerCard.style.maxHeight = (vpHeight - 16) + 'px';
+                        if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                            setTimeout(() => {
+                                document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        }
+                    } else {
+                        drawerCard.style.maxHeight = '';
+                    }
+                }
+            });
+        }
+    })();
+
+    // Touch Swipe down to dismiss gesture on mobile
+    (function initTouchGesture() {
+        const drawerHeader = document.getElementById('drawerHeader');
+        if (!drawerHeader) return;
+
+        let startY = 0;
+        let currentY = 0;
+
+        drawerHeader.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        drawerHeader.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+        }, { passive: true });
+
+        drawerHeader.addEventListener('touchend', () => {
+            if (currentY - startY > 60) {
+                closeLoginDrawer();
+            }
+            startY = 0;
+            currentY = 0;
+        });
+    })();
+
+    // Auto-open drawer on mobile if there are errors or old input
+    @if ($errors->any() || old('email'))
+        if (window.innerWidth < 1024) {
+            document.addEventListener('DOMContentLoaded', () => {
+                openLoginDrawer();
+            });
+        }
+    @endif
 </script>
 @endsection

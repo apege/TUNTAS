@@ -20,6 +20,67 @@
 }
 
 /* ==========================================================================
+   Global Custom Sleek Scrollbar
+   Eliminates ugly Windows default gray scrollbars and integrates seamlessly
+   with the Neumorphic / Claymorphic aesthetic.
+   ========================================================================== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(180, 170, 155, 0.45);
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(140, 130, 115, 0.7);
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(180, 170, 155, 0.45) transparent;
+}
+
+/* Utility to completely hide scrollbar while keeping scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+/* Custom thin scrollbar for designated containers */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(160, 150, 135, 0.4);
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 110, 95, 0.65);
+}
+
+/* ==========================================================================
    Claymorphism + Neumorphism Hybrid Design System
    Combines Neumorphic light-source directional shadows (soft embossed /
    debossed depth) with Claymorphic puffy 3D volume, rounded geometry,
@@ -181,3 +242,225 @@
         inset 2px 2px 4px rgba(175, 165, 149, 0.5),
         inset -1px -1px 2px rgba(255, 255, 255, 0.8);
 }
+
+/* Mobile Welcome CTA Button (Extruded Cream Clay on Dark Green Slab) */
+.clay-btn-mobile {
+    background: linear-gradient(145deg, #FAF8F4 0%, #E8E4DA 100%);
+    border-radius: 18px;
+    box-shadow: 
+        0 10px 24px rgba(7, 22, 14, 0.45),
+        inset 2px 2px 4px #FFFFFF,
+        inset -2px -2px 4px rgba(180, 172, 158, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clay-btn-mobile:hover {
+    background: linear-gradient(145deg, #FFFFFF 0%, #ECE8DF 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 14px 28px rgba(7, 22, 14, 0.55),
+        inset 2px 2px 4px #FFFFFF,
+        inset -2px -2px 4px rgba(180, 172, 158, 0.35);
+}
+
+.clay-btn-mobile:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 4px 10px rgba(7, 22, 14, 0.3),
+        inset 3px 3px 6px rgba(175, 165, 149, 0.5);
+}
+
+/* ==========================================================================
+   Dashboard Warga: Claymorphic & Neumorphic Extended Component Tokens
+   ========================================================================== */
+
+/* Dashboard Layout Surface */
+.dashboard-canvas {
+    background-color: #F6F4EE;
+    background-image: 
+        radial-gradient(at 15% 10%, rgba(255, 255, 255, 0.95) 0px, transparent 35%),
+        radial-gradient(at 85% 90%, rgba(215, 208, 196, 0.4) 0px, transparent 40%),
+        radial-gradient(at 50% 45%, rgba(245, 242, 235, 0.7) 0px, transparent 60%);
+}
+
+/* Sidebar Container */
+.neu-sidebar {
+    background: #FAF8F4;
+    border-right: 1px solid rgba(225, 219, 208, 0.8);
+    box-shadow: 4px 0 24px rgba(185, 175, 160, 0.15);
+}
+
+/* Soft Emblazoned Pill (Tag RT/RW) */
+.neu-pill-tag {
+    background: #EFECE5;
+    border-radius: 9999px;
+    box-shadow: 
+        4px 4px 10px rgba(185, 175, 160, 0.4),
+        -3px -3px 8px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.95),
+        inset -1.5px -1.5px 3px rgba(185, 175, 160, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Sunken Search Field */
+.neu-search-input {
+    background-color: #EDE8DE;
+    border-radius: 16px;
+    box-shadow: 
+        inset 4px 4px 8px rgba(175, 165, 149, 0.5),
+        inset -4px -4px 8px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease;
+}
+
+.neu-search-input:focus-within {
+    background-color: #E8E3D8;
+    box-shadow: 
+        inset 5px 5px 10px rgba(170, 160, 144, 0.6),
+        inset -4px -4px 8px #FFFFFF,
+        0 0 0 2px rgba(36, 86, 64, 0.2);
+    border-color: rgba(36, 86, 64, 0.35);
+}
+
+/* Active Menu Item: Dark Green Clay Pill */
+.clay-nav-active {
+    background: linear-gradient(135deg, #245640 0%, #153B29 100%);
+    color: #FFFFFF !important;
+    border-radius: 16px;
+    box-shadow: 
+        0 8px 18px -2px rgba(21, 59, 41, 0.35),
+        4px 6px 12px rgba(180, 170, 155, 0.3),
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.4),
+        inset -2px -2px 4px rgba(10, 28, 18, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Inactive Nav Item */
+.neu-nav-item {
+    color: #44594D;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+.neu-nav-item:hover {
+    background-color: #ECE8E0;
+    color: #153B29;
+    box-shadow: 
+        3px 3px 8px rgba(185, 175, 160, 0.3),
+        -2px -2px 6px #FFFFFF;
+}
+
+/* Stat Cards: Extruded Neumorphic/Clay Geometry */
+.clay-card-stat {
+    background: #FAF8F4;
+    border-radius: 24px;
+    box-shadow: 
+        10px 12px 26px rgba(185, 175, 160, 0.42),
+        -8px -8px 22px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 5px rgba(185, 175, 160, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clay-card-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        14px 16px 32px rgba(185, 175, 160, 0.5),
+        -10px -10px 26px #FFFFFF,
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 5px rgba(185, 175, 160, 0.15);
+}
+
+/* Hero Welcome Banner */
+.clay-hero-banner {
+    background: linear-gradient(135deg, #E2ECE4 0%, #D8E7DC 55%, #CCE0D2 100%);
+    border-radius: 28px;
+    box-shadow: 
+        14px 16px 36px rgba(175, 185, 175, 0.5),
+        -10px -10px 28px #FFFFFF,
+        inset 2px 2px 5px rgba(255, 255, 255, 0.95),
+        inset -3px -3px 8px rgba(145, 170, 155, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+/* Content Container Cards (Laporan Saya & Pengumuman) */
+.clay-card-content {
+    background: #FAF8F4;
+    border-radius: 28px;
+    box-shadow: 
+        12px 14px 32px rgba(185, 175, 160, 0.42),
+        -10px -10px 26px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 5px rgba(185, 175, 160, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+/* Soft Tactile Squircle for Icons */
+.clay-icon-badge {
+    border-radius: 18px;
+    box-shadow: 
+        4px 4px 10px rgba(180, 170, 155, 0.35),
+        -3px -3px 8px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
+        inset -1.5px -1.5px 3px rgba(180, 170, 155, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Territory Card / Subtle Sunken Frame */
+.clay-territory-card {
+    background: #EFECE5;
+    border-radius: 20px;
+    box-shadow: 
+        6px 6px 14px rgba(185, 175, 160, 0.35),
+        -5px -5px 12px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
+        inset -1.5px -1.5px 3px rgba(185, 175, 160, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile Bottom Navigation Dock */
+.neu-bottom-bar {
+    background: rgba(248, 246, 241, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 -8px 24px rgba(175, 165, 150, 0.22);
+}
+
+/* Mobile Center Action Floating Clay Button */
+.clay-btn-fab {
+    background: linear-gradient(135deg, #245640 0%, #153B29 100%);
+    box-shadow: 
+        0 8px 20px rgba(21, 59, 41, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.4),
+        inset -2px -2px 4px rgba(10, 28, 18, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Bottom Awareness Banner (Kenali kondisi di sekitar Anda) */
+.clay-bottom-banner {
+    background: linear-gradient(135deg, #E6F0E9 0%, #DDEBE1 100%);
+    border-radius: 24px;
+    box-shadow: 
+        10px 12px 28px rgba(175, 185, 175, 0.42),
+        -8px -8px 22px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.85),
+        inset -2px -2px 4px rgba(145, 170, 155, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* Sidebar Helper Info Card */
+.clay-helper-card {
+    background: linear-gradient(135deg, #E4EFE7 0%, #D9E9DE 100%);
+    border-radius: 22px;
+    box-shadow: 
+        6px 8px 18px rgba(175, 185, 175, 0.35),
+        -5px -5px 14px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
+        inset -1.5px -1.5px 3px rgba(145, 170, 155, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+}
+

@@ -93,7 +93,7 @@
             <div class="clay-territory-card p-4">
                 <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E] mb-2">Wilayah Anda</span>
                 <div class="flex items-center gap-3">
-                    <div class="clay-icon-badge w-10 h-10 bg-[#E8F1EC] text-[#245640] flex items-center justify-center shrink-0">
+                    <div class="clay-icon-mint w-10 h-10 text-[#1B4332] flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -205,7 +205,7 @@
                 <span class="block text-[10px] xl:text-[11px] font-bold uppercase tracking-wider text-[#687C71] mb-1.5 px-1">Wilayah Anda</span>
                 <div class="clay-territory-card p-3 xl:p-3.5">
                     <div class="flex items-center gap-2.5">
-                        <div class="clay-icon-badge w-8 h-8 xl:w-9 xl:h-9 bg-[#E8F1EC] text-[#245640] flex items-center justify-center shrink-0">
+                        <div class="clay-icon-mint w-8 h-8 xl:w-9 xl:h-9 text-[#1B4332] flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -284,7 +284,7 @@
         <div class="mt-3 xl:mt-4">
             <div class="clay-helper-card p-3 xl:p-3.5 relative overflow-hidden">
                 <div class="flex items-start gap-2.5 relative z-10">
-                    <div class="clay-icon-badge w-7 h-7 bg-[#1B4332] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    <div class="clay-badge-help w-7 h-7 text-white flex items-center justify-center font-bold text-xs shrink-0">
                         ?
                     </div>
                     <div class="flex-1 min-w-0">
@@ -589,7 +589,7 @@
                 <!-- Card 1: Laporan Saya -->
                 <div class="clay-card-stat p-3.5 sm:p-4 xl:p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
-                        <div class="clay-icon-badge w-9 h-9 xl:w-10 xl:h-10 bg-[#E8F1EC] text-[#245640] flex items-center justify-center shrink-0">
+                        <div class="clay-icon-mint w-10 h-10 xl:w-11 xl:h-11 text-[#1B4332] flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4 xl:w-5 xl:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -607,7 +607,7 @@
                 <!-- Card 2: Sedang Ditangani -->
                 <div class="clay-card-stat p-3.5 sm:p-4 xl:p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
-                        <div class="clay-icon-badge w-9 h-9 xl:w-10 xl:h-10 bg-[#E8F0FE] text-[#2563EB] flex items-center justify-center shrink-0">
+                        <div class="clay-icon-blue w-10 h-10 xl:w-11 xl:h-11 text-[#1D4ED8] flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4 xl:w-5 xl:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -625,7 +625,7 @@
                 <!-- Card 3: Menunggu Verifikasi -->
                 <div class="clay-card-stat p-3.5 sm:p-4 xl:p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
-                        <div class="clay-icon-badge w-9 h-9 xl:w-10 xl:h-10 bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+                        <div class="clay-icon-amber w-10 h-10 xl:w-11 xl:h-11 text-[#B45309] flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4 xl:w-5 xl:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                             </svg>
@@ -643,7 +643,7 @@
                 <!-- Card 4: Laporan Selesai -->
                 <div class="clay-card-stat p-3.5 sm:p-4 xl:p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
-                        <div class="clay-icon-badge w-9 h-9 xl:w-10 xl:h-10 bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+                        <div class="clay-icon-emerald w-10 h-10 xl:w-11 xl:h-11 text-[#15803D] flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4 xl:w-5 xl:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -687,7 +687,7 @@
                             <!-- Dynamic Report List -->
                             <div class="py-3 space-y-3">
                                 @foreach ($laporanTerbaru as $lap)
-                                    <div class="clay-card p-3.5 sm:p-4 transition-all duration-200 hover:-translate-y-0.5">
+                                    <div class="clay-item-card p-3.5 sm:p-4">
                                         <div class="flex items-center justify-between gap-2 mb-1.5">
                                             <div class="flex items-center gap-2 min-w-0">
                                                 <span class="text-[11px] font-black text-[#1E3A2B] font-mono tracking-tight shrink-0">{{ $lap->kode }}</span>
@@ -734,8 +734,8 @@
                         @endif
                     </div>
 
-                    <!-- Bottom Helper Note Inside Card -->
-                    <div class="pt-4 border-t border-[#E8E2D7] flex items-start gap-3 text-xs text-[#52685C]">
+                    <!-- Bottom Helper Note Inside Card: Sunken Debossed Clay Pill -->
+                    <div class="clay-sunken-note p-3 sm:p-3.5 mt-4 flex items-start gap-2.5 text-xs text-[#52685C]">
                         <svg class="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
                             <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
@@ -771,7 +771,7 @@
                             <!-- Dynamic Announcement List -->
                             <div class="py-3 space-y-3">
                                 @foreach ($pengumumanTerbaru as $pengumuman)
-                                    <div class="clay-card p-3.5 sm:p-4 transition-all duration-200 hover:-translate-y-0.5">
+                                    <div class="clay-item-card p-3.5 sm:p-4">
                                         <div class="flex items-center justify-between gap-2 mb-1.5">
                                             <div class="flex items-center gap-2">
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide {{ $pengumuman->jenis_badge['bg'] }} {{ $pengumuman->jenis_badge['text'] }}">
@@ -825,7 +825,7 @@
             <section class="clay-bottom-banner p-5 sm:p-6 mb-8 relative overflow-hidden">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
-                        <div class="clay-icon-badge w-12 h-12 bg-[#E1EDE4] text-[#1B4332] flex items-center justify-center shrink-0">
+                        <div class="clay-icon-mint w-12 h-12 text-[#1B4332] flex items-center justify-center shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                             </svg>

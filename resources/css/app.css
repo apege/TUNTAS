@@ -272,195 +272,318 @@
 }
 
 /* ==========================================================================
-   Dashboard Warga: Claymorphic & Neumorphic Extended Component Tokens
+   Dashboard Warga: Advanced Claymorphism & Neumorphism Extended Tokens
+   Enhanced with true volumetric 3D pillowing, specular bevel reflections,
+   and directional tactile physics.
    ========================================================================== */
 
 /* Dashboard Layout Surface */
 .dashboard-canvas {
-    background-color: #F6F4EE;
+    background-color: #F5F2EB;
     background-image: 
-        radial-gradient(at 15% 10%, rgba(255, 255, 255, 0.95) 0px, transparent 35%),
-        radial-gradient(at 85% 90%, rgba(215, 208, 196, 0.4) 0px, transparent 40%),
-        radial-gradient(at 50% 45%, rgba(245, 242, 235, 0.7) 0px, transparent 60%);
+        radial-gradient(at 10% 8%, rgba(255, 255, 255, 0.98) 0px, transparent 38%),
+        radial-gradient(at 88% 88%, rgba(212, 204, 190, 0.5) 0px, transparent 42%),
+        radial-gradient(at 50% 50%, rgba(246, 243, 237, 0.7) 0px, transparent 60%);
 }
 
 /* Sidebar Container */
 .neu-sidebar {
-    background: #FAF8F4;
-    border-right: 1px solid rgba(225, 219, 208, 0.8);
-    box-shadow: 4px 0 24px rgba(185, 175, 160, 0.15);
+    background: linear-gradient(180deg, #FAF8F4 0%, #F4EFE6 100%);
+    border-right: 1.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 6px 0 28px rgba(185, 175, 158, 0.2);
 }
 
 /* Soft Emblazoned Pill (Tag RT/RW) */
 .neu-pill-tag {
-    background: #EFECE5;
+    background: linear-gradient(145deg, #FFFFFF 0%, #EBE7DD 100%);
     border-radius: 9999px;
     box-shadow: 
-        4px 4px 10px rgba(185, 175, 160, 0.4),
-        -3px -3px 8px #FFFFFF,
-        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.95),
-        inset -1.5px -1.5px 3px rgba(185, 175, 160, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+        5px 6px 14px rgba(185, 175, 158, 0.45),
+        -4px -4px 10px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 1),
+        inset -1.5px -1.5px 3px rgba(185, 175, 158, 0.25);
+    border: 1.2px solid rgba(255, 255, 255, 0.9);
 }
 
-/* Sunken Search Field */
+/* Sunken Search Field: Capsule / Pill Neumorphic Well */
 .neu-search-input {
-    background-color: #EDE8DE;
-    border-radius: 16px;
+    background-color: #E8E3D7;
+    border-radius: 9999px;
     box-shadow: 
-        inset 4px 4px 8px rgba(175, 165, 149, 0.5),
-        inset -4px -4px 8px #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    transition: all 0.2s ease;
-}
-
-.neu-search-input:focus-within {
-    background-color: #E8E3D8;
-    box-shadow: 
-        inset 5px 5px 10px rgba(170, 160, 144, 0.6),
-        inset -4px -4px 8px #FFFFFF,
-        0 0 0 2px rgba(36, 86, 64, 0.2);
-    border-color: rgba(36, 86, 64, 0.35);
-}
-
-/* Active Menu Item: Dark Green Clay Pill */
-.clay-nav-active {
-    background: linear-gradient(135deg, #245640 0%, #153B29 100%);
-    color: #FFFFFF !important;
-    border-radius: 16px;
-    box-shadow: 
-        0 8px 18px -2px rgba(21, 59, 41, 0.35),
-        4px 6px 12px rgba(180, 170, 155, 0.3),
-        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.4),
-        inset -2px -2px 4px rgba(10, 28, 18, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* Inactive Nav Item */
-.neu-nav-item {
-    color: #44594D;
-    border-radius: 16px;
-    transition: all 0.2s ease;
-}
-
-.neu-nav-item:hover {
-    background-color: #ECE8E0;
-    color: #153B29;
-    box-shadow: 
-        3px 3px 8px rgba(185, 175, 160, 0.3),
-        -2px -2px 6px #FFFFFF;
-}
-
-/* Stat Cards: Extruded Neumorphic/Clay Geometry */
-.clay-card-stat {
-    background: #FAF8F4;
-    border-radius: 24px;
-    box-shadow: 
-        10px 12px 26px rgba(185, 175, 160, 0.42),
-        -8px -8px 22px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
-        inset -2px -2px 5px rgba(185, 175, 160, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.85);
+        inset 4px 4px 9px rgba(165, 155, 138, 0.55),
+        inset -4px -4px 9px #FFFFFF,
+        0 1px 2px rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.55);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.clay-card-stat:hover {
-    transform: translateY(-3px);
+.neu-search-input:focus-within {
+    background-color: #E4DFD2;
     box-shadow: 
-        14px 16px 32px rgba(185, 175, 160, 0.5),
-        -10px -10px 26px #FFFFFF,
-        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
-        inset -2px -2px 5px rgba(185, 175, 160, 0.15);
+        inset 5px 5px 11px rgba(160, 150, 132, 0.65),
+        inset -4px -4px 9px #FFFFFF,
+        0 0 0 3px rgba(36, 86, 64, 0.22);
+    border-color: rgba(36, 86, 64, 0.4);
 }
 
-/* Hero Welcome Banner */
-.clay-hero-banner {
-    background: linear-gradient(135deg, #E2ECE4 0%, #D8E7DC 55%, #CCE0D2 100%);
+/* Active Menu Item: Puffy Dark Green Clay Pill */
+.clay-nav-active {
+    background: linear-gradient(145deg, #2A664D 0%, #17422F 60%, #103323 100%);
+    color: #FFFFFF !important;
+    border-radius: 20px;
+    box-shadow: 
+        0 12px 24px -3px rgba(16, 48, 33, 0.5),
+        6px 8px 18px rgba(175, 165, 150, 0.35),
+        inset 2px 2.5px 5px rgba(255, 255, 255, 0.42),
+        inset -3px -3px 6px rgba(5, 18, 12, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clay-nav-active:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+        0 14px 28px -3px rgba(16, 48, 33, 0.6),
+        7px 10px 22px rgba(175, 165, 150, 0.4),
+        inset 2px 2.5px 5px rgba(255, 255, 255, 0.5);
+}
+
+.clay-nav-active:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 4px 10px rgba(16, 48, 33, 0.4),
+        inset 4px 4px 8px rgba(5, 18, 12, 0.7),
+        inset -2px -2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Inactive Nav Item: Tactile Embossed Pebble */
+.neu-nav-item {
+    color: #44594D;
+    border-radius: 18px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neu-nav-item:hover {
+    background: linear-gradient(145deg, #FAF8F4 0%, #EAE5DC 100%);
+    color: #122A1E;
+    transform: translateY(-1px);
+    box-shadow: 
+        5px 6px 14px rgba(185, 175, 158, 0.35),
+        -4px -4px 10px #FFFFFF,
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.95);
+}
+
+.neu-nav-item:active {
+    transform: translateY(1px);
+    box-shadow: 
+        inset 3px 3px 6px rgba(175, 165, 149, 0.45),
+        inset -2px -2px 5px #FFFFFF;
+}
+
+/* Stat Cards: Volumetric 3D Clay Pillows with Specular Highlight */
+.clay-card-stat {
+    background: linear-gradient(145deg, #FFFFFF 0%, #F7F3EB 55%, #EBE5DB 100%);
     border-radius: 28px;
     box-shadow: 
-        14px 16px 36px rgba(175, 185, 175, 0.5),
-        -10px -10px 28px #FFFFFF,
-        inset 2px 2px 5px rgba(255, 255, 255, 0.95),
-        inset -3px -3px 8px rgba(145, 170, 155, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.75);
+        14px 18px 38px rgba(185, 175, 158, 0.5),
+        -10px -10px 26px #FFFFFF,
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+        inset -3px -3px 7px rgba(185, 175, 158, 0.25);
+    border: 1.5px solid rgba(255, 255, 255, 0.92);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clay-card-stat:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 
+        18px 24px 48px rgba(185, 175, 158, 0.6),
+        -12px -12px 30px #FFFFFF,
+        inset 3px 3px 6px rgba(255, 255, 255, 1),
+        inset -2.5px -2.5px 6px rgba(185, 175, 158, 0.2);
+}
+
+.clay-card-stat:active {
+    transform: translateY(1px) scale(0.99);
+    box-shadow: 
+        8px 10px 20px rgba(185, 175, 158, 0.4),
+        -6px -6px 14px #FFFFFF;
+}
+
+/* Hero Welcome Banner: Mint-Sage Puffy Clay Pad */
+.clay-hero-banner {
+    background: linear-gradient(140deg, #E3ECE5 0%, #D5E7DA 48%, #C7DFCE 100%);
+    border-radius: 32px;
+    box-shadow: 
+        16px 20px 44px rgba(165, 182, 170, 0.55),
+        -12px -12px 32px #FFFFFF,
+        inset 3px 3px 6px rgba(255, 255, 255, 0.98),
+        inset -4px -4px 10px rgba(130, 162, 142, 0.38);
+    border: 1.5px solid rgba(255, 255, 255, 0.88);
 }
 
 /* Content Container Cards (Laporan Saya & Pengumuman) */
 .clay-card-content {
-    background: #FAF8F4;
-    border-radius: 28px;
+    background: linear-gradient(145deg, #FFFFFF 0%, #F6F2E9 60%, #ECE6DC 100%);
+    border-radius: 32px;
     box-shadow: 
-        12px 14px 32px rgba(185, 175, 160, 0.42),
-        -10px -10px 26px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
-        inset -2px -2px 5px rgba(185, 175, 160, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.85);
+        16px 20px 44px rgba(185, 175, 158, 0.5),
+        -12px -12px 30px #FFFFFF,
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+        inset -3px -3px 8px rgba(180, 170, 152, 0.28);
+    border: 1.5px solid rgba(255, 255, 255, 0.92);
 }
 
-/* Soft Tactile Squircle for Icons */
+/* Dedicated Tactile 3D Clay Icon Squircles */
+.clay-icon-mint {
+    background: linear-gradient(135deg, #F0F7F2 0%, #DCEFE3 100%);
+    border-radius: 18px;
+    box-shadow: 
+        5px 6px 14px rgba(155, 185, 165, 0.45),
+        -3px -3px 8px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
+        inset -2px -2px 4px rgba(135, 170, 148, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+}
+
+.clay-icon-blue {
+    background: linear-gradient(135deg, #F0F6FD 0%, #DCEAFC 100%);
+    border-radius: 18px;
+    box-shadow: 
+        5px 6px 14px rgba(155, 175, 205, 0.45),
+        -3px -3px 8px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
+        inset -2px -2px 4px rgba(130, 160, 200, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+}
+
+.clay-icon-amber {
+    background: linear-gradient(135deg, #FFFDF0 0%, #FDF1D6 100%);
+    border-radius: 18px;
+    box-shadow: 
+        5px 6px 14px rgba(200, 180, 140, 0.45),
+        -3px -3px 8px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
+        inset -2px -2px 4px rgba(195, 165, 115, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+}
+
+.clay-icon-emerald {
+    background: linear-gradient(135deg, #F2FCF5 0%, #DDF7E4 100%);
+    border-radius: 18px;
+    box-shadow: 
+        5px 6px 14px rgba(150, 195, 165, 0.45),
+        -3px -3px 8px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
+        inset -2px -2px 4px rgba(125, 185, 145, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+}
+
+/* Generic Tactile Squircle Badge */
 .clay-icon-badge {
     border-radius: 18px;
     box-shadow: 
-        4px 4px 10px rgba(180, 170, 155, 0.35),
-        -3px -3px 8px #FFFFFF,
-        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
-        inset -1.5px -1.5px 3px rgba(180, 170, 155, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+        5px 6px 14px rgba(180, 170, 155, 0.4),
+        -4px -4px 10px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 4px rgba(175, 165, 148, 0.22);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
 }
 
-/* Territory Card / Subtle Sunken Frame */
+/* Territory Card / Tactile Side Slab */
 .clay-territory-card {
-    background: #EFECE5;
-    border-radius: 20px;
+    background: linear-gradient(145deg, #FAF8F4 0%, #ECE7DD 100%);
+    border-radius: 22px;
     box-shadow: 
-        6px 6px 14px rgba(185, 175, 160, 0.35),
-        -5px -5px 12px #FFFFFF,
-        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
-        inset -1.5px -1.5px 3px rgba(185, 175, 160, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+        8px 10px 24px rgba(185, 175, 158, 0.42),
+        -6px -6px 16px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 1),
+        inset -2.5px -2.5px 5px rgba(185, 175, 158, 0.22);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
 }
 
 /* Mobile Bottom Navigation Dock */
 .neu-bottom-bar {
-    background: rgba(248, 246, 241, 0.94);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-top: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 -8px 24px rgba(175, 165, 150, 0.22);
+    background: rgba(248, 246, 241, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 -10px 28px rgba(175, 165, 150, 0.25);
 }
 
 /* Mobile Center Action Floating Clay Button */
 .clay-btn-fab {
-    background: linear-gradient(135deg, #245640 0%, #153B29 100%);
+    background: linear-gradient(145deg, #2A664D 0%, #163E2D 100%);
     box-shadow: 
-        0 8px 20px rgba(21, 59, 41, 0.4),
-        0 2px 6px rgba(0, 0, 0, 0.12),
-        inset 2px 2px 4px rgba(255, 255, 255, 0.4),
-        inset -2px -2px 4px rgba(10, 28, 18, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.8);
+        0 10px 24px rgba(21, 59, 41, 0.45),
+        0 3px 8px rgba(0, 0, 0, 0.15),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.45),
+        inset -2.5px -2.5px 5px rgba(10, 28, 18, 0.55);
+    border: 2.5px solid rgba(255, 255, 255, 0.9);
 }
 
 /* Bottom Awareness Banner (Kenali kondisi di sekitar Anda) */
 .clay-bottom-banner {
-    background: linear-gradient(135deg, #E6F0E9 0%, #DDEBE1 100%);
-    border-radius: 24px;
+    background: linear-gradient(140deg, #E6F1EA 0%, #D8EAD9 58%, #CCE3CE 100%);
+    border-radius: 28px;
     box-shadow: 
-        10px 12px 28px rgba(175, 185, 175, 0.42),
-        -8px -8px 22px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.85),
-        inset -2px -2px 4px rgba(145, 170, 155, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+        14px 18px 38px rgba(168, 185, 172, 0.5),
+        -10px -10px 26px #FFFFFF,
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+        inset -3px -3px 8px rgba(135, 165, 142, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.88);
 }
 
 /* Sidebar Helper Info Card */
 .clay-helper-card {
-    background: linear-gradient(135deg, #E4EFE7 0%, #D9E9DE 100%);
+    background: linear-gradient(140deg, #E6EFE9 0%, #D7E8DC 100%);
+    border-radius: 24px;
+    box-shadow: 
+        8px 10px 24px rgba(170, 185, 175, 0.4),
+        -6px -6px 16px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 5px rgba(140, 170, 152, 0.3);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+}
+
+/* Nested Report / Announcement Clay Card Item */
+.clay-item-card {
+    background: linear-gradient(145deg, #FFFFFF 0%, #F8F5EE 60%, #EFE9DF 100%);
     border-radius: 22px;
     box-shadow: 
-        6px 8px 18px rgba(175, 185, 175, 0.35),
-        -5px -5px 14px #FFFFFF,
-        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
-        inset -1.5px -1.5px 3px rgba(145, 170, 155, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+        8px 10px 22px rgba(185, 175, 158, 0.35),
+        -6px -6px 16px #FFFFFF,
+        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
+        inset -2px -2px 4px rgba(185, 175, 158, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+.clay-item-card:hover {
+    transform: translateY(-2px) scale(1.008);
+    box-shadow: 
+        12px 14px 28px rgba(185, 175, 158, 0.45),
+        -8px -8px 20px #FFFFFF;
+}
+
+/* Sunken Tip Note Box */
+.clay-sunken-note {
+    background-color: #ECE7DD;
+    border-radius: 18px;
+    box-shadow: 
+        inset 3px 3px 7px rgba(175, 165, 148, 0.45),
+        inset -3px -3px 7px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Help Badge Pill */
+.clay-badge-help {
+    background: linear-gradient(145deg, #255C44 0%, #173B2B 100%);
+    border-radius: 12px;
+    box-shadow: 
+        3px 4px 10px rgba(18, 50, 35, 0.4),
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.4),
+        inset -1.5px -1.5px 3px rgba(8, 22, 15, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 

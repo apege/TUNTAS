@@ -354,16 +354,107 @@
                         </div>
                     </form>
 
-                    <!-- Notification Button -->
-                    <button type="button" 
-                            class="clay-pill w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#245640] relative shrink-0" 
-                            title="Pemberitahuan">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                        <!-- Unread Dot Indicator -->
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#1B4332] ring-2 ring-white"></span>
-                    </button>
+                    <!-- Notification Dropdown Container -->
+                    <div class="relative" id="notification-dropdown-container">
+                        <!-- Notification Bell Button -->
+                        <button type="button" 
+                                id="notification-toggle-btn"
+                                onclick="toggleNotificationDropdown()" 
+                                class="clay-pill w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#245640] relative shrink-0 transition-transform active:scale-95" 
+                                title="Pemberitahuan"
+                                aria-label="Pemberitahuan"
+                                aria-expanded="false">
+                            <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <!-- Unread Dot Indicator (Visible only if unread > 0) -->
+                            <span id="notification-unread-dot" class="{{ ($unreadNotifikasiCount ?? 0) > 0 ? '' : 'hidden' }} absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#1B4332] ring-2 ring-white animate-pulse"></span>
+                        </button>
+
+                        <!-- Notification Dropdown Menu (Claymorphic + Neumorphic) -->
+                        <div id="notification-dropdown-menu" 
+                             class="hidden absolute right-0 mt-2 w-80 sm:w-96 clay-card-content p-3 sm:p-4 z-50 shadow-2xl border border-white/95 text-left">
+                            
+                            <!-- Header -->
+                            <div class="flex items-center justify-between pb-3 border-b border-[#E3DDD1]">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm font-black text-[#122A1E]">Pemberitahuan</h3>
+                                    <span id="notification-unread-badge" class="{{ ($unreadNotifikasiCount ?? 0) > 0 ? '' : 'hidden' }} px-2 py-0.5 rounded-full bg-[#1B4332] text-white text-[10px] font-black">
+                                        {{ $unreadNotifikasiCount ?? 0 }} baru
+                                    </span>
+                                </div>
+                                @if (($unreadNotifikasiCount ?? 0) > 0)
+                                    <button type="button" 
+                                            id="btn-mark-all-read"
+                                            onclick="markAllNotificationsAsRead()"
+                                            class="text-[11px] font-bold text-[#245640] hover:text-[#122A1E] transition-colors">
+                                        Tandai semua dibaca
+                                    </button>
+                                @endif
+                            </div>
+
+                            <!-- Notification List -->
+                            <div id="notification-list" class="my-2 max-h-72 sm:max-h-80 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                                @forelse ($notifikasis ?? [] as $notif)
+                                    <div id="notif-item-{{ $notif->id }}" 
+                                         onclick="markNotificationAsRead('{{ $notif->id }}')"
+                                         class="clay-item-card p-2.5 sm:p-3 flex items-start gap-2.5 cursor-pointer transition-all hover:-translate-y-0.5 {{ $notif->isUnread() ? 'bg-[#FCFAF5] border-l-4 border-l-[#1B4332]' : 'opacity-85' }}">
+                                        
+                                        <!-- Icon Badge by Type -->
+                                        @if ($notif->pengumuman_id)
+                                            <div class="clay-icon-amber w-8 h-8 flex items-center justify-center text-[#B45309] shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                                </svg>
+                                            </div>
+                                        @elseif ($notif->kasus_id)
+                                            <div class="clay-icon-blue w-8 h-8 flex items-center justify-center text-[#1D4ED8] shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                        @else
+                                            <div class="clay-icon-mint w-8 h-8 flex items-center justify-center text-[#1B4332] shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                        @endif
+
+                                        <!-- Text -->
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between gap-1">
+                                                <h4 class="text-xs font-black text-[#122A1E] truncate">{{ $notif->judul }}</h4>
+                                                @if ($notif->isUnread())
+                                                    <span id="notif-dot-{{ $notif->id }}" class="w-2 h-2 rounded-full bg-[#1B4332] shrink-0"></span>
+                                                @endif
+                                            </div>
+                                            <p class="text-[11px] text-[#55695D] line-clamp-2 mt-0.5 leading-snug">{{ $notif->pesan }}</p>
+                                            <span class="block text-[10px] text-[#7C8F83] font-medium mt-1">
+                                                {{ $notif->created_at ? $notif->created_at->diffForHumans() : 'Baru saja' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="py-8 text-center flex flex-col items-center justify-center text-[#6A7F73]">
+                                        <div class="w-10 h-10 rounded-2xl bg-[#E8F1EB]/60 flex items-center justify-center text-[#558269] mb-2 shadow-sm border border-white">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-xs font-bold text-[#142D21]">Belum ada pemberitahuan</p>
+                                        <p class="text-[11px] text-[#718579] mt-0.5">Pembaruan laporan & pengumuman akan muncul di sini</p>
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="pt-2 border-t border-[#E3DDD1] flex items-center justify-between text-[10px] text-[#6A7F73]">
+                                <span>Lingkungan Sukamaju</span>
+                                <span class="font-bold text-[#245640]">RT {{ $rtNomor ?? '02' }} / RW {{ $rwNomor ?? '05' }}</span>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- User Profile Dropdown Toggle -->
                     <div class="relative">
@@ -944,27 +1035,126 @@
         }
     }
 
+    function toggleNotificationDropdown() {
+        const notifMenu = document.getElementById('notification-dropdown-menu');
+        const profileMenu = document.getElementById('profile-dropdown-menu');
+        const notifBtn = document.getElementById('notification-toggle-btn');
+        if (!notifMenu) return;
+
+        // Tutup menu profil jika sedang terbuka
+        if (profileMenu && !profileMenu.classList.contains('hidden')) {
+            profileMenu.classList.add('hidden');
+        }
+
+        const isHidden = notifMenu.classList.contains('hidden');
+        notifMenu.classList.toggle('hidden');
+        if (notifBtn) {
+            notifBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+        }
+    }
+
     function toggleProfileDropdown() {
         const menu = document.getElementById('profile-dropdown-menu');
+        const notifMenu = document.getElementById('notification-dropdown-menu');
         if (!menu) return;
+
+        // Tutup menu notifikasi jika sedang terbuka
+        if (notifMenu && !notifMenu.classList.contains('hidden')) {
+            notifMenu.classList.add('hidden');
+            const notifBtn = document.getElementById('notification-toggle-btn');
+            if (notifBtn) notifBtn.setAttribute('aria-expanded', 'false');
+        }
+
         menu.classList.toggle('hidden');
     }
 
-    // Close dropdown on click outside
+    // Close dropdowns on click outside
     document.addEventListener('click', function(e) {
-        const menu = document.getElementById('profile-dropdown-menu');
-        const toggleButtons = document.querySelectorAll('[onclick="toggleProfileDropdown()"]');
-        if (!menu || menu.classList.contains('hidden')) return;
+        const profileMenu = document.getElementById('profile-dropdown-menu');
+        const notifMenu = document.getElementById('notification-dropdown-menu');
+        const notifContainer = document.getElementById('notification-dropdown-container');
+        const profileContainer = document.querySelector('[onclick="toggleProfileDropdown()"]')?.parentElement;
 
-        let clickedInside = menu.contains(e.target);
-        toggleButtons.forEach(btn => {
-            if (btn.contains(e.target)) clickedInside = true;
-        });
+        if (profileMenu && !profileMenu.classList.contains('hidden')) {
+            if (profileContainer && !profileContainer.contains(e.target)) {
+                profileMenu.classList.add('hidden');
+            }
+        }
 
-        if (!clickedInside) {
-            menu.classList.add('hidden');
+        if (notifMenu && !notifMenu.classList.contains('hidden')) {
+            if (notifContainer && !notifContainer.contains(e.target)) {
+                notifMenu.classList.add('hidden');
+                const notifBtn = document.getElementById('notification-toggle-btn');
+                if (notifBtn) notifBtn.setAttribute('aria-expanded', 'false');
+            }
         }
     });
+
+    // Mark single notification as read
+    function markNotificationAsRead(id) {
+        const dot = document.getElementById('notif-dot-' + id);
+        const item = document.getElementById('notif-item-' + id);
+
+        // Optimistic UI update
+        if (dot) dot.remove();
+        if (item) {
+            item.classList.remove('border-l-4', 'border-l-[#1B4332]', 'bg-[#FCFAF5]');
+            item.classList.add('opacity-85');
+        }
+
+        fetch('/notifikasi/' + id + '/baca', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        }).then(response => response.json())
+          .then(data => {
+              if (data && data.success) {
+                  const badge = document.getElementById('notification-unread-badge');
+                  const topDot = document.getElementById('notification-unread-dot');
+                  if (badge) {
+                      let count = parseInt(badge.textContent) || 0;
+                      if (count > 1) {
+                          badge.textContent = (count - 1) + ' baru';
+                      } else {
+                          badge.classList.add('hidden');
+                          if (topDot) topDot.classList.add('hidden');
+                          const btnMarkAll = document.getElementById('btn-mark-all-read');
+                          if (btnMarkAll) btnMarkAll.remove();
+                      }
+                  }
+              }
+          }).catch(err => console.error(err));
+    }
+
+    // Mark all notifications as read
+    function markAllNotificationsAsRead() {
+        const topDot = document.getElementById('notification-unread-dot');
+        const badge = document.getElementById('notification-unread-badge');
+        const btnMarkAll = document.getElementById('btn-mark-all-read');
+
+        // Optimistic UI update
+        if (topDot) topDot.classList.add('hidden');
+        if (badge) badge.classList.add('hidden');
+        if (btnMarkAll) btnMarkAll.remove();
+
+        document.querySelectorAll('[id^="notif-dot-"]').forEach(el => el.remove());
+        document.querySelectorAll('[id^="notif-item-"]').forEach(el => {
+            el.classList.remove('border-l-4', 'border-l-[#1B4332]', 'bg-[#FCFAF5]');
+            el.classList.add('opacity-85');
+        });
+
+        fetch('{{ route("notifikasi.baca-semua") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        }).catch(err => console.error(err));
+    }
 
     // Keyboard shortcut: Cmd+K / Ctrl+K focuses the search bar
     document.addEventListener('keydown', function(e) {

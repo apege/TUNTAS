@@ -89,4 +89,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Kasus::class, 'koordinator_id');
     }
+
+    /**
+     * Relasi ke Notifikasi yang diterima pengguna.
+     */
+    public function notifikasis(): HasMany
+    {
+        return $this->hasMany(Notifikasi::class, 'penerima_id');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notifikasi;
 use App\Models\Pengumuman;
 use App\Models\Report;
 use Carbon\Carbon;
@@ -116,6 +117,18 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Query Dinamis Notifikasi Pengguna
+        $notifikasis = Notifikasi::query()
+            ->when($user, fn ($q) => $q->where('penerima_id', $user->id))
+            ->with(['laporan', 'pengumuman'])
+            ->latest('created_at')
+            ->take(8)
+            ->get();
+
+        $unreadNotifikasiCount = $user
+            ? Notifikasi::where('penerima_id', $user->id)->whereNull('dibaca_at')->count()
+            : 0;
+
         return view('dashboard.warga', [
             'user' => $user,
             'namaPanggilan' => $namaPanggilan,
@@ -133,6 +146,8 @@ class DashboardController extends Controller
             ],
             'laporanTerbaru' => $laporanTerbaru,
             'pengumumanTerbaru' => $pengumumanTerbaru,
+            'notifikasis' => $notifikasis,
+            'unreadNotifikasiCount' => $unreadNotifikasiCount,
         ]);
     }
 

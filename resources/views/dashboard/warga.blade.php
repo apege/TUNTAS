@@ -758,80 +758,78 @@
             <!-- ================= TWO LARGE CONTENT PANELS ================= -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-7">
                 
-                <!-- Left Panel: Perkembangan Laporan Saya -->
-                <div class="clay-card-content p-6 sm:p-7 flex flex-col justify-between">
-                    <div>
-                        <!-- Header -->
-                        <div class="flex items-center justify-between pb-4 border-b border-[#E3DDD1]">
-                            <div>
-                                <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
-                                    Setiap Laporan Berarti
-                                </span>
-                                <h3 class="text-lg font-black text-[#122A1E] mt-0.5">
-                                    Perkembangan Laporan Saya
-                                </h3>
-                            </div>
-                            <a href="#semua-laporan" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#245640] hover:text-[#142D21] transition-colors">
-                                <span>Semua laporan</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </a>
+                <!-- Left Panel: Perkembangan Laporan Saya (Balanced Scrollable Height) -->
+                <div class="clay-card-content p-5 sm:p-6 h-[480px] xl:h-[510px] flex flex-col justify-between">
+                    <!-- Header (Fixed at Top) -->
+                    <div class="flex items-center justify-between pb-3.5 border-b border-[#E3DDD1] shrink-0">
+                        <div>
+                            <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
+                                Setiap Laporan Berarti
+                            </span>
+                            <h3 class="text-base sm:text-lg font-black text-[#122A1E] mt-0.5">
+                                Perkembangan Laporan Saya
+                            </h3>
                         </div>
-
-                        @if ($laporanTerbaru->isNotEmpty())
-                            <!-- Dynamic Report List -->
-                            <div class="py-3 space-y-3">
-                                @foreach ($laporanTerbaru as $lap)
-                                    <div class="clay-item-card p-3.5 sm:p-4">
-                                        <div class="flex items-center justify-between gap-2 mb-1.5">
-                                            <div class="flex items-center gap-2 min-w-0">
-                                                <span class="text-[11px] font-black text-[#1E3A2B] font-mono tracking-tight shrink-0">{{ $lap->kode }}</span>
-                                                <span class="w-1 h-1 rounded-full bg-[#A2B3A8] shrink-0"></span>
-                                                <span class="text-[11px] font-medium text-[#52645B] truncate">{{ $lap->kategori?->nama ?? 'Umum' }}</span>
-                                            </div>
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $lap->status_badge['bg'] }} {{ $lap->status_badge['text'] }} shrink-0">
-                                                <span class="w-1.5 h-1.5 rounded-full {{ $lap->status_badge['dot'] }}"></span>
-                                                <span>{{ $lap->status_label }}</span>
-                                            </span>
-                                        </div>
-                                        <h4 class="text-xs sm:text-sm font-extrabold text-[#122A1E] leading-snug">{{ $lap->judul }}</h4>
-                                        <p class="text-xs text-[#52645B] mt-1 line-clamp-2 leading-relaxed">{{ $lap->uraian }}</p>
-                                        <div class="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-[#E3DDD1] text-[10px] sm:text-[11px] text-[#6A7F73]">
-                                            <div class="flex items-center gap-1.5 truncate">
-                                                <svg class="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                </svg>
-                                                <span class="truncate">{{ $lap->lokasi_detail }}</span>
-                                            </div>
-                                            <span class="shrink-0 font-medium">{{ $lap->created_at->diffForHumans() }}</span>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <!-- Empty State View -->
-                            <div class="py-12 sm:py-16 text-center flex flex-col items-center justify-center">
-                                <!-- Delicate Outline Leaf Icon -->
-                                <div class="w-14 h-14 rounded-2xl bg-[#E8F1EB]/60 flex items-center justify-center text-[#558269] mb-4 shadow-sm border border-white">
-                                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-                                        <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
-                                    </svg>
-                                </div>
-                                <h4 class="font-extrabold text-sm sm:text-base text-[#153425]">
-                                    Belum ada laporan pribadi.
-                                </h4>
-                                <p class="text-xs text-[#6B8074] mt-1 max-w-xs">
-                                    Periksa kembali nanti atau sesuaikan pencarian dan filter.
-                                </p>
-                            </div>
-                        @endif
+                        <a href="#semua-laporan" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#245640] hover:text-[#142D21] transition-colors">
+                            <span>Semua laporan</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </a>
                     </div>
 
-                    <!-- Bottom Helper Note Inside Card: Sunken Debossed Clay Pill -->
-                    <div class="clay-sunken-note p-3 sm:p-3.5 mt-4 flex items-start gap-2.5 text-xs text-[#52685C]">
+                    @if ($laporanTerbaru->isNotEmpty())
+                        <!-- Dynamic Report List with Smooth Internal Scroll -->
+                        <div class="flex-1 overflow-y-auto py-3 space-y-3 pr-1.5 custom-scrollbar min-h-0">
+                            @foreach ($laporanTerbaru as $lap)
+                                <div class="clay-item-card p-3.5 sm:p-4">
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="text-[11px] font-black text-[#1E3A2B] font-mono tracking-tight shrink-0">{{ $lap->kode }}</span>
+                                            <span class="w-1 h-1 rounded-full bg-[#A2B3A8] shrink-0"></span>
+                                            <span class="text-[11px] font-medium text-[#52645B] truncate">{{ $lap->kategori?->nama ?? 'Umum' }}</span>
+                                        </div>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $lap->status_badge['bg'] }} {{ $lap->status_badge['text'] }} shrink-0">
+                                            <span class="w-1.5 h-1.5 rounded-full {{ $lap->status_badge['dot'] }}"></span>
+                                            <span>{{ $lap->status_label }}</span>
+                                        </span>
+                                    </div>
+                                    <h4 class="text-xs sm:text-sm font-extrabold text-[#122A1E] leading-snug">{{ $lap->judul }}</h4>
+                                    <p class="text-xs text-[#52645B] mt-1 line-clamp-2 leading-relaxed">{{ $lap->uraian }}</p>
+                                    <div class="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-[#E3DDD1] text-[10px] sm:text-[11px] text-[#6A7F73]">
+                                        <div class="flex items-center gap-1.5 truncate">
+                                            <svg class="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                            <span class="truncate">{{ $lap->lokasi_detail }}</span>
+                                        </div>
+                                        <span class="shrink-0 font-medium">{{ $lap->created_at->diffForHumans() }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <!-- Empty State View -->
+                        <div class="flex-1 flex flex-col items-center justify-center py-8 text-center">
+                            <!-- Delicate Outline Leaf Icon -->
+                            <div class="w-14 h-14 rounded-2xl bg-[#E8F1EB]/60 flex items-center justify-center text-[#558269] mb-4 shadow-sm border border-white">
+                                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                                    <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
+                                </svg>
+                            </div>
+                            <h4 class="font-extrabold text-sm sm:text-base text-[#153425]">
+                                Belum ada laporan pribadi.
+                            </h4>
+                            <p class="text-xs text-[#6B8074] mt-1 max-w-xs">
+                                Periksa kembali nanti atau sesuaikan pencarian dan filter.
+                            </p>
+                        </div>
+                    @endif
+
+                    <!-- Bottom Helper Note (Fixed at Bottom) -->
+                    <div class="clay-sunken-note p-3 mt-3 flex items-start gap-2.5 text-xs text-[#52685C] shrink-0">
                         <svg class="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
                             <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
@@ -842,77 +840,80 @@
                     </div>
                 </div>
 
-                <!-- Right Panel: Pengumuman Warga -->
-                <div class="clay-card-content p-6 sm:p-7 flex flex-col justify-between">
-                    <div>
-                        <!-- Header -->
-                        <div class="flex items-center justify-between pb-4 border-b border-[#E3DDD1]">
-                            <div>
-                                <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
-                                    Kabar Dari Lingkungan
-                                </span>
-                                <h3 class="text-lg font-black text-[#122A1E] mt-0.5">
-                                    Pengumuman Warga
-                                </h3>
-                            </div>
-                            <a href="#semua-pengumuman" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#245640] hover:text-[#142D21] transition-colors">
-                                <span>Semua</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </a>
+                <!-- Right Panel: Pengumuman Warga (Balanced Scrollable Height) -->
+                <div class="clay-card-content p-5 sm:p-6 h-[480px] xl:h-[510px] flex flex-col justify-between">
+                    <!-- Header (Fixed at Top) -->
+                    <div class="flex items-center justify-between pb-3.5 border-b border-[#E3DDD1] shrink-0">
+                        <div>
+                            <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
+                                Kabar Dari Lingkungan
+                            </span>
+                            <h3 class="text-base sm:text-lg font-black text-[#122A1E] mt-0.5">
+                                Pengumuman Warga
+                            </h3>
                         </div>
-
-                        @if ($pengumumanTerbaru->isNotEmpty())
-                            <!-- Dynamic Announcement List -->
-                            <div class="py-3 space-y-3">
-                                @foreach ($pengumumanTerbaru as $pengumuman)
-                                    <div class="clay-item-card p-3.5 sm:p-4">
-                                        <div class="flex items-center justify-between gap-2 mb-1.5">
-                                            <div class="flex items-center gap-2">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide {{ $pengumuman->jenis_badge['bg'] }} {{ $pengumuman->jenis_badge['text'] }}">
-                                                    {{ $pengumuman->jenis_badge['label'] }}
-                                                </span>
-                                                <span class="text-[11px] font-bold text-[#2D6A4F]">
-                                                    {{ $pengumuman->wilayah?->tingkat === 'rw' ? 'RW ' . $pengumuman->wilayah->nomor : 'RT ' . $pengumuman->wilayah?->nomor }}
-                                                </span>
-                                            </div>
-                                            <span class="text-[10px] sm:text-[11px] text-[#6A7F73] font-medium shrink-0">
-                                                {{ $pengumuman->terbit_at ? $pengumuman->terbit_at->diffForHumans() : $pengumuman->created_at->diffForHumans() }}
-                                            </span>
-                                        </div>
-                                        <h4 class="text-xs sm:text-sm font-extrabold text-[#122A1E] leading-snug">{{ $pengumuman->judul }}</h4>
-                                        <p class="text-xs text-[#52645B] mt-1 line-clamp-2 leading-relaxed">{{ $pengumuman->isi }}</p>
-                                        <div class="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-[#E3DDD1] text-[10px] sm:text-[11px] text-[#6A7F73]">
-                                            <span class="truncate">Oleh: <strong class="text-[#142D21] font-semibold">{{ $pengumuman->pembuat?->nama ?? 'Pengurus Lingkungan' }}</strong></span>
-                                            <span class="text-[#245640] font-bold shrink-0">Pengumuman Resmi</span>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <!-- Empty State View -->
-                            <div class="py-12 sm:py-16 text-center flex flex-col items-center justify-center">
-                                <!-- Delicate Outline Leaf Icon -->
-                                <div class="w-14 h-14 rounded-2xl bg-[#E8F1EB]/60 flex items-center justify-center text-[#558269] mb-4 shadow-sm border border-white">
-                                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-                                        <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
-                                    </svg>
-                                </div>
-                                <h4 class="font-extrabold text-sm sm:text-base text-[#153425]">
-                                    Belum ada pengumuman untuk wilayah Anda.
-                                </h4>
-                                <p class="text-xs text-[#6B8074] mt-1 max-w-xs">
-                                    Periksa kembali nanti atau sesuaikan pencarian dan filter.
-                                </p>
-                            </div>
-                        @endif
+                        <a href="#semua-pengumuman" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#245640] hover:text-[#142D21] transition-colors">
+                            <span>Semua</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </a>
                     </div>
 
-                    <!-- Bottom Spacing Placeholder for Equal Balance -->
-                    <div class="pt-4 border-t border-[#E8E2D7] invisible flex items-center gap-2 text-xs">
-                        <span>Spacer</span>
+                    @if ($pengumumanTerbaru->isNotEmpty())
+                        <!-- Dynamic Announcement List with Smooth Internal Scroll -->
+                        <div class="flex-1 overflow-y-auto py-3 space-y-3 pr-1.5 custom-scrollbar min-h-0">
+                            @foreach ($pengumumanTerbaru as $pengumuman)
+                                <div class="clay-item-card p-3.5 sm:p-4">
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide {{ $pengumuman->jenis_badge['bg'] }} {{ $pengumuman->jenis_badge['text'] }}">
+                                                {{ $pengumuman->jenis_badge['label'] }}
+                                            </span>
+                                            <span class="text-[11px] font-bold text-[#2D6A4F]">
+                                                {{ $pengumuman->wilayah?->tingkat === 'rw' ? 'RW ' . $pengumuman->wilayah->nomor : 'RT ' . $pengumuman->wilayah?->nomor }}
+                                            </span>
+                                        </div>
+                                        <span class="text-[10px] sm:text-[11px] text-[#6A7F73] font-medium shrink-0">
+                                            {{ $pengumuman->terbit_at ? $pengumuman->terbit_at->diffForHumans() : $pengumuman->created_at->diffForHumans() }}
+                                        </span>
+                                    </div>
+                                    <h4 class="text-xs sm:text-sm font-extrabold text-[#122A1E] leading-snug">{{ $pengumuman->judul }}</h4>
+                                    <p class="text-xs text-[#52645B] mt-1 line-clamp-2 leading-relaxed">{{ $pengumuman->isi }}</p>
+                                    <div class="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-[#E3DDD1] text-[10px] sm:text-[11px] text-[#6A7F73]">
+                                        <span class="truncate">Oleh: <strong class="text-[#142D21] font-semibold">{{ $pengumuman->pembuat?->nama ?? 'Pengurus Lingkungan' }}</strong></span>
+                                        <span class="text-[#245640] font-bold shrink-0">Pengumuman Resmi</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <!-- Empty State View -->
+                        <div class="flex-1 flex flex-col items-center justify-center py-8 text-center">
+                            <!-- Delicate Outline Leaf Icon -->
+                            <div class="w-14 h-14 rounded-2xl bg-[#E8F1EB]/60 flex items-center justify-center text-[#558269] mb-4 shadow-sm border border-white">
+                                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                                    <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
+                                </svg>
+                            </div>
+                            <h4 class="font-extrabold text-sm sm:text-base text-[#153425]">
+                                Belum ada pengumuman untuk wilayah Anda.
+                            </h4>
+                            <p class="text-xs text-[#6B8074] mt-1 max-w-xs">
+                                Periksa kembali nanti atau sesuaikan pencarian dan filter.
+                            </p>
+                        </div>
+                    @endif
+
+                    <!-- Bottom Helper Note (Fixed at Bottom - Perfectly Balanced with Left Panel) -->
+                    <div class="clay-sunken-note p-3 mt-3 flex items-start gap-2.5 text-xs text-[#52685C] shrink-0">
+                        <svg class="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="leading-relaxed text-[11px] sm:text-xs">
+                            Pengumuman diterbitkan langsung oleh Ketua RT & RW untuk keterbukaan informasi dan koordinasi seluruh warga.
+                        </p>
                     </div>
                 </div>
             </section>

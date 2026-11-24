@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Notifikasi;
 use App\Models\Pengumuman;
 use App\Models\Report;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -14,6 +16,13 @@ class DashboardController extends Controller
 {
     /**
      * Dashboard untuk peran Warga (Dinamis dari Database).
+     *
+     * Logika dashboard disusun modular agar mudah dipresentasikan:
+     * 1. Resolusi Profil & Hierarki Wilayah Warga (RT & RW induk)
+     * 2. Agregasi 4 Indikator Statistik Laporan Pribadi
+     * 3. Pengambilan Riwayat Laporan Terkini dengan Filter Pencarian
+     * 4. Pengambilan Pengumuman Resmi Multi-Tier (RT lokal + RW induk)
+     * 5. Sinkronisasi Notifikasi Interaktif Real-Time
      */
     public function warga(Request $request): View
     {
@@ -22,6 +31,48 @@ class DashboardController extends Controller
             $user->loadMissing(['wilayah.parent']);
         }
 
+        $search = trim((string) $request->query('q', ''));
+
+        // 1. Informasi Wilayah & Profil Warga
+        $profil = $this->resolveProfilWarga($user);
+
+        // 2. Statistik 4 Indikator Laporan Pribadi
+        $stats = $this->resolveStatistikLaporan($user);
+
+        // 3. Daftar Laporan Warga (Mendukung scroll & pencarian kata kunci)
+        $laporanTerbaru = $this->getLaporanTerbaru($user, $search, limit: 10);
+
+        // 4. Daftar Pengumuman Wilayah (Tingkat RT dan RW)
+        $pengumumanTerbaru = $this->getPengumumanWilayah($user, $search, limit: 10);
+
+        // 5. Notifikasi Interaktif Pengguna
+        $notifikasiData = $this->getNotifikasiWarga($user, limit: 8);
+
+        return view('dashboard.warga', array_merge($profil, [
+            'user' => $user,
+            'search' => $search,
+            'stats' => $stats,
+            'laporanTerbaru' => $laporanTerbaru,
+            'pengumumanTerbaru' => $pengumumanTerbaru,
+            'notifikasis' => $notifikasiData['list'],
+            'unreadNotifikasiCount' => $notifikasiData['unread_count'],
+        ]));
+    }
+
+    /**
+     * Resolusi identitas warga, inisial avatar, dan hierarki wilayah (RT/RW).
+     *
+     * @return array{
+     *     namaPanggilan: string,
+     *     initials: string,
+     *     rtNomor: string,
+     *     rwNomor: string,
+     *     kelurahan: string,
+     *     tanggalHariIni: string
+     * }
+     */
+    protected function resolveProfilWarga(?User $user): array
+    {
         $rtNomor = '02';
         $rwNomor = '05';
         $kelurahan = 'Sukamaju';
@@ -39,7 +90,6 @@ class DashboardController extends Controller
 
         $namaPanggilan = $user ? explode(' ', trim($user->nama))[0] : 'Siti';
 
-        // Inisial untuk avatar, cth: "Siti Aminah" -> "SA"
         $initials = 'SA';
         if ($user && ! empty($user->nama)) {
             $words = explode(' ', trim($user->nama));
@@ -48,22 +98,40 @@ class DashboardController extends Controller
 
         $tanggalHariIni = Carbon::now()->locale('id')->isoFormat('dddd, D MMMM Y');
 
-        // Parameter pencarian opsional dari input header
-        $search = trim((string) $request->query('q', ''));
+        return [
+            'namaPanggilan' => $namaPanggilan,
+            'initials' => $initials,
+            'rtNomor' => $rtNomor,
+            'rwNomor' => $rwNomor,
+            'kelurahan' => $kelurahan,
+            'tanggalHariIni' => $tanggalHariIni,
+        ];
+    }
 
-        // Query Dinamis Statistik Laporan Pribadi Warga
-        $userReportsQuery = Report::query()
+    /**
+     * Menghitung statistik 4 kartu status laporan warga secara real-time.
+     *
+     * @return array{
+     *     total: int,
+     *     sedang_ditangani: int,
+     *     menunggu_verifikasi: int,
+     *     selesai: int
+     * }
+     */
+    protected function resolveStatistikLaporan(?User $user): array
+    {
+        $baseQuery = Report::query()
             ->when($user, fn ($q) => $q->where('pelapor_id', $user->id));
 
-        $totalReports = (clone $userReportsQuery)->count();
+        $totalReports = (clone $baseQuery)->count();
 
-        // 1. Menunggu Verifikasi: status_penerimaan = 'baru'
-        $menungguVerifikasiCount = (clone $userReportsQuery)
+        // Status 1: Menunggu Verifikasi (laporan baru dari warga belum diverifikasi pengurus)
+        $menungguVerifikasiCount = (clone $baseQuery)
             ->where('status_penerimaan', 'baru')
             ->count();
 
-        // 2. Sedang Ditangani: status_penerimaan = 'diverifikasi' AND (belum masuk kasus atau kasus sedang berjalan)
-        $sedangDitanganiCount = (clone $userReportsQuery)
+        // Status 2: Sedang Ditangani (sudah diverifikasi dan kasus sedang dalam penanganan)
+        $sedangDitanganiCount = (clone $baseQuery)
             ->where('status_penerimaan', 'diverifikasi')
             ->where(function ($query) {
                 $query->whereDoesntHave('kasus')
@@ -73,16 +141,29 @@ class DashboardController extends Controller
             })
             ->count();
 
-        // 3. Selesai: status_penerimaan = 'diverifikasi' AND kasus.status = 'selesai'
-        $selesaiCount = (clone $userReportsQuery)
+        // Status 3: Selesai (laporan diverifikasi & kasus telah rampung)
+        $selesaiCount = (clone $baseQuery)
             ->where('status_penerimaan', 'diverifikasi')
             ->whereHas('kasus', function ($q) {
                 $q->where('status', 'selesai');
             })
             ->count();
 
-        // Query Dinamis Laporan Terbaru Milik Warga
-        $laporanTerbaru = (clone $userReportsQuery)
+        return [
+            'total' => $totalReports,
+            'sedang_ditangani' => $sedangDitanganiCount,
+            'menunggu_verifikasi' => $menungguVerifikasiCount,
+            'selesai' => $selesaiCount,
+        ];
+    }
+
+    /**
+     * Mengambil daftar laporan terbaru milik warga dengan relasi kategori & kasus.
+     */
+    protected function getLaporanTerbaru(?User $user, string $search, int $limit = 10): Collection
+    {
+        return Report::query()
+            ->when($user, fn ($q) => $q->where('pelapor_id', $user->id))
             ->with(['kategori', 'kasus'])
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($inner) use ($search) {
@@ -92,16 +173,21 @@ class DashboardController extends Controller
                 });
             })
             ->latest('created_at')
-            ->take(5)
+            ->take($limit)
             ->get();
+    }
 
-        // Query Dinamis Pengumuman Wilayah (RT setempat & RW induk)
+    /**
+     * Mengambil pengumuman relevan untuk warga berdasarkan wilayahnya (RT setempat & RW induk).
+     */
+    protected function getPengumumanWilayah(?User $user, string $search, int $limit = 10): Collection
+    {
         $targetWilayahIds = array_filter([
             $user?->wilayah_id,
             $user?->wilayah?->parent_id,
         ]);
 
-        $pengumumanTerbaru = Pengumuman::query()
+        return Pengumuman::query()
             ->where('status', 'diterbitkan')
             ->when(! empty($targetWilayahIds), function ($query) use ($targetWilayahIds) {
                 $query->whereIn('wilayah_id', $targetWilayahIds);
@@ -114,41 +200,32 @@ class DashboardController extends Controller
                 });
             })
             ->latest('terbit_at')
-            ->take(5)
+            ->take($limit)
             ->get();
+    }
 
-        // Query Dinamis Notifikasi Pengguna
-        $notifikasis = Notifikasi::query()
+    /**
+     * Mengambil daftar notifikasi pengguna dan menghitung jumlah notifikasi yang belum dibaca.
+     *
+     * @return array{list: Collection, unread_count: int}
+     */
+    protected function getNotifikasiWarga(?User $user, int $limit = 8): array
+    {
+        $list = Notifikasi::query()
             ->when($user, fn ($q) => $q->where('penerima_id', $user->id))
             ->with(['laporan', 'pengumuman'])
             ->latest('created_at')
-            ->take(8)
+            ->take($limit)
             ->get();
 
-        $unreadNotifikasiCount = $user
+        $unreadCount = $user
             ? Notifikasi::where('penerima_id', $user->id)->whereNull('dibaca_at')->count()
             : 0;
 
-        return view('dashboard.warga', [
-            'user' => $user,
-            'namaPanggilan' => $namaPanggilan,
-            'initials' => $initials,
-            'rtNomor' => $rtNomor,
-            'rwNomor' => $rwNomor,
-            'kelurahan' => $kelurahan,
-            'tanggalHariIni' => $tanggalHariIni,
-            'search' => $search,
-            'stats' => [
-                'total' => $totalReports,
-                'sedang_ditangani' => $sedangDitanganiCount,
-                'menunggu_verifikasi' => $menungguVerifikasiCount,
-                'selesai' => $selesaiCount,
-            ],
-            'laporanTerbaru' => $laporanTerbaru,
-            'pengumumanTerbaru' => $pengumumanTerbaru,
-            'notifikasis' => $notifikasis,
-            'unreadNotifikasiCount' => $unreadNotifikasiCount,
-        ]);
+        return [
+            'list' => $list,
+            'unread_count' => $unreadCount,
+        ];
     }
 
     /**

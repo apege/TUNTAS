@@ -44,11 +44,11 @@
                 <span>RW {{ $rwNomor ?? '05' }}</span>
             </div>
 
-            <!-- Profile Avatar (Mobile) -->
+            <!-- Profile Avatar (Mobile) -> opens mobile drawer to access profile and logout -->
             <button type="button" 
-                    onclick="toggleProfileDropdown()" 
-                    class="clay-pill w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-[#1B4332] bg-[#E5F2E9] border border-white/80"
-                    aria-label="Profil Warga">
+                    onclick="toggleMobileDrawer()" 
+                    class="clay-pill w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-[#1B4332] bg-[#E5F2E9] border border-white/80 active:scale-95 transition-transform"
+                    aria-label="Buka Menu Profil Warga">
                 {{ $initials ?? 'SA' }}
             </button>
         </div>
@@ -359,7 +359,7 @@
                         <!-- Notification Bell Button -->
                         <button type="button" 
                                 id="notification-toggle-btn"
-                                onclick="toggleNotificationDropdown()" 
+                                onclick="toggleNotificationDropdown(event)" 
                                 class="clay-pill w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#245640] relative shrink-0 transition-transform active:scale-95" 
                                 title="Pemberitahuan"
                                 aria-label="Pemberitahuan"
@@ -368,7 +368,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             <!-- Unread Dot Indicator (Visible only if unread > 0) -->
-                            <span id="notification-unread-dot" class="{{ ($unreadNotifikasiCount ?? 0) > 0 ? '' : 'hidden' }} absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#1B4332] ring-2 ring-white animate-pulse"></span>
+                            <span id="notification-unread-dot" class="{{ ($unreadNotifikasiCount ?? 0) > 0 ? '' : 'hidden' }} absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#1B4332] ring-2 ring-white"></span>
                         </button>
 
                         <!-- Notification Dropdown Menu (Claymorphic + Neumorphic) -->
@@ -457,10 +457,13 @@
                     </div>
 
                     <!-- User Profile Dropdown Toggle -->
-                    <div class="relative">
+                    <div class="relative" id="profile-dropdown-container">
                         <button type="button" 
-                                onclick="toggleProfileDropdown()" 
-                                class="clay-pill pl-1 pr-2.5 sm:pr-3 py-1 flex items-center gap-2 text-left group shrink-0">
+                                id="profile-toggle-btn"
+                                onclick="toggleProfileDropdown(event)" 
+                                class="clay-pill pl-1 pr-2.5 sm:pr-3 py-1 flex items-center gap-2 text-left group shrink-0 transition-transform active:scale-95"
+                                aria-label="Menu Pengguna"
+                                aria-expanded="false">
                             <!-- Avatar Squircle -->
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#D8F3DC] text-[#1B4332] font-black text-xs flex items-center justify-center shadow-inner border border-white/80">
                                 {{ $initials ?? 'SA' }}
@@ -478,23 +481,26 @@
 
                         <!-- Profile Dropdown Menu -->
                         <div id="profile-dropdown-menu" 
-                             class="hidden absolute right-0 mt-2 w-52 bg-[#FAF8F4] clay-card-stat p-2 z-50 shadow-xl border border-white/90">
-                            <div class="px-3 py-2 border-b border-[#E3DDD1]">
-                                <span class="block text-xs font-bold text-[#142D21] truncate">{{ $user->nama ?? 'Siti Aminah' }}</span>
-                                <span class="block text-[11px] text-[#60776C] truncate">{{ $user->email ?? 'warga@tuntas.id' }}</span>
+                             class="hidden absolute right-0 mt-2 w-56 clay-card-content p-3 z-50 shadow-2xl border border-white/95 text-left">
+                            <div class="px-2.5 py-2 border-b border-[#E3DDD1]">
+                                <span class="block text-xs font-black text-[#142D21] truncate">{{ $user->nama ?? 'Siti Aminah' }}</span>
+                                <span class="block text-[11px] text-[#60776C] truncate mt-0.5">{{ $user->email ?? 'warga@tuntas.id' }}</span>
+                                <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#E8F1EC] text-[#1B4332]">
+                                    Warga RT {{ $rtNomor ?? '02' }} / RW {{ $rwNomor ?? '05' }}
+                                </span>
                             </div>
-                            <div class="py-1">
-                                <a href="#profil" class="block px-3 py-2 text-xs font-semibold text-[#30483C] hover:bg-[#EAE5DC] rounded-xl transition-colors">
+                            <div class="py-1.5 space-y-0.5">
+                                <a href="#profil" class="block px-2.5 py-2 text-xs font-bold text-[#30483C] hover:bg-[#EAE5DC] rounded-xl transition-colors">
                                     Pengaturan Profil
                                 </a>
-                                <a href="#panduan" class="block px-3 py-2 text-xs font-semibold text-[#30483C] hover:bg-[#EAE5DC] rounded-xl transition-colors">
+                                <a href="#panduan" class="block px-2.5 py-2 text-xs font-bold text-[#30483C] hover:bg-[#EAE5DC] rounded-xl transition-colors">
                                     Panduan Penggunaan
                                 </a>
                             </div>
-                            <div class="pt-1 border-t border-[#E3DDD1]">
+                            <div class="pt-1.5 border-t border-[#E3DDD1]">
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="w-full text-left px-3 py-2 text-xs font-bold text-[#9E2A2B] hover:bg-red-50 rounded-xl transition-colors">
+                                    <button type="submit" class="w-full text-left px-2.5 py-2 text-xs font-bold text-[#9E2A2B] hover:bg-red-50 rounded-xl transition-colors">
                                         Keluar
                                     </button>
                                 </form>
@@ -510,9 +516,8 @@
                     
                     <!-- Left Hero Content -->
                     <div class="md:col-span-7 space-y-3 sm:space-y-3.5">
-                        <!-- Date & Location Badge -->
-                        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/50 backdrop-blur-sm text-[10px] sm:text-[11px] font-bold text-[#204E3A] border border-white/70 shadow-sm">
-                            <span class="w-2 h-2 rounded-full bg-[#2D6A4F] animate-pulse"></span>
+                        <!-- Date & Location Badge (Clean, no AI slop pulse dot) -->
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/50 backdrop-blur-sm text-[10px] sm:text-[11px] font-bold text-[#204E3A] border border-white/70 shadow-sm">
                             <span>{{ $tanggalHariIni ?? 'Senin, 23 November 2026' }} • RT {{ $rtNomor ?? '02' }} / RW {{ $rwNomor ?? '05' }}</span>
                         </div>
 
@@ -1035,15 +1040,21 @@
         }
     }
 
-    function toggleNotificationDropdown() {
+    function toggleNotificationDropdown(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+
         const notifMenu = document.getElementById('notification-dropdown-menu');
         const profileMenu = document.getElementById('profile-dropdown-menu');
         const notifBtn = document.getElementById('notification-toggle-btn');
+        const profileBtn = document.getElementById('profile-toggle-btn');
         if (!notifMenu) return;
 
         // Tutup menu profil jika sedang terbuka
         if (profileMenu && !profileMenu.classList.contains('hidden')) {
             profileMenu.classList.add('hidden');
+            if (profileBtn) profileBtn.setAttribute('aria-expanded', 'false');
         }
 
         const isHidden = notifMenu.classList.contains('hidden');
@@ -1053,19 +1064,28 @@
         }
     }
 
-    function toggleProfileDropdown() {
+    function toggleProfileDropdown(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+
         const menu = document.getElementById('profile-dropdown-menu');
         const notifMenu = document.getElementById('notification-dropdown-menu');
+        const profileBtn = document.getElementById('profile-toggle-btn');
+        const notifBtn = document.getElementById('notification-toggle-btn');
         if (!menu) return;
 
         // Tutup menu notifikasi jika sedang terbuka
         if (notifMenu && !notifMenu.classList.contains('hidden')) {
             notifMenu.classList.add('hidden');
-            const notifBtn = document.getElementById('notification-toggle-btn');
             if (notifBtn) notifBtn.setAttribute('aria-expanded', 'false');
         }
 
+        const isHidden = menu.classList.contains('hidden');
         menu.classList.toggle('hidden');
+        if (profileBtn) {
+            profileBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+        }
     }
 
     // Close dropdowns on click outside
@@ -1073,11 +1093,14 @@
         const profileMenu = document.getElementById('profile-dropdown-menu');
         const notifMenu = document.getElementById('notification-dropdown-menu');
         const notifContainer = document.getElementById('notification-dropdown-container');
-        const profileContainer = document.querySelector('[onclick="toggleProfileDropdown()"]')?.parentElement;
+        const profileContainer = document.getElementById('profile-dropdown-container');
+        const profileBtn = document.getElementById('profile-toggle-btn');
+        const notifBtn = document.getElementById('notification-toggle-btn');
 
         if (profileMenu && !profileMenu.classList.contains('hidden')) {
-            if (profileContainer && !profileContainer.contains(e.target)) {
+            if (!profileContainer || !profileContainer.contains(e.target)) {
                 profileMenu.classList.add('hidden');
+                if (profileBtn) profileBtn.setAttribute('aria-expanded', 'false');
             }
         }
 

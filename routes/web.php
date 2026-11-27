@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,8 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::get('/warga/dashboard', [DashboardController::class, 'warga'])->name('warga.dashboard');
+    Route::get('/warga/laporan/buat', [ReportController::class, 'create'])->name('warga.laporan.create');
+    Route::post('/warga/laporan', [ReportController::class, 'store'])->name('warga.laporan.store');
     Route::get('/admin-rt/dashboard', [DashboardController::class, 'adminRt'])->name('admin-rt.dashboard');
     Route::get('/admin-rw/dashboard', [DashboardController::class, 'adminRw'])->name('admin-rw.dashboard');
     Route::get('/petugas/dashboard', [DashboardController::class, 'petugas'])->name('petugas.dashboard');

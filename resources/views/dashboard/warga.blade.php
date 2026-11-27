@@ -120,7 +120,7 @@
                     <span>Beranda</span>
                 </a>
 
-                <a href="#buat-laporan" class="neu-nav-item px-4 py-3 flex items-center gap-3 font-semibold text-sm">
+                <a href="{{ route('warga.laporan.create') }}" class="neu-nav-item px-4 py-3 flex items-center gap-3 font-semibold text-sm">
                     <svg class="w-4 h-4 text-[#52665B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -235,7 +235,7 @@
                 </a>
 
                 <!-- Buat Laporan -->
-                <a href="#buat-laporan" class="neu-nav-item px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center gap-3 font-semibold text-xs xl:text-sm">
+                <a href="{{ route('warga.laporan.create') }}" class="neu-nav-item px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center gap-3 font-semibold text-xs xl:text-sm">
                     <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -308,6 +308,21 @@
     <main class="flex-1 min-w-0 p-4 sm:p-5 lg:p-6 xl:p-8 pb-24 lg:pb-8 flex flex-col justify-between">
         
         <div>
+            @if (session('success'))
+                <div class="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl bg-[#E8F5ED] border border-[#A7D7B9] text-[#164E33] shadow-sm flex items-center justify-between gap-3"
+                     x-data="{ show: true }" x-show="show">
+                    <div class="flex items-center gap-3">
+                        <div class="clay-icon-emerald w-8 h-8 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4 text-[#15803D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <span class="text-xs sm:text-sm font-bold">{{ session('success') }}</span>
+                    </div>
+                    <button type="button" @click="show = false" class="text-[#4E7660] hover:text-[#164E33] font-bold text-xs px-2 py-1 rounded-lg hover:bg-black/5" aria-label="Tutup pemberitahuan">✕</button>
+                </div>
+            @endif
+
             <!-- ================= TOP HEADER BAR ================= -->
             <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-5 xl:mb-6">
                 <!-- Title & Breadcrumb & Territory Badge -->
@@ -533,7 +548,7 @@
 
                         <!-- Action Button -->
                         <div class="pt-0.5">
-                            <a href="#buat-laporan" 
+                            <a href="{{ route('warga.laporan.create') }}" 
                                class="clay-btn-green inline-flex items-center gap-2 px-5 py-2.5 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all">
                                 <span>Laporkan Masalah</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -987,7 +1002,7 @@
         </a>
 
         <!-- Center Action Floating Clay Button (Buat Laporan) -->
-        <a href="#buat-laporan" class="-mt-5 flex flex-col items-center group" aria-label="Buat Laporan Baru">
+        <a href="{{ route('warga.laporan.create') }}" class="-mt-5 flex flex-col items-center group" aria-label="Buat Laporan Baru">
             <div class="clay-btn-fab w-13 h-13 rounded-full flex items-center justify-center text-white transition-transform active:scale-95">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.8">
                     <line x1="12" y1="5" x2="12" y2="19"></line>

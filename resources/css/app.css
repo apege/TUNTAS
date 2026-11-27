@@ -89,11 +89,9 @@
 
 /* Tactile Stone/Clay Base Canvas */
 .clay-bg {
-    background-color: #EAE6DE;
+    background-color: #EAE5DB;
     background-image: 
-        radial-gradient(at 10% 15%, rgba(255, 255, 255, 0.9) 0px, transparent 40%),
-        radial-gradient(at 90% 85%, rgba(200, 192, 178, 0.6) 0px, transparent 45%),
-        radial-gradient(at 50% 50%, rgba(240, 236, 228, 0.5) 0px, transparent 60%);
+        linear-gradient(165deg, #EFECE4 0%, #E5DFD3 100%);
 }
 
 /* Left Panel: Deep Forest Green 3D Clay-Neumorphic Slab */
@@ -144,31 +142,34 @@
 /* Action Button: Tactile Extruded Clay Button (with realistic physical press) */
 .clay-btn-green {
     background: linear-gradient(145deg, #275D46 0%, #18412F 100%);
-    border-radius: 16px;
+    border-radius: 18px;
     box-shadow: 
-        8px 10px 22px rgba(170, 160, 145, 0.6),
-        -6px -6px 16px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.35),
-        inset -3px -3px 6px rgba(10, 28, 18, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        0 12px 24px -4px rgba(21, 55, 39, 0.45),
+        0 4px 8px -2px rgba(0, 0, 0, 0.15),
+        -4px -4px 10px rgba(255, 255, 255, 0.7),
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.45),
+        inset -3.5px -3.5px 7px rgba(8, 22, 15, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .clay-btn-green:hover {
     background: linear-gradient(145deg, #2F6F54 0%, #1D4B36 100%);
     transform: translateY(-2px);
     box-shadow: 
-        12px 14px 28px rgba(170, 160, 145, 0.7),
-        -8px -8px 20px #FFFFFF,
-        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.45),
-        inset -3px -3px 6px rgba(10, 28, 18, 0.4);
+        0 16px 28px -4px rgba(21, 55, 39, 0.55),
+        0 6px 12px -2px rgba(0, 0, 0, 0.18),
+        -5px -5px 12px rgba(255, 255, 255, 0.8),
+        inset 3px 3px 6px rgba(255, 255, 255, 0.5),
+        inset -3.5px -3.5px 7px rgba(8, 22, 15, 0.6);
 }
 
 .clay-btn-green:active {
-    transform: translateY(2px);
+    transform: translateY(2px) scale(0.98);
     box-shadow: 
-        inset 6px 6px 12px rgba(10, 28, 18, 0.6),
-        inset -3px -3px 8px rgba(255, 255, 255, 0.15);
+        0 4px 8px rgba(21, 55, 39, 0.35),
+        inset 5px 5px 10px rgba(8, 22, 15, 0.7),
+        inset -2px -2px 5px rgba(255, 255, 255, 0.15);
 }
 
 /* Leaf Badge: Extruded Squircle on Dark Green Background */
@@ -195,29 +196,31 @@
 
 /* Pill / Subtle Icon Container */
 .clay-pill {
-    background-color: #E8E4DB;
+    background: linear-gradient(145deg, #FFFFFF 0%, #EDE8DF 100%);
     border-radius: 9999px;
     box-shadow: 
-        5px 5px 12px rgba(182, 172, 156, 0.6),
-        -4px -4px 10px #FFFFFF,
-        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.95),
-        inset -1.5px -1.5px 3px rgba(182, 172, 156, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    transition: all 0.2s ease;
+        0 6px 14px -2px rgba(135, 120, 100, 0.22),
+        0 2px 5px -1px rgba(0, 0, 0, 0.05),
+        -3px -3px 8px rgba(255, 255, 255, 0.9),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
+        inset -2px -2.5px 5px rgba(165, 150, 130, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .clay-pill:hover {
-    background-color: #E3DFD5;
-    transform: translateY(-1px);
+    transform: translateY(-1.5px);
     box-shadow: 
-        6px 6px 14px rgba(182, 172, 156, 0.7),
-        -5px -5px 12px #FFFFFF;
+        0 8px 18px -2px rgba(135, 120, 100, 0.28),
+        0 3px 6px -1px rgba(0, 0, 0, 0.08),
+        -4px -4px 10px rgba(255, 255, 255, 0.95),
+        inset 2px 2px 4px rgba(255, 255, 255, 1);
 }
 
 .clay-pill:active {
-    transform: translateY(1px);
+    transform: translateY(1px) scale(0.98);
     box-shadow: 
-        inset 3px 3px 6px rgba(175, 165, 149, 0.55),
+        inset 3px 3px 6px rgba(160, 145, 128, 0.5),
         inset -2px -2px 5px rgba(255, 255, 255, 0.9);
 }
 
@@ -279,77 +282,77 @@
 
 /* Dashboard Layout Surface */
 .dashboard-canvas {
-    background-color: #F5F2EB;
+    background-color: #EAE5DB;
     background-image: 
-        radial-gradient(at 10% 8%, rgba(255, 255, 255, 0.98) 0px, transparent 38%),
-        radial-gradient(at 88% 88%, rgba(212, 204, 190, 0.5) 0px, transparent 42%),
-        radial-gradient(at 50% 50%, rgba(246, 243, 237, 0.7) 0px, transparent 60%);
+        linear-gradient(165deg, #EFECE4 0%, #E5DFD3 100%);
 }
 
 /* Sidebar Container */
 .neu-sidebar {
-    background: linear-gradient(180deg, #FAF8F4 0%, #F4EFE6 100%);
-    border-right: 1.5px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 6px 0 28px rgba(185, 175, 158, 0.2);
+    background: linear-gradient(180deg, #F5F1E8 0%, #ECE6DC 100%);
+    border-right: 1.5px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 8px 0 24px -4px rgba(140, 125, 105, 0.16);
 }
 
 /* Soft Emblazoned Pill (Tag RT/RW) */
 .neu-pill-tag {
-    background: linear-gradient(145deg, #FFFFFF 0%, #EBE7DD 100%);
+    background: linear-gradient(145deg, #FFFFFF 0%, #ECE7DD 100%);
     border-radius: 9999px;
     box-shadow: 
-        5px 6px 14px rgba(185, 175, 158, 0.45),
-        -4px -4px 10px #FFFFFF,
+        0 4px 10px -2px rgba(135, 120, 100, 0.2),
+        -2px -2px 6px rgba(255, 255, 255, 0.95),
         inset 1.5px 1.5px 3px rgba(255, 255, 255, 1),
-        inset -1.5px -1.5px 3px rgba(185, 175, 158, 0.25);
-    border: 1.2px solid rgba(255, 255, 255, 0.9);
+        inset -1.5px -1.5px 3px rgba(165, 150, 130, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Sunken Search Field: Capsule / Pill Neumorphic Well */
 .neu-search-input {
-    background-color: #E8E3D7;
+    background-color: #E2DDD2;
     border-radius: 9999px;
     box-shadow: 
-        inset 4px 4px 9px rgba(165, 155, 138, 0.55),
-        inset -4px -4px 9px #FFFFFF,
-        0 1px 2px rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.55);
+        inset 3.5px 3.5px 8px rgba(150, 140, 125, 0.45),
+        inset -3px -3px 7px rgba(255, 255, 255, 0.95),
+        0 1px 2px rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.45);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .neu-search-input:focus-within {
-    background-color: #E4DFD2;
+    background-color: #DDD8CC;
     box-shadow: 
-        inset 5px 5px 11px rgba(160, 150, 132, 0.65),
-        inset -4px -4px 9px #FFFFFF,
-        0 0 0 3px rgba(36, 86, 64, 0.22);
+        inset 4px 4px 9px rgba(145, 135, 120, 0.55),
+        inset -3px -3px 7px rgba(255, 255, 255, 0.95),
+        0 0 0 3px rgba(36, 86, 64, 0.25);
     border-color: rgba(36, 86, 64, 0.4);
 }
 
 /* Active Menu Item: Puffy Dark Green Clay Pill */
 .clay-nav-active {
-    background: linear-gradient(145deg, #2A664D 0%, #17422F 60%, #103323 100%);
+    background: linear-gradient(145deg, #2D6A4F 0%, #1A4432 60%, #112F22 100%);
     color: #FFFFFF !important;
     border-radius: 20px;
     box-shadow: 
-        0 12px 24px -3px rgba(16, 48, 33, 0.5),
-        6px 8px 18px rgba(175, 165, 150, 0.35),
-        inset 2px 2.5px 5px rgba(255, 255, 255, 0.42),
-        inset -3px -3px 6px rgba(5, 18, 12, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+        0 12px 24px -3px rgba(16, 48, 33, 0.45),
+        0 4px 8px -1px rgba(0, 0, 0, 0.12),
+        -3px -3px 8px rgba(255, 255, 255, 0.6),
+        inset 2.5px 3px 5px rgba(255, 255, 255, 0.45),
+        inset -3.5px -3.5px 7px rgba(5, 18, 12, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .clay-nav-active:hover {
     transform: translateY(-1px);
     box-shadow: 
-        0 14px 28px -3px rgba(16, 48, 33, 0.6),
-        7px 10px 22px rgba(175, 165, 150, 0.4),
-        inset 2px 2.5px 5px rgba(255, 255, 255, 0.5);
+        0 16px 28px -3px rgba(16, 48, 33, 0.55),
+        0 6px 12px -1px rgba(0, 0, 0, 0.15),
+        -4px -4px 10px rgba(255, 255, 255, 0.7),
+        inset 2.5px 3px 5px rgba(255, 255, 255, 0.55);
 }
 
 .clay-nav-active:active {
-    transform: translateY(2px);
+    transform: translateY(2px) scale(0.98);
     box-shadow: 
         0 4px 10px rgba(16, 48, 33, 0.4),
         inset 4px 4px 8px rgba(5, 18, 12, 0.7),
@@ -364,141 +367,151 @@
 }
 
 .neu-nav-item:hover {
-    background: linear-gradient(145deg, #FAF8F4 0%, #EAE5DC 100%);
+    background: linear-gradient(145deg, #FAF8F4 0%, #E8E2D6 100%);
     color: #122A1E;
     transform: translateY(-1px);
     box-shadow: 
-        5px 6px 14px rgba(185, 175, 158, 0.35),
-        -4px -4px 10px #FFFFFF,
+        0 6px 14px -2px rgba(135, 120, 100, 0.18),
+        -3px -3px 8px rgba(255, 255, 255, 0.9),
         inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.95);
 }
 
 .neu-nav-item:active {
     transform: translateY(1px);
     box-shadow: 
-        inset 3px 3px 6px rgba(175, 165, 149, 0.45),
-        inset -2px -2px 5px #FFFFFF;
+        inset 3px 3px 6px rgba(160, 145, 130, 0.45),
+        inset -2px -2px 5px rgba(255, 255, 255, 0.9);
 }
 
 /* Stat Cards: Volumetric 3D Clay Pillows with Specular Highlight */
 .clay-card-stat {
-    background: linear-gradient(145deg, #FFFFFF 0%, #F7F3EB 55%, #EBE5DB 100%);
+    background: linear-gradient(145deg, #FFFFFF 0%, #FAF7F2 48%, #EBE4D8 100%);
     border-radius: 28px;
     box-shadow: 
-        14px 18px 38px rgba(185, 175, 158, 0.5),
-        -10px -10px 26px #FFFFFF,
-        inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
-        inset -3px -3px 7px rgba(185, 175, 158, 0.25);
-    border: 1.5px solid rgba(255, 255, 255, 0.92);
+        0 18px 36px -6px rgba(135, 120, 100, 0.24),
+        0 6px 14px -2px rgba(135, 120, 100, 0.14),
+        -6px -6px 16px rgba(255, 255, 255, 0.9),
+        inset 3.5px 4px 7px rgba(255, 255, 255, 0.98),
+        inset -4px -5px 10px rgba(170, 155, 135, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.82);
     transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .clay-card-stat:hover {
-    transform: translateY(-4px) scale(1.01);
+    transform: translateY(-4px) scale(1.012);
     box-shadow: 
-        18px 24px 48px rgba(185, 175, 158, 0.6),
-        -12px -12px 30px #FFFFFF,
-        inset 3px 3px 6px rgba(255, 255, 255, 1),
-        inset -2.5px -2.5px 6px rgba(185, 175, 158, 0.2);
+        0 24px 44px -8px rgba(135, 120, 100, 0.3),
+        0 8px 18px -3px rgba(135, 120, 100, 0.16),
+        -8px -8px 20px rgba(255, 255, 255, 0.95),
+        inset 4px 4.5px 8px rgba(255, 255, 255, 1),
+        inset -3.5px -4px 8px rgba(170, 155, 135, 0.22);
 }
 
 .clay-card-stat:active {
     transform: translateY(1px) scale(0.99);
     box-shadow: 
-        8px 10px 20px rgba(185, 175, 158, 0.4),
-        -6px -6px 14px #FFFFFF;
+        0 8px 18px -2px rgba(135, 120, 100, 0.2),
+        -4px -4px 10px rgba(255, 255, 255, 0.85),
+        inset 2px 2px 5px rgba(255, 255, 255, 0.9);
 }
 
 /* Hero Welcome Banner: Mint-Sage Puffy Clay Pad */
 .clay-hero-banner {
-    background: linear-gradient(140deg, #E3ECE5 0%, #D5E7DA 48%, #C7DFCE 100%);
+    background: linear-gradient(140deg, #E2EDE5 0%, #D3E5D8 48%, #C4DDD0 100%);
     border-radius: 32px;
     box-shadow: 
-        16px 20px 44px rgba(165, 182, 170, 0.55),
-        -12px -12px 32px #FFFFFF,
-        inset 3px 3px 6px rgba(255, 255, 255, 0.98),
-        inset -4px -4px 10px rgba(130, 162, 142, 0.38);
-    border: 1.5px solid rgba(255, 255, 255, 0.88);
+        0 20px 42px -6px rgba(115, 145, 125, 0.28),
+        0 6px 14px -2px rgba(115, 145, 125, 0.16),
+        -6px -6px 18px rgba(255, 255, 255, 0.85),
+        inset 4px 4.5px 8px rgba(255, 255, 255, 0.98),
+        inset -5px -6px 12px rgba(105, 142, 120, 0.36);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Content Container Cards (Laporan Saya & Pengumuman) */
 .clay-card-content {
-    background: linear-gradient(145deg, #FFFFFF 0%, #F6F2E9 60%, #ECE6DC 100%);
+    background: linear-gradient(145deg, #FFFFFF 0%, #FAF6F0 48%, #ECE5DA 100%);
     border-radius: 32px;
     box-shadow: 
-        16px 20px 44px rgba(185, 175, 158, 0.5),
-        -12px -12px 30px #FFFFFF,
-        inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
-        inset -3px -3px 8px rgba(180, 170, 152, 0.28);
-    border: 1.5px solid rgba(255, 255, 255, 0.92);
+        0 20px 42px -6px rgba(135, 120, 100, 0.24),
+        0 6px 14px -2px rgba(135, 120, 100, 0.12),
+        -8px -8px 22px rgba(255, 255, 255, 0.9),
+        inset 3.5px 4px 7px rgba(255, 255, 255, 0.98),
+        inset -4px -5px 10px rgba(170, 155, 135, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.82);
 }
 
 /* Dedicated Tactile 3D Clay Icon Squircles */
 .clay-icon-mint {
-    background: linear-gradient(135deg, #F0F7F2 0%, #DCEFE3 100%);
+    background: linear-gradient(135deg, #F0F8F3 0%, #D8EFE0 100%);
     border-radius: 18px;
     box-shadow: 
-        5px 6px 14px rgba(155, 185, 165, 0.45),
-        -3px -3px 8px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
-        inset -2px -2px 4px rgba(135, 170, 148, 0.35);
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
+        0 6px 12px -2px rgba(135, 120, 100, 0.2),
+        0 2px 5px -1px rgba(0, 0, 0, 0.05),
+        -2px -2px 6px rgba(255, 255, 255, 0.95),
+        inset 2.5px 2.5px 4.5px rgba(255, 255, 255, 0.98),
+        inset -2.5px -3px 5px rgba(110, 165, 130, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.88);
 }
 
 .clay-icon-blue {
-    background: linear-gradient(135deg, #F0F6FD 0%, #DCEAFC 100%);
+    background: linear-gradient(135deg, #F0F6FD 0%, #D6E8FC 100%);
     border-radius: 18px;
     box-shadow: 
-        5px 6px 14px rgba(155, 175, 205, 0.45),
-        -3px -3px 8px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
-        inset -2px -2px 4px rgba(130, 160, 200, 0.35);
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
+        0 6px 12px -2px rgba(135, 120, 100, 0.2),
+        0 2px 5px -1px rgba(0, 0, 0, 0.05),
+        -2px -2px 6px rgba(255, 255, 255, 0.95),
+        inset 2.5px 2.5px 4.5px rgba(255, 255, 255, 0.98),
+        inset -2.5px -3px 5px rgba(110, 145, 195, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.88);
 }
 
 .clay-icon-amber {
-    background: linear-gradient(135deg, #FFFDF0 0%, #FDF1D6 100%);
+    background: linear-gradient(135deg, #FFFDF0 0%, #FEEEC8 100%);
     border-radius: 18px;
     box-shadow: 
-        5px 6px 14px rgba(200, 180, 140, 0.45),
-        -3px -3px 8px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
-        inset -2px -2px 4px rgba(195, 165, 115, 0.35);
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
+        0 6px 12px -2px rgba(135, 120, 100, 0.2),
+        0 2px 5px -1px rgba(0, 0, 0, 0.05),
+        -2px -2px 6px rgba(255, 255, 255, 0.95),
+        inset 2.5px 2.5px 4.5px rgba(255, 255, 255, 0.98),
+        inset -2.5px -3px 5px rgba(195, 150, 95, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.88);
 }
 
 .clay-icon-emerald {
-    background: linear-gradient(135deg, #F2FCF5 0%, #DDF7E4 100%);
+    background: linear-gradient(135deg, #F2FCF5 0%, #D6F7DF 100%);
     border-radius: 18px;
     box-shadow: 
-        5px 6px 14px rgba(150, 195, 165, 0.45),
-        -3px -3px 8px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
-        inset -2px -2px 4px rgba(125, 185, 145, 0.35);
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
+        0 6px 12px -2px rgba(135, 120, 100, 0.2),
+        0 2px 5px -1px rgba(0, 0, 0, 0.05),
+        -2px -2px 6px rgba(255, 255, 255, 0.95),
+        inset 2.5px 2.5px 4.5px rgba(255, 255, 255, 0.98),
+        inset -2.5px -3px 5px rgba(100, 175, 125, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.88);
 }
 
 /* Generic Tactile Squircle Badge */
 .clay-icon-badge {
     border-radius: 18px;
     box-shadow: 
-        5px 6px 14px rgba(180, 170, 155, 0.4),
-        -4px -4px 10px #FFFFFF,
+        0 6px 12px -2px rgba(135, 120, 100, 0.2),
+        0 2px 5px -1px rgba(0, 0, 0, 0.05),
+        -2px -2px 6px rgba(255, 255, 255, 0.95),
         inset 2px 2px 4px rgba(255, 255, 255, 0.95),
-        inset -2px -2px 4px rgba(175, 165, 148, 0.22);
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
+        inset -2px -2.5px 4px rgba(165, 150, 130, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Territory Card / Tactile Side Slab */
 .clay-territory-card {
-    background: linear-gradient(145deg, #FAF8F4 0%, #ECE7DD 100%);
+    background: linear-gradient(145deg, #FAF8F4 0%, #EAE4D8 100%);
     border-radius: 22px;
     box-shadow: 
-        8px 10px 24px rgba(185, 175, 158, 0.42),
-        -6px -6px 16px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 1),
-        inset -2.5px -2.5px 5px rgba(185, 175, 158, 0.22);
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
+        0 10px 22px -3px rgba(135, 120, 100, 0.22),
+        -4px -4px 12px rgba(255, 255, 255, 0.9),
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+        inset -2.5px -3px 6px rgba(165, 150, 130, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Mobile Bottom Navigation Dock */
@@ -523,56 +536,59 @@
 
 /* Bottom Awareness Banner (Kenali kondisi di sekitar Anda) */
 .clay-bottom-banner {
-    background: linear-gradient(140deg, #E6F1EA 0%, #D8EAD9 58%, #CCE3CE 100%);
+    background: linear-gradient(140deg, #E4EFE8 0%, #D5E8DB 58%, #C7DFD0 100%);
     border-radius: 28px;
     box-shadow: 
-        14px 18px 38px rgba(168, 185, 172, 0.5),
-        -10px -10px 26px #FFFFFF,
-        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
-        inset -3px -3px 8px rgba(135, 165, 142, 0.35);
-    border: 1.5px solid rgba(255, 255, 255, 0.88);
+        0 18px 36px -6px rgba(115, 145, 125, 0.25),
+        0 6px 14px -2px rgba(115, 145, 125, 0.14),
+        -6px -6px 16px rgba(255, 255, 255, 0.85),
+        inset 3.5px 4px 7px rgba(255, 255, 255, 0.98),
+        inset -4px -5px 10px rgba(105, 142, 120, 0.32);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Sidebar Helper Info Card */
 .clay-helper-card {
-    background: linear-gradient(140deg, #E6EFE9 0%, #D7E8DC 100%);
+    background: linear-gradient(140deg, #E6EFE9 0%, #D8E7DD 100%);
     border-radius: 24px;
     box-shadow: 
-        8px 10px 24px rgba(170, 185, 175, 0.4),
-        -6px -6px 16px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.95),
-        inset -2px -2px 5px rgba(140, 170, 152, 0.3);
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
+        0 10px 22px -3px rgba(130, 150, 138, 0.22),
+        -4px -4px 12px rgba(255, 255, 255, 0.85),
+        inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.98),
+        inset -2.5px -3px 6px rgba(115, 145, 125, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.85);
 }
 
 /* Nested Report / Announcement Clay Card Item */
 .clay-item-card {
-    background: linear-gradient(145deg, #FFFFFF 0%, #F8F5EE 60%, #EFE9DF 100%);
+    background: linear-gradient(145deg, #FFFFFF 0%, #FAF7F2 60%, #EFEAE0 100%);
     border-radius: 22px;
     box-shadow: 
-        8px 10px 22px rgba(185, 175, 158, 0.35),
-        -6px -6px 16px #FFFFFF,
-        inset 2px 2px 4px rgba(255, 255, 255, 0.98),
-        inset -2px -2px 4px rgba(185, 175, 158, 0.18);
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
+        0 8px 18px -3px rgba(135, 120, 100, 0.18),
+        0 2px 6px -1px rgba(0, 0, 0, 0.05),
+        -3px -3px 8px rgba(255, 255, 255, 0.9),
+        inset 2.5px 2.5px 4.5px rgba(255, 255, 255, 0.98),
+        inset -2px -2.5px 5px rgba(165, 150, 130, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.82);
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .clay-item-card:hover {
     transform: translateY(-2px) scale(1.008);
     box-shadow: 
-        12px 14px 28px rgba(185, 175, 158, 0.45),
-        -8px -8px 20px #FFFFFF;
+        0 12px 24px -4px rgba(135, 120, 100, 0.25),
+        0 4px 8px -2px rgba(0, 0, 0, 0.08),
+        -4px -4px 12px rgba(255, 255, 255, 0.95);
 }
 
 /* Sunken Tip Note Box */
 .clay-sunken-note {
-    background-color: #ECE7DD;
+    background-color: #E2DCD1;
     border-radius: 18px;
     box-shadow: 
-        inset 3px 3px 7px rgba(175, 165, 148, 0.45),
-        inset -3px -3px 7px #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.6);
+        inset 3px 3px 7px rgba(150, 140, 125, 0.42),
+        inset -3px -3px 7px rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.45);
 }
 
 /* Help Badge Pill */

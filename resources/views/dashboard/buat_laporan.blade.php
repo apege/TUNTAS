@@ -479,33 +479,113 @@
                                accept="image/jpeg,image/png,image/webp"
                                class="hidden">
 
-                        <!-- Upload Dropzone Container -->
+                        <!-- Native mobile camera capture fallback -->
+                        <input type="file"
+                               id="foto-camera-fallback"
+                               accept="image/*"
+                               capture="environment"
+                               class="hidden">
+
+                        <!-- Upload & Camera Dropzone Container -->
                         <div id="foto-dropzone"
-                             class="clay-upload-dropzone p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all"
-                             onclick="document.getElementById('foto-input').click()">
+                             class="clay-upload-dropzone p-5 sm:p-7 flex flex-col items-center justify-center text-center transition-all">
                             
-                            <!-- State 1: No Photo Selected -->
-                            <div id="foto-empty-state" class="flex flex-col items-center">
-                                <div class="clay-pill w-12 h-12 flex items-center justify-center text-[#2D6A4F] mb-3">
+                            <!-- State 1: Empty State (Upload or Live Camera) -->
+                            <div id="foto-empty-state" class="flex flex-col items-center w-full">
+                                <div class="clay-pill w-12 h-12 flex items-center justify-center text-[#2D6A4F] mb-3 cursor-pointer"
+                                     onclick="document.getElementById('foto-input').click()">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <h4 class="font-extrabold text-xs sm:text-sm text-[#142D21]">
-                                    Pilih atau seret foto kondisi lingkungan
+                                    Pilih, seret, atau ambil foto kondisi lingkungan
                                 </h4>
                                 <p class="text-[11px] text-[#63796E] mt-1 font-medium">
                                     JPG, PNG, atau WebP • maksimal 5 MB
                                 </p>
+
+                                <div class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+                                    <button type="button"
+                                            onclick="document.getElementById('foto-input').click()"
+                                            class="clay-pill px-4 py-2 inline-flex items-center gap-2 text-xs font-bold text-[#1B4332] cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        </svg>
+                                        <span>Pilih dari Galeri</span>
+                                    </button>
+
+                                    <button type="button"
+                                            id="btn-open-camera"
+                                            onclick="openCameraCapture(event)"
+                                            class="clay-btn-green px-4 py-2 inline-flex items-center gap-2 text-xs font-bold text-white cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <circle cx="12" cy="13" r="3" />
+                                        </svg>
+                                        <span>Ambil Foto Kamera</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- State 2: Photo Selected & Preview Visible -->
+                            <!-- State 2: Live Camera Viewfinder -->
+                            <div id="foto-camera-state" class="hidden w-full flex flex-col items-center space-y-3">
+                                <div class="relative w-full max-w-md rounded-2xl overflow-hidden bg-[#112B1F] border-2 border-white shadow-md">
+                                    <video id="camera-video" autoplay playsinline muted class="w-full aspect-video object-cover"></video>
+                                    <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/50 backdrop-blur-xs text-[10px] font-bold text-white inline-flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                        Kamera Aktif
+                                    </span>
+                                </div>
+
+                                <!-- Camera Permission / Error Fallback Notice -->
+                                <div id="camera-error-box" class="hidden w-full max-w-md p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs text-center space-y-2">
+                                    <p id="camera-error-text" class="font-medium"></p>
+                                    <button type="button"
+                                            onclick="document.getElementById('foto-camera-fallback').click()"
+                                            class="clay-pill px-3.5 py-1.5 text-[11px] font-bold text-[#1B4332] cursor-pointer">
+                                        Buka Kamera / Galeri Perangkat
+                                    </button>
+                                </div>
+
+                                <div class="flex flex-wrap items-center justify-center gap-2.5">
+                                    <button type="button"
+                                            onclick="closeCameraCapture(event)"
+                                            class="clay-btn-cancel px-4 py-2 text-xs font-bold cursor-pointer">
+                                        Batal
+                                    </button>
+
+                                    <button type="button"
+                                            id="btn-switch-camera"
+                                            onclick="switchCameraFacing(event)"
+                                            class="clay-pill px-3.5 py-2 inline-flex items-center gap-1.5 text-xs font-bold text-[#1B4332] cursor-pointer"
+                                            title="Ganti kamera depan / belakang">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span>Balik Kamera</span>
+                                    </button>
+
+                                    <button type="button"
+                                            id="btn-capture-snapshot"
+                                            onclick="captureCameraSnapshot(event)"
+                                            class="clay-btn-green px-5 py-2 inline-flex items-center gap-2 text-xs font-bold text-white cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                            <circle cx="12" cy="12" r="9" />
+                                            <circle cx="12" cy="12" r="4" fill="currentColor" />
+                                        </svg>
+                                        <span>Jepret Foto</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- State 3: Photo Selected & Preview Visible -->
                             <div id="foto-preview-state" class="hidden w-full flex flex-col items-center space-y-3">
                                 <div class="relative max-w-xs rounded-2xl overflow-hidden border-2 border-white shadow-md">
                                     <img id="foto-preview-img" src="" alt="Pratinjau Foto" class="w-full h-44 object-cover">
                                     <button type="button" 
                                             onclick="clearPhoto(event)" 
-                                            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600/90 text-white flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-700 transition-colors"
+                                            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600/90 text-white flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-700 transition-colors cursor-pointer"
                                             title="Hapus foto">
                                         ✕
                                     </button>
@@ -513,15 +593,24 @@
                                 <div class="text-center">
                                     <span id="foto-preview-name" class="block text-xs font-bold text-[#142D21]"></span>
                                     <span id="foto-preview-size" class="block text-[10px] text-[#63796E]"></span>
-                                    <span class="inline-block text-[11px] font-bold text-[#2D6A4F] mt-1 hover:underline">
-                                        Klik untuk mengganti foto
-                                    </span>
+                                    <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2">
+                                        <button type="button"
+                                                onclick="document.getElementById('foto-input').click()"
+                                                class="clay-pill px-3.5 py-1.5 text-[11px] font-bold text-[#1B4332] cursor-pointer">
+                                            Ganti File
+                                        </button>
+                                        <button type="button"
+                                                onclick="openCameraCapture(event)"
+                                                class="clay-pill px-3.5 py-1.5 text-[11px] font-bold text-[#1B4332] cursor-pointer">
+                                            Foto Ulang
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <p class="text-[10px] sm:text-[11px] text-[#718579] mt-2 px-1">
-                            Foto hanya dibaca sebagai pratinjau lokal sebelum dikirim, lalu disimpan aman untuk verifikasi pengurus RT.
+                            Anda dapat memilih foto dari galeri atau mengambil foto langsung dari kamera, lalu disimpan aman untuk verifikasi pengurus RT.
                         </p>
                     </div>
 
@@ -1286,7 +1375,40 @@
             }
         }
 
-        // 6. Photo Upload & Drag-n-Drop Preview
+        // 6. Photo Upload, Drag-n-Drop & Live Camera Capture
+        let activeMediaStream = null;
+        let currentFacingMode = 'environment';
+
+        const emptyState = document.getElementById('foto-empty-state');
+        const cameraState = document.getElementById('foto-camera-state');
+        const previewState = document.getElementById('foto-preview-state');
+        const cameraVideo = document.getElementById('camera-video');
+        const cameraErrorBox = document.getElementById('camera-error-box');
+        const cameraErrorText = document.getElementById('camera-error-text');
+        const btnCapture = document.getElementById('btn-capture-snapshot');
+        const btnSwitchCamera = document.getElementById('btn-switch-camera');
+        const cameraFallbackInput = document.getElementById('foto-camera-fallback');
+
+        function stopCameraStream() {
+            if (activeMediaStream) {
+                activeMediaStream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                activeMediaStream = null;
+            }
+            if (cameraVideo) {
+                cameraVideo.srcObject = null;
+            }
+        }
+
+        function assignFileToMainInput(file) {
+            if (!fotoInput || !file) return;
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fotoInput.files = dataTransfer.files;
+            handlePhotoFile(file);
+        }
+
         function handlePhotoFile(file) {
             if (!file) return;
 
@@ -1303,23 +1425,119 @@
                 return;
             }
 
-            const emptyState = document.getElementById('foto-empty-state');
-            const previewState = document.getElementById('foto-preview-state');
             const previewImg = document.getElementById('foto-preview-img');
             const previewName = document.getElementById('foto-preview-name');
             const previewSize = document.getElementById('foto-preview-size');
 
             const reader = new FileReader();
             reader.onload = function (e) {
+                stopCameraStream();
                 if (previewImg) previewImg.src = e.target.result;
                 if (previewName) previewName.textContent = file.name;
                 if (previewSize) previewSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
                 if (emptyState) emptyState.classList.add('hidden');
+                if (cameraState) cameraState.classList.add('hidden');
                 if (previewState) previewState.classList.remove('hidden');
                 updateChecklist();
             };
             reader.readAsDataURL(file);
         }
+
+        async function startCameraStream() {
+            stopCameraStream();
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                if (cameraErrorBox && cameraErrorText) {
+                    cameraErrorText.textContent = 'Browser tidak mendukung kamera langsung di halaman ini. Gunakan kamera bawaan perangkat di bawah.';
+                    cameraErrorBox.classList.remove('hidden');
+                }
+                if (btnCapture) btnCapture.classList.add('hidden');
+                if (btnSwitchCamera) btnSwitchCamera.classList.add('hidden');
+                return;
+            }
+
+            if (cameraErrorBox) cameraErrorBox.classList.add('hidden');
+            if (btnCapture) btnCapture.classList.remove('hidden');
+            if (btnSwitchCamera) btnSwitchCamera.classList.remove('hidden');
+
+            try {
+                activeMediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: currentFacingMode },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+                if (cameraVideo) {
+                    cameraVideo.srcObject = activeMediaStream;
+                }
+            } catch (err) {
+                // Fallback ke constraint sederhana jika facingMode tidak tersedia (misal webcam laptop)
+                try {
+                    activeMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    if (cameraVideo) {
+                        cameraVideo.srcObject = activeMediaStream;
+                    }
+                } catch (fallbackErr) {
+                    if (cameraErrorBox && cameraErrorText) {
+                        cameraErrorText.textContent = 'Izin kamera belum aktif atau kamera tidak terdeteksi. Izinkan akses kamera browser atau buka kamera perangkat.';
+                        cameraErrorBox.classList.remove('hidden');
+                    }
+                    if (btnCapture) btnCapture.classList.add('hidden');
+                    if (btnSwitchCamera) btnSwitchCamera.classList.add('hidden');
+                }
+            }
+        }
+
+        window.openCameraCapture = function (event) {
+            if (event) event.stopPropagation();
+            if (emptyState) emptyState.classList.add('hidden');
+            if (previewState) previewState.classList.add('hidden');
+            if (cameraState) cameraState.classList.remove('hidden');
+            startCameraStream();
+        };
+
+        window.closeCameraCapture = function (event) {
+            if (event) event.stopPropagation();
+            stopCameraStream();
+            if (cameraState) cameraState.classList.add('hidden');
+            if (fotoInput && fotoInput.files && fotoInput.files.length > 0) {
+                if (previewState) previewState.classList.remove('hidden');
+            } else {
+                if (emptyState) emptyState.classList.remove('hidden');
+            }
+        };
+
+        window.switchCameraFacing = function (event) {
+            if (event) event.stopPropagation();
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            startCameraStream();
+        };
+
+        window.captureCameraSnapshot = function (event) {
+            if (event) event.stopPropagation();
+            if (!cameraVideo || !cameraVideo.videoWidth || !cameraVideo.videoHeight) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraVideo.videoWidth;
+            canvas.height = cameraVideo.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(function (blob) {
+                if (!blob) return;
+                const now = new Date();
+                const stamp = now.toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+                const capturedFile = new File([blob], 'foto_kamera_' + stamp + '.jpg', {
+                    type: 'image/jpeg',
+                    lastModified: Date.now()
+                });
+                assignFileToMainInput(capturedFile);
+            }, 'image/jpeg', 0.9);
+        };
 
         if (fotoInput) {
             fotoInput.addEventListener('change', function (e) {
@@ -1329,15 +1547,24 @@
             });
         }
 
+        if (cameraFallbackInput) {
+            cameraFallbackInput.addEventListener('change', function (e) {
+                if (e.target.files && e.target.files[0]) {
+                    assignFileToMainInput(e.target.files[0]);
+                    cameraFallbackInput.value = '';
+                }
+            });
+        }
+
         window.clearPhoto = function (event) {
             if (event) event.stopPropagation();
+            stopCameraStream();
             if (fotoInput) fotoInput.value = '';
-            const emptyState = document.getElementById('foto-empty-state');
-            const previewState = document.getElementById('foto-preview-state');
             const previewImg = document.getElementById('foto-preview-img');
 
             if (previewImg) previewImg.src = '';
             if (previewState) previewState.classList.add('hidden');
+            if (cameraState) cameraState.classList.add('hidden');
             if (emptyState) emptyState.classList.remove('hidden');
             updateChecklist();
         };
@@ -1361,14 +1588,13 @@
 
             dropzone.addEventListener('drop', function (e) {
                 const files = e.dataTransfer ? e.dataTransfer.files : null;
-                if (files && files[0] && fotoInput) {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(files[0]);
-                    fotoInput.files = dataTransfer.files;
-                    handlePhotoFile(files[0]);
+                if (files && files[0]) {
+                    assignFileToMainInput(files[0]);
                 }
             });
         }
+
+        window.addEventListener('beforeunload', stopCameraStream);
 
         // Initialize state on load
         if (kategoriInput && kategoriInput.value) {

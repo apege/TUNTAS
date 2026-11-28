@@ -532,7 +532,7 @@
                     <!-- Left Hero Content -->
                     <div class="md:col-span-7 space-y-3 sm:space-y-3.5">
                         <!-- Date & Location Badge (Clean, no AI slop pulse dot) -->
-                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/50 backdrop-blur-sm text-[10px] sm:text-[11px] font-bold text-[#204E3A] border border-white/70 shadow-sm">
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/40 backdrop-blur-sm text-[10px] sm:text-[11px] font-bold text-[#143525] border border-white/50 shadow-2xs">
                             <span>{{ $tanggalHariIni ?? 'Senin, 23 November 2026' }} • RT {{ $rtNomor ?? '02' }} / RW {{ $rwNomor ?? '05' }}</span>
                         </div>
 

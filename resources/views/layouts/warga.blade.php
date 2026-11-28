@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen dashboard-canvas flex flex-col lg:flex-row antialiased relative selection:bg-[#245640] selection:text-white"
-     x-data="{ mobileMenuOpen: false, profileDropdownOpen: false }">
+<div class="min-h-screen dashboard-canvas flex flex-col lg:flex-row antialiased relative selection:bg-[#245640] selection:text-white">
 
     <!-- =========================================================================
          MOBILE TOPBAR (Visible on screens < lg)
@@ -310,8 +309,7 @@
         <div>
             <!-- Flash Message Toast Notification -->
             @if (session('success'))
-                <div class="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl bg-[#E8F5ED] border border-[#A7D7B9] text-[#164E33] shadow-sm flex items-center justify-between gap-3"
-                     x-data="{ show: true }" x-show="show">
+                <div data-flash-toast class="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl bg-[#E8F5ED] border border-[#A7D7B9] text-[#164E33] shadow-sm flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
                         <div class="clay-icon-emerald w-8 h-8 flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4 text-[#15803D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -320,7 +318,7 @@
                         </div>
                         <span class="text-xs sm:text-sm font-bold">{{ session('success') }}</span>
                     </div>
-                    <button type="button" @click="show = false" class="text-[#4E7660] hover:text-[#164E33] font-bold text-xs px-2 py-1 rounded-lg hover:bg-black/5" aria-label="Tutup pemberitahuan">✕</button>
+                    <button type="button" onclick="this.closest('[data-flash-toast]').remove()" class="text-[#4E7660] hover:text-[#164E33] font-bold text-xs px-2 py-1 rounded-lg hover:bg-black/5" aria-label="Tutup pemberitahuan">✕</button>
                 </div>
             @endif
 

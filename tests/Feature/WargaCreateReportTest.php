@@ -196,4 +196,39 @@ class WargaCreateReportTest extends TestCase
 
         $response->assertSessionHasErrors(['uraian']);
     }
+
+    public function test_semua_kategori_terpetakan_unik_termasuk_penerangan_jalan_umum(): void
+    {
+        Kategori::create([
+            'id' => (string) Str::uuid(),
+            'nama' => 'Drainase & Saluran Air',
+            'warna_peta' => '#3B82F6',
+            'aktif' => true,
+        ]);
+        Kategori::create([
+            'id' => (string) Str::uuid(),
+            'nama' => 'Jalan Lingkungan & Trotoar',
+            'warna_peta' => '#F59E0B',
+            'aktif' => true,
+        ]);
+        Kategori::create([
+            'id' => (string) Str::uuid(),
+            'nama' => 'Penerangan Jalan Umum',
+            'warna_peta' => '#10B981',
+            'aktif' => true,
+        ]);
+        Kategori::create([
+            'id' => (string) Str::uuid(),
+            'nama' => 'Fasilitas Umum & Ruang Terbuka',
+            'warna_peta' => '#8B5CF6',
+            'aktif' => true,
+        ]);
+
+        $response = $this->actingAs($this->wargaUser)->get(route('warga.laporan.create'));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Sampah', 'Drainase', 'Jalan', 'Fasilitas Umum', 'Penerangan']);
+        $response->assertSee('Panduan Kategori');
+        $response->assertSee('Saran judul cepat:');
+    }
 }

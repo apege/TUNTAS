@@ -37,7 +37,7 @@ class ReportController extends Controller
         // 1. Resolusi Profil Warga & Hierarki Wilayah
         $profil = $this->resolveProfilWarga($user);
 
-        // 2. Kategori Aktif dari Database
+        // 2. Kategori Aktif dari Database beserta metadata kontekstual untuk form
         $kategoris = Kategori::where('aktif', true)
             ->orderBy('created_at')
             ->get()
@@ -45,9 +45,18 @@ class ReportController extends Controller
                 $meta = $this->resolveKategoriMeta($kategori->nama);
                 $kategori->short_name = $meta['short_name'];
                 $kategori->icon_type = $meta['icon_type'];
+                $kategori->sort_order = $meta['sort_order'];
+                $kategori->tips = $meta['tips'];
+                $kategori->placeholder_judul = $meta['placeholder_judul'];
+                $kategori->placeholder_uraian = $meta['placeholder_uraian'];
+                $kategori->contoh_judul = $meta['contoh_judul'];
+                $kategori->suggested_dampak = $meta['suggested_dampak'];
+                $kategori->suggested_urgensi = $meta['suggested_urgensi'];
 
                 return $kategori;
-            });
+            })
+            ->sortBy('sort_order')
+            ->values();
 
         // 3. Pilihan Area Lingkungan / Blok
         $daftarBlok = [
@@ -178,31 +187,112 @@ class ReportController extends Controller
     }
 
     /**
-     * Pemetaan nama kategori database ke label singkat dan tipe ikon visual UI.
+     * Pemetaan nama kategori database ke label singkat, ikon, urutan tampil, dan asisten form kontekstual.
      *
-     * @return array{short_name: string, icon_type: string}
+     * @return array{
+     *     short_name: string,
+     *     icon_type: string,
+     *     sort_order: int,
+     *     tips: string,
+     *     placeholder_judul: string,
+     *     placeholder_uraian: string,
+     *     contoh_judul: list<string>,
+     *     suggested_dampak: string,
+     *     suggested_urgensi: string
+     * }
      */
     protected function resolveKategoriMeta(string $namaKategori): array
     {
         $namaLower = strtolower($namaKategori);
 
-        if (str_contains($namaLower, 'sampah')) {
-            return ['short_name' => 'Sampah', 'icon_type' => 'sampah'];
+        if (str_contains($namaLower, 'sampah') || str_contains($namaLower, 'kebersihan')) {
+            return [
+                'short_name' => 'Sampah',
+                'icon_type' => 'sampah',
+                'sort_order' => 1,
+                'tips' => 'Sebutkan jenis & perkiraan volume sampah, serta apakah menimbulkan bau atau menghalangi akses.',
+                'placeholder_judul' => 'Contoh: Tumpukan sampah menumpuk dekat pos ronda',
+                'placeholder_uraian' => 'Jelaskan perkiraan volume tumpukan sampah, sejak kapan belum terangkut, dan apakah menimbulkan bau menyengat atau mengundang lalat/tikus...',
+                'contoh_judul' => [
+                    'Tumpukan sampah rumah tangga belum terangkut',
+                    'Pembuangan sampah liar di bahu jalan',
+                    'Bak sampah umum penuh dan meluber',
+                ],
+                'suggested_dampak' => 'sedang',
+                'suggested_urgensi' => 'sedang',
+            ];
         }
 
         if (str_contains($namaLower, 'drainase') || str_contains($namaLower, 'saluran') || str_contains($namaLower, 'air')) {
-            return ['short_name' => 'Drainase', 'icon_type' => 'drainase'];
+            return [
+                'short_name' => 'Drainase',
+                'icon_type' => 'drainase',
+                'sort_order' => 2,
+                'tips' => 'Informasikan penyebab sumbatan (lumpur/sampah) dan ketinggian genangan saat turun hujan.',
+                'placeholder_judul' => 'Contoh: Saluran air tersumbat di Gang 2',
+                'placeholder_uraian' => 'Jelaskan kondisi selokan atau gorong-gorong yang mampet, tinggi genangan air saat hujan, serta rumah atau jalan yang terdampak luapan...',
+                'contoh_judul' => [
+                    'Saluran air mampet menyebabkan genangan',
+                    'Selokan penuh endapan lumpur dan dedaunan',
+                    'Penutup gorong-gorong patah/bergeser',
+                ],
+                'suggested_dampak' => 'sedang',
+                'suggested_urgensi' => 'tinggi',
+            ];
+        }
+
+        // Cek penerangan/lampu SEBELUM jalan agar "Penerangan Jalan Umum" tidak tertukar dengan "Jalan"
+        if (str_contains($namaLower, 'penerangan') || str_contains($namaLower, 'lampu') || str_contains($namaLower, 'pju')) {
+            return [
+                'short_name' => 'Penerangan',
+                'icon_type' => 'penerangan',
+                'sort_order' => 5,
+                'tips' => 'Catat nomor tiang lampu jika terlihat atau patokan rumah terdekat beserta berapa malam lampu padam.',
+                'placeholder_judul' => 'Contoh: Lampu PJU mati total di tikungan Mawar Barat',
+                'placeholder_uraian' => 'Jelaskan kondisi lampu (mati total, berkedip, atau kabel kendor), sudah berapa malam padam, dan apakah area tersebut gelap/rawan saat malam...',
+                'contoh_judul' => [
+                    'Lampu penerangan jalan umum mati total',
+                    'Lampu PJU berkedip-kedip hampir padam',
+                    'Kabel lampu gang kendor/membahayakan',
+                ],
+                'suggested_dampak' => 'sedang',
+                'suggested_urgensi' => 'tinggi',
+            ];
         }
 
         if (str_contains($namaLower, 'jalan') || str_contains($namaLower, 'trotoar')) {
-            return ['short_name' => 'Jalan', 'icon_type' => 'jalan'];
+            return [
+                'short_name' => 'Jalan',
+                'icon_type' => 'jalan',
+                'sort_order' => 3,
+                'tips' => 'Tuliskan perkiraan lebar atau kedalaman lubang dan patokan terdekat agar bisa segera diberi rambu.',
+                'placeholder_judul' => 'Contoh: Jalan berlubang cukup dalam di depan Blok B',
+                'placeholder_uraian' => 'Jelaskan jenis kerusakan jalan (berlubang, aspal terkelupas, paving amblas), perkiraan ukurannya, dan risikonya bagi pengendara/pejalan kaki...',
+                'contoh_judul' => [
+                    'Aspal jalan berlubang membahayakan pengendara',
+                    'Paving block gang amblas dan licin',
+                    'Trotoar retak/ambles di depan area warga',
+                ],
+                'suggested_dampak' => 'tinggi',
+                'suggested_urgensi' => 'tinggi',
+            ];
         }
 
-        if (str_contains($namaLower, 'penerangan') || str_contains($namaLower, 'lampu') || str_contains($namaLower, 'pju')) {
-            return ['short_name' => 'Penerangan', 'icon_type' => 'penerangan'];
-        }
-
-        return ['short_name' => 'Fasilitas Umum', 'icon_type' => 'fasilitas'];
+        return [
+            'short_name' => 'Fasilitas Umum',
+            'icon_type' => 'fasilitas',
+            'sort_order' => 4,
+            'tips' => 'Sebutkan nama fasilitas umum (pos ronda, taman, balai warga) dan bagian spesifik yang rusak.',
+            'placeholder_judul' => 'Contoh: Atap pos kamling RT bocor dan rapuh',
+            'placeholder_uraian' => 'Jelaskan nama fasilitas umum, bagian yang mengalami kerusakan, sejak kapan terjadi, dan dampaknya terhadap kenyamanan/keamanan warga...',
+            'contoh_judul' => [
+                'Atap pos ronda bocor saat hujan',
+                'Bangku taman warga rusak/patah',
+                'Cermin cembung tikungan pecah/buram',
+            ],
+            'suggested_dampak' => 'rendah',
+            'suggested_urgensi' => 'sedang',
+        ];
     }
 
     /**

@@ -343,6 +343,11 @@
                                 <span>RW {{ $rwNomor ?? '05' }}</span>
                             </div>
                         </div>
+                        @hasSection('header-subtitle')
+                            <p class="text-xs sm:text-sm text-[#55695D] mt-1 max-w-2xl leading-relaxed">
+                                @yield('header-subtitle')
+                            </p>
+                        @endif
                     </div>
                 </div>
 

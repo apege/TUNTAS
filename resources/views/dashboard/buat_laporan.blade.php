@@ -1,6 +1,7 @@
 @extends('layouts.warga')
 
 @section('header-title', 'Buat Laporan')
+@section('header-subtitle', 'Ceritakan masalah di sekitar Anda. Pengurus RT akan membantu menindaklanjutinya.')
 
 @section('warga-content')
 <div x-data="{ 
@@ -33,19 +34,6 @@
         if (input) input.value = '';
     }
 }">
-
-    <!-- ================= SUB-HEADER / SECTION TITLE ================= -->
-    <section class="mb-5 xl:mb-6">
-        <span class="block text-[11px] font-extrabold uppercase tracking-wider text-[#63796E]">
-            TUNTAS • RT {{ $rtNomor ?? '02' }} / RW {{ $rwNomor ?? '05' }}
-        </span>
-        <h1 class="text-2xl sm:text-3xl xl:text-4xl font-black text-[#122A1E] tracking-tight mt-0.5">
-            Buat Laporan
-        </h1>
-        <p class="text-xs sm:text-sm text-[#55695D] mt-1 max-w-2xl leading-relaxed">
-            Ceritakan masalah di sekitar Anda. Pengurus RT akan membantu menindaklanjutinya.
-        </p>
-    </section>
 
     <!-- ================= MAIN TWO COLUMNS GRID ================= -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

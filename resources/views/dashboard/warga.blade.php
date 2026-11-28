@@ -263,7 +263,7 @@
                         Perkembangan Laporan Saya
                     </h3>
                 </div>
-                <a href="#semua-laporan" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#245640] hover:text-[#142D21] transition-colors">
+                <a href="{{ route('warga.laporan.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#245640] hover:text-[#142D21] transition-colors">
                     <span>Semua laporan</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>

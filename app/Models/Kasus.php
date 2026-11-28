@@ -83,4 +83,20 @@ class Kasus extends Model
     {
         return $this->hasMany(Report::class, 'kasus_id');
     }
+
+    /**
+     * Relasi ke Penugasan petugas lapangan untuk kasus ini.
+     */
+    public function penugasans(): HasMany
+    {
+        return $this->hasMany(Penugasan::class, 'kasus_id');
+    }
+
+    /**
+     * Relasi ke Riwayat Review & Konfirmasi kasus ini.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'kasus_id');
+    }
 }

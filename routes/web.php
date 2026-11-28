@@ -46,8 +46,10 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::get('/warga/dashboard', [DashboardController::class, 'warga'])->name('warga.dashboard');
+    Route::get('/warga/laporan', [ReportController::class, 'index'])->name('warga.laporan.index');
     Route::get('/warga/laporan/buat', [ReportController::class, 'create'])->name('warga.laporan.create');
     Route::post('/warga/laporan', [ReportController::class, 'store'])->name('warga.laporan.store');
+    Route::post('/warga/laporan/{report}/konfirmasi', [ReportController::class, 'confirmResolution'])->name('warga.laporan.confirm');
     Route::get('/admin-rt/dashboard', [DashboardController::class, 'adminRt'])->name('admin-rt.dashboard');
     Route::get('/admin-rw/dashboard', [DashboardController::class, 'adminRw'])->name('admin-rw.dashboard');
     Route::get('/petugas/dashboard', [DashboardController::class, 'petugas'])->name('petugas.dashboard');

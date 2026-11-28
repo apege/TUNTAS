@@ -8,24 +8,206 @@ use App\Models\Kategori;
 use App\Models\Lampiran;
 use App\Models\Notifikasi;
 use App\Models\Report;
+use App\Models\Review;
 use App\Models\User;
 use App\Models\Wilayah;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ReportController extends Controller
 {
+    /**
+     * Tampilkan halaman daftar & pelacakan laporan milik Warga (Laporan Saya).
+     *
+     * Logika modular untuk presentasi:
+     * 1. Hitung ringkasan jumlah per status (Semua, Menunggu, Diproses, Konfirmasi, Selesai, Ditolak)
+     * 2. Terapkan filter status, kategori, kata kunci pencarian, dan urutan
+     * 3. Muat relasi kasus, penugasan, progres petugas, lampiran foto, dan riwayat review
+     * 4. Susun timeline kronologis per laporan agar siap ditampilkan di modal detail
+     */
+    public function index(Request $request): View
+    {
+        $user = Auth::user();
+        if ($user) {
+            $user->loadMissing(['wilayah.parent']);
+        }
+
+        $profil = $this->resolveProfilWarga($user);
+        $kategoris = $this->getFormattedKategoris();
+
+        $activeStatus = (string) $request->query('status', 'semua');
+        $allowedStatuses = ['semua', 'menunggu', 'diproses', 'konfirmasi', 'selesai', 'ditolak'];
+        if (! in_array($activeStatus, $allowedStatuses, true)) {
+            $activeStatus = 'semua';
+        }
+
+        $activeKategori = (string) $request->query('kategori', 'semua');
+        $search = trim((string) $request->query('q', ''));
+        $sort = (string) $request->query('sort', 'terbaru');
+
+        // 1. Hitung agregasi jumlah per tab filter (langsung dari database)
+        $tabCounts = [
+            'semua' => Report::milikPelapor($user->id)->count(),
+            'menunggu' => Report::milikPelapor($user->id)->filterStatus('menunggu')->count(),
+            'diproses' => Report::milikPelapor($user->id)->filterStatus('diproses')->count(),
+            'konfirmasi' => Report::milikPelapor($user->id)->filterStatus('konfirmasi')->count(),
+            'selesai' => Report::milikPelapor($user->id)->filterStatus('selesai')->count(),
+            'ditolak' => Report::milikPelapor($user->id)->filterStatus('ditolak')->count(),
+        ];
+
+        // 2. Query daftar laporan dengan filter dinamis & eager loading lengkap
+        $query = Report::milikPelapor($user->id)
+            ->with([
+                'kategori',
+                'lampirans',
+                'wilayah.parent',
+                'reviews.pemeriksa',
+                'kasus.koordinator',
+                'kasus.penugasans.petugas',
+                'kasus.penugasans.progres.pencatat',
+                'kasus.penugasans.progres.lampirans',
+                'kasus.reviews.pemeriksa',
+            ])
+            ->filterStatus($activeStatus)
+            ->when($activeKategori !== 'semua' && Str::isUuid($activeKategori), function (Builder $q) use ($activeKategori): void {
+                $q->where('kategori_id', $activeKategori);
+            })
+            ->when($search !== '', function (Builder $q) use ($search): void {
+                $q->where(function (Builder $inner) use ($search): void {
+                    $inner->where('judul', 'like', "%{$search}%")
+                        ->orWhere('kode', 'like', "%{$search}%")
+                        ->orWhere('lokasi_detail', 'like', "%{$search}%")
+                        ->orWhere('blok', 'like', "%{$search}%")
+                        ->orWhere('uraian', 'like', "%{$search}%");
+                });
+            });
+
+        if ($sort === 'terlama') {
+            $query->oldest('created_at');
+        } elseif ($sort === 'urgensi') {
+            $query->orderByRaw("CASE urgensi WHEN 'mendesak' THEN 1 WHEN 'tinggi' THEN 2 WHEN 'sedang' THEN 3 ELSE 4 END")
+                ->latest('created_at');
+        } else {
+            $query->latest('created_at');
+        }
+
+        $laporans = $query->paginate(8)->withQueryString();
+
+        // 3. Susun payload detail & timeline untuk modal interaktif
+        $reportDetailMap = [];
+        foreach ($laporans as $lap) {
+            $reportDetailMap[$lap->id] = $this->buildReportDetailPayload($lap, $kategoris);
+        }
+
+        $notifikasiData = $this->getNotifikasiWarga($user, limit: 8);
+
+        return view('dashboard.laporan_saya', array_merge($profil, [
+            'user' => $user,
+            'laporans' => $laporans,
+            'kategoris' => $kategoris,
+            'tabCounts' => $tabCounts,
+            'activeStatus' => $activeStatus,
+            'activeKategori' => $activeKategori,
+            'search' => $search,
+            'sort' => $sort,
+            'totalLaporanSaya' => $tabCounts['semua'],
+            'reportDetailMap' => $reportDetailMap,
+            'notifikasis' => $notifikasiData['list'],
+            'unreadNotifikasiCount' => $notifikasiData['unread_count'],
+        ]));
+    }
+
+    /**
+     * Konfirmasi hasil penanganan oleh Warga (Tuntas atau Belum Tuntas / Buka Kembali).
+     */
+    public function confirmResolution(Request $request, Report $report): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user || $report->pelapor_id !== $user->id) {
+            abort(403, 'Anda tidak berhak mengonfirmasi laporan ini.');
+        }
+
+        $report->loadMissing('kasus');
+        if (! $report->kasus || $report->kasus->status !== 'menunggu_konfirmasi') {
+            return back()->with('error', 'Laporan ini belum berada pada tahap menunggu konfirmasi warga.');
+        }
+
+        $validated = $request->validate([
+            'keputusan' => ['required', 'string', 'in:tuntas,belum_tuntas'],
+            'catatan' => ['required_if:keputusan,belum_tuntas', 'nullable', 'string', 'max:500'],
+        ], [
+            'keputusan.required' => 'Pilih keputusan konfirmasi Anda.',
+            'keputusan.in' => 'Pilihan konfirmasi tidak valid.',
+            'catatan.required_if' => 'Mohon jelaskan bagian yang masih belum tuntas agar petugas dapat menindaklanjuti kembali.',
+            'catatan.max' => 'Catatan konfirmasi maksimal :max karakter.',
+        ]);
+
+        $keputusan = $validated['keputusan'];
+        $catatan = filled($validated['catatan'] ?? null) ? trim((string) $validated['catatan']) : null;
+
+        DB::transaction(function () use ($user, $report, $keputusan, $catatan): void {
+            $kasus = $report->kasus;
+
+            Review::create([
+                'jenis' => 'konfirmasi_warga',
+                'laporan_id' => $report->id,
+                'kasus_id' => $kasus->id,
+                'pemeriksa_id' => $user->id,
+                'keputusan' => $keputusan,
+                'catatan' => $catatan,
+            ]);
+
+            if ($keputusan === 'tuntas') {
+                $kasus->update([
+                    'status' => 'selesai',
+                    'selesai_at' => now(),
+                ]);
+            } else {
+                $kasus->update([
+                    'status' => 'dibuka_kembali',
+                    'selesai_at' => null,
+                ]);
+            }
+
+            if ($kasus->koordinator_id) {
+                Notifikasi::create([
+                    'penerima_id' => $kasus->koordinator_id,
+                    'laporan_id' => $report->id,
+                    'kasus_id' => $kasus->id,
+                    'judul' => $keputusan === 'tuntas'
+                        ? 'Warga Mengonfirmasi Masalah Tuntas'
+                        : 'Warga Meminta Penanganan Ulang',
+                    'pesan' => $keputusan === 'tuntas'
+                        ? "{$user->nama} mengonfirmasi laporan {$report->kode} telah selesai ditangani dengan baik."
+                        : "{$user->nama} melaporkan kasus {$kasus->kode} masih belum tuntas: ".($catatan ?? 'Perlu pengecekan kembali.'),
+                    'dikirim_at' => now(),
+                ]);
+            }
+        });
+
+        $flashMessage = $keputusan === 'tuntas'
+            ? "Terima kasih! Laporan {$report->kode} telah resmi dinyatakan Tuntas."
+            : "Permintaan penanganan ulang untuk laporan {$report->kode} telah dikirim ke pengurus.";
+
+        return redirect()
+            ->route('warga.laporan.index')
+            ->with('success', $flashMessage);
+    }
+
     /**
      * Tampilkan formulir pembuatan laporan baru untuk Warga.
      *
      * Data dimuat secara dinamis dari database:
      * 1. Profil dan hierarki wilayah warga (RT & RW)
      * 2. Daftar kategori aktif yang dipetakan ke ikon UI
-     * 3. Pilihan area lingkungan / blok
+     * 3. Pilihan area lingkungan & riwayat lokasi per RT
      * 4. Agregasi statistik laporan untuk navigasi sidebar
      */
     public function create(Request $request): View
@@ -39,25 +221,7 @@ class ReportController extends Controller
         $profil = $this->resolveProfilWarga($user);
 
         // 2. Kategori Aktif dari Database beserta metadata kontekstual untuk form
-        $kategoris = Kategori::where('aktif', true)
-            ->orderBy('created_at')
-            ->get()
-            ->map(function (Kategori $kategori): Kategori {
-                $meta = $this->resolveKategoriMeta($kategori->nama);
-                $kategori->short_name = $meta['short_name'];
-                $kategori->icon_type = $meta['icon_type'];
-                $kategori->sort_order = $meta['sort_order'];
-                $kategori->tips = $meta['tips'];
-                $kategori->placeholder_judul = $meta['placeholder_judul'];
-                $kategori->placeholder_uraian = $meta['placeholder_uraian'];
-                $kategori->contoh_judul = $meta['contoh_judul'];
-                $kategori->suggested_dampak = $meta['suggested_dampak'];
-                $kategori->suggested_urgensi = $meta['suggested_urgensi'];
-
-                return $kategori;
-            })
-            ->sortBy('sort_order')
-            ->values();
+        $kategoris = $this->getFormattedKategoris();
 
         // 3. Pilihan Area Lingkungan & Saran Lokasi Dinamis dari Database per RT
         $rtWilayahId = $this->resolveRtWilayahId($user);
@@ -432,6 +596,167 @@ class ReportController extends Controller
             ->take(10)
             ->values()
             ->all();
+    }
+
+    /**
+     * Ambil daftar kategori aktif lengkap dengan metadata visual & urutan standar UI.
+     */
+    protected function getFormattedKategoris(): Collection
+    {
+        return Kategori::where('aktif', true)
+            ->orderBy('created_at')
+            ->get()
+            ->map(function (Kategori $kategori): Kategori {
+                $meta = $this->resolveKategoriMeta($kategori->nama);
+                $kategori->short_name = $meta['short_name'];
+                $kategori->icon_type = $meta['icon_type'];
+                $kategori->sort_order = $meta['sort_order'];
+                $kategori->tips = $meta['tips'];
+                $kategori->placeholder_judul = $meta['placeholder_judul'];
+                $kategori->placeholder_uraian = $meta['placeholder_uraian'];
+                $kategori->contoh_judul = $meta['contoh_judul'];
+                $kategori->suggested_dampak = $meta['suggested_dampak'];
+                $kategori->suggested_urgensi = $meta['suggested_urgensi'];
+
+                return $kategori;
+            })
+            ->sortBy('sort_order')
+            ->values();
+    }
+
+    /**
+     * Susun payload lengkap detail laporan & timeline penanganan kronologis untuk modal.
+     *
+     * @return array<string, mixed>
+     */
+    protected function buildReportDetailPayload(Report $report, Collection $kategoris): array
+    {
+        $kategoriMeta = $kategoris->firstWhere('id', $report->kategori_id);
+        $dampakLabels = ['rendah' => 'Ringan', 'sedang' => 'Sedang', 'tinggi' => 'Berat'];
+        $urgensiLabels = ['rendah' => 'Rendah', 'sedang' => 'Sedang', 'tinggi' => 'Tinggi', 'mendesak' => 'Darurat'];
+
+        $photos = $report->lampirans->map(function (Lampiran $lampiran): array {
+            return [
+                'id' => $lampiran->id,
+                'name' => $lampiran->nama_file,
+                'url' => Storage::disk('public')->exists($lampiran->storage_key)
+                    ? asset('storage/'.$lampiran->storage_key)
+                    : null,
+            ];
+        })->filter(fn (array $p): bool => $p['url'] !== null)->values()->all();
+
+        $timeline = [
+            [
+                'timestamp' => $report->created_at->timestamp,
+                'time_label' => $report->created_at->locale('id')->isoFormat('D MMM Y • HH:mm'),
+                'title' => 'Laporan Dikirim',
+                'actor' => $report->pelapor?->nama ?? 'Warga Pelapor',
+                'note' => 'Laporan masuk ke antrean verifikasi pengurus RT.',
+                'tone' => 'emerald',
+            ],
+        ];
+
+        foreach ($report->reviews as $review) {
+            $keputusanText = match ($review->keputusan) {
+                'diterima' => 'Laporan Diverifikasi & Diterima',
+                'ditolak' => 'Laporan Ditolak',
+                'perlu_perbaikan' => 'Perlu Perbaikan Data',
+                'tuntas' => 'Warga Mengonfirmasi Tuntas',
+                'belum_tuntas' => 'Warga Meminta Penanganan Ulang',
+                default => 'Pemeriksaan Pengurus',
+            };
+
+            $timeline[] = [
+                'timestamp' => $review->created_at?->timestamp ?? $report->created_at->timestamp,
+                'time_label' => $review->created_at?->locale('id')->isoFormat('D MMM Y • HH:mm') ?? '-',
+                'title' => $keputusanText,
+                'actor' => $review->pemeriksa?->nama ?? 'Pengurus Lingkungan',
+                'note' => $review->catatan ?: 'Pemeriksaan selesai dicatat.',
+                'tone' => $review->keputusan === 'ditolak' || $review->keputusan === 'belum_tuntas' ? 'amber' : 'blue',
+            ];
+        }
+
+        if ($report->kasus) {
+            $kasus = $report->kasus;
+
+            $timeline[] = [
+                'timestamp' => $kasus->created_at->timestamp,
+                'time_label' => $kasus->created_at->locale('id')->isoFormat('D MMM Y • HH:mm'),
+                'title' => "Ditindaklanjuti dalam Kasus {$kasus->kode}",
+                'actor' => $kasus->koordinator?->nama ?? 'Koordinator Lingkungan',
+                'note' => $kasus->judul,
+                'tone' => 'blue',
+            ];
+
+            foreach ($kasus->penugasans as $penugasan) {
+                $timeline[] = [
+                    'timestamp' => ($penugasan->ditugaskan_at ?? $penugasan->created_at)->timestamp,
+                    'time_label' => ($penugasan->ditugaskan_at ?? $penugasan->created_at)->locale('id')->isoFormat('D MMM Y • HH:mm'),
+                    'title' => 'Petugas Lapangan Ditugaskan',
+                    'actor' => $penugasan->petugas?->nama ?? 'Petugas Lapangan',
+                    'note' => $penugasan->instruksi ?: 'Petugas ditugaskan menuju lokasi.',
+                    'tone' => 'blue',
+                ];
+
+                foreach ($penugasan->progres as $prog) {
+                    $progTitle = match ($prog->jenis) {
+                        'penyelesaian' => 'Penyelesaian Lapangan Dicatat',
+                        'kendala' => 'Kendala Lapangan Dilaporkan',
+                        default => 'Pembaruan Progres Lapangan',
+                    };
+                    $timeline[] = [
+                        'timestamp' => $prog->created_at?->timestamp ?? now()->timestamp,
+                        'time_label' => $prog->created_at?->locale('id')->isoFormat('D MMM Y • HH:mm') ?? '-',
+                        'title' => $progTitle,
+                        'actor' => $prog->pencatat?->nama ?? 'Petugas',
+                        'note' => $prog->catatan,
+                        'tone' => $prog->jenis === 'kendala' ? 'amber' : 'emerald',
+                    ];
+                }
+            }
+
+            foreach ($kasus->reviews as $kasusReview) {
+                if ($kasusReview->laporan_id === $report->id) {
+                    continue;
+                }
+                $timeline[] = [
+                    'timestamp' => $kasusReview->created_at?->timestamp ?? now()->timestamp,
+                    'time_label' => $kasusReview->created_at?->locale('id')->isoFormat('D MMM Y • HH:mm') ?? '-',
+                    'title' => $kasusReview->keputusan === 'tuntas' ? 'Konfirmasi Selesai' : 'Catatan Penanganan Kasus',
+                    'actor' => $kasusReview->pemeriksa?->nama ?? 'Pengurus / Warga',
+                    'note' => $kasusReview->catatan ?: '-',
+                    'tone' => $kasusReview->keputusan === 'belum_tuntas' ? 'amber' : 'emerald',
+                ];
+            }
+        }
+
+        usort($timeline, fn (array $a, array $b): int => $a['timestamp'] <=> $b['timestamp']);
+
+        return [
+            'id' => $report->id,
+            'kode' => $report->kode,
+            'judul' => $report->judul,
+            'uraian' => $report->uraian,
+            'kategori' => $kategoriMeta?->short_name ?? ($report->kategori?->nama ?? 'Umum'),
+            'kategori_full' => $report->kategori?->nama ?? 'Umum',
+            'kategori_warna' => $report->kategori?->warna_peta ?? '#2D6A4F',
+            'lokasi_detail' => $report->lokasi_detail,
+            'blok' => $report->blok,
+            'dampak' => $dampakLabels[$report->dampak] ?? ucfirst($report->dampak),
+            'urgensi' => $urgensiLabels[$report->urgensi] ?? ucfirst($report->urgensi),
+            'status_label' => $report->status_label,
+            'status_badge' => $report->status_badge,
+            'progress_step' => $report->progress_step,
+            'tanggal' => $report->created_at->locale('id')->isoFormat('dddd, D MMMM Y • HH:mm'),
+            'kasus_kode' => $report->kasus?->kode,
+            'kasus_judul' => $report->kasus?->judul,
+            'koordinator' => $report->kasus?->koordinator?->nama,
+            'needs_confirmation' => $report->status_penerimaan === 'diverifikasi'
+                && $report->kasus?->status === 'menunggu_konfirmasi',
+            'confirm_url' => route('warga.laporan.confirm', $report),
+            'photos' => $photos,
+            'timeline' => $timeline,
+        ];
     }
 
     /**

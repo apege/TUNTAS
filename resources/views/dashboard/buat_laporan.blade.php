@@ -707,7 +707,7 @@
                     SETELAH LAPORAN DIKIRIM
                 </span>
                 <p class="text-xs text-[#203D2E] leading-relaxed font-medium">
-                    Admin RT akan memeriksa laporan. Anda dapat memantau perkembangan dan memberikan konfirmasi hasil melalui <span class="font-bold text-[#142D21]">Laporan Saya</span>.
+                    Admin RT akan memeriksa laporan. Anda dapat memantau perkembangan dan memberikan konfirmasi hasil melalui <a href="{{ route('warga.laporan.index') }}" class="font-bold text-[#1B4332] hover:underline">Laporan Saya</a>.
                 </p>
             </div>
 

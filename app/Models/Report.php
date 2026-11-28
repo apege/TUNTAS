@@ -96,11 +96,68 @@ class Report extends Model
     }
 
     /**
+     * Relasi ke Riwayat Review / Verifikasi & Konfirmasi Warga.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'laporan_id');
+    }
+
+    /**
      * Scope laporan milik pelapor tertentu.
      */
     public function scopeMilikPelapor(Builder $query, string $userId): Builder
     {
         return $query->where('pelapor_id', $userId);
+    }
+
+    /**
+     * Scope filter status gabungan (status penerimaan laporan + status kasus) yang ramah bagi warga.
+     */
+    public function scopeFilterStatus(Builder $query, string $status): Builder
+    {
+        return match ($status) {
+            'menunggu' => $query->where('status_penerimaan', 'baru'),
+            'diproses' => $query->where('status_penerimaan', 'diverifikasi')
+                ->where(function (Builder $q): void {
+                    $q->whereDoesntHave('kasus')
+                        ->orWhereHas('kasus', function (Builder $k): void {
+                            $k->whereIn('status', ['menunggu', 'diproses', 'dibuka_kembali']);
+                        });
+                }),
+            'konfirmasi' => $query->where('status_penerimaan', 'diverifikasi')
+                ->whereHas('kasus', fn (Builder $k): Builder => $k->where('status', 'menunggu_konfirmasi')),
+            'selesai' => $query->where('status_penerimaan', 'diverifikasi')
+                ->whereHas('kasus', fn (Builder $k): Builder => $k->where('status', 'selesai')),
+            'ditolak' => $query->where('status_penerimaan', 'ditolak'),
+            default => $query,
+        };
+    }
+
+    /**
+     * Tahap progres linier (1..4) untuk visual progress stepper di daftar laporan.
+     */
+    public function getProgressStepAttribute(): int
+    {
+        if ($this->status_penerimaan === 'ditolak') {
+            return 0;
+        }
+
+        if ($this->status_penerimaan === 'baru') {
+            return 1;
+        }
+
+        if (! $this->kasus) {
+            return 2;
+        }
+
+        return match ($this->kasus->status) {
+            'menunggu' => 2,
+            'diproses', 'dibuka_kembali' => 3,
+            'menunggu_konfirmasi' => 4,
+            'selesai' => 5,
+            default => 2,
+        };
     }
 
     /**

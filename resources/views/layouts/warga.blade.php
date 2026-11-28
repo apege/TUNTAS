@@ -126,14 +126,14 @@
                     <span>Buat Laporan</span>
                 </a>
 
-                <a href="{{ route('warga.dashboard') }}#laporan-saya" class="neu-nav-item px-4 py-3 flex items-center justify-between font-semibold text-sm">
+                <a href="{{ route('warga.laporan.index') }}" class="{{ request()->routeIs('warga.laporan.index') ? 'clay-nav-active' : 'neu-nav-item' }} px-4 py-3 flex items-center justify-between font-semibold text-sm">
                     <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <svg class="w-4 h-4 {{ request()->routeIs('warga.laporan.index') ? '' : 'text-[#52665B]' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span>Laporan Saya</span>
                     </div>
-                    <span class="neu-pill-tag px-2 py-0.5 text-xs font-bold text-[#142D21]">{{ $stats['total'] ?? $totalLaporanSaya ?? 0 }}</span>
+                    <span class="{{ request()->routeIs('warga.laporan.index') ? 'bg-white/20 text-white' : 'neu-pill-tag text-[#142D21]' }} px-2 py-0.5 text-xs font-bold rounded-full">{{ $stats['total'] ?? $totalLaporanSaya ?? 0 }}</span>
                 </a>
 
                 <a href="{{ route('warga.dashboard') }}#peta" class="neu-nav-item px-4 py-3 flex items-center gap-3 font-semibold text-sm">
@@ -242,14 +242,14 @@
                 </a>
 
                 <!-- Laporan Saya -->
-                <a href="{{ route('warga.dashboard') }}#laporan-saya" class="neu-nav-item px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center justify-between font-semibold text-xs xl:text-sm">
+                <a href="{{ route('warga.laporan.index') }}" class="{{ request()->routeIs('warga.laporan.index') ? 'clay-nav-active' : 'neu-nav-item' }} px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center justify-between font-semibold text-xs xl:text-sm">
                     <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <svg class="w-4 h-4 {{ request()->routeIs('warga.laporan.index') ? '' : 'text-[#52665B]' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span>Laporan Saya</span>
                     </div>
-                    <span class="neu-pill-tag px-2 py-0.5 text-[10px] xl:text-[11px] font-bold text-[#142D21]">{{ $stats['total'] ?? $totalLaporanSaya ?? 0 }}</span>
+                    <span class="{{ request()->routeIs('warga.laporan.index') ? 'bg-white/20 text-white' : 'neu-pill-tag text-[#142D21]' }} px-2 py-0.5 text-[10px] xl:text-[11px] font-bold rounded-full">{{ $stats['total'] ?? $totalLaporanSaya ?? 0 }}</span>
                 </a>
 
                 <!-- Peta Lingkungan -->
@@ -322,6 +322,13 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div data-flash-toast class="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 shadow-sm flex items-center justify-between gap-3">
+                    <span class="text-xs sm:text-sm font-bold">{{ session('error') }}</span>
+                    <button type="button" onclick="this.closest('[data-flash-toast]').remove()" class="text-red-700 hover:text-red-900 font-bold text-xs px-2 py-1 rounded-lg hover:bg-black/5" aria-label="Tutup pemberitahuan">✕</button>
+                </div>
+            @endif
+
             <!-- ================= SHARED TOP HEADER BAR (Identical across all pages) ================= -->
             <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-5 xl:mb-6">
                 <!-- Title & Breadcrumb & Territory Badge -->
@@ -347,7 +354,7 @@
                 <!-- Right Header Actions (Search, Notification, Profile) -->
                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                     <!-- Search Form -->
-                    <form action="{{ route('warga.dashboard') }}" method="GET" class="relative w-44 sm:w-56 md:w-64 lg:w-48 xl:w-64 m-0">
+                    <form action="@yield('search-action', route('warga.dashboard'))" method="GET" class="relative w-44 sm:w-56 md:w-64 lg:w-48 xl:w-64 m-0">
                         <div class="neu-search-input flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2">
                             <svg class="w-3.5 h-3.5 text-[#73877C] shrink-0 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -359,7 +366,7 @@
                                    placeholder="Cari laporan..." 
                                    class="w-full bg-transparent border-0 p-0 text-xs text-[#122A1E] placeholder-[#798D82] focus:outline-none focus:ring-0">
                             @if (!empty($search))
-                                <a href="{{ route('warga.dashboard') }}" class="text-xs text-[#798D82] hover:text-[#122A1E] mr-1.5" title="Hapus pencarian">✕</a>
+                                <a href="@yield('search-action', route('warga.dashboard'))" class="text-xs text-[#798D82] hover:text-[#122A1E] mr-1.5" title="Hapus pencarian">✕</a>
                             @endif
                             <kbd class="hidden xl:inline-flex items-center px-1.5 py-0.5 text-[9px] font-semibold text-[#6A7F73] bg-[#DFDAD0] rounded border border-white/60 shadow-inner">
                                 ⌘K
@@ -541,8 +548,8 @@
         </a>
 
         <!-- Laporan -->
-        <a href="{{ route('warga.dashboard') }}#laporan-saya" class="flex flex-col items-center gap-0.5">
-            <svg class="w-5 h-5 text-[#52665B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <a href="{{ route('warga.laporan.index') }}" class="flex flex-col items-center gap-0.5 {{ request()->routeIs('warga.laporan.index') ? 'text-[#1B4332] font-black' : '' }}">
+            <svg class="w-5 h-5 {{ request()->routeIs('warga.laporan.index') ? 'text-[#1B4332]' : 'text-[#52665B]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span class="text-[10px]">Laporan</span>

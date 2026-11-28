@@ -1,7 +1,6 @@
 @extends('layouts.warga')
 
 @section('header-title', 'Buat Laporan')
-@section('header-subtitle', 'Ceritakan masalah di sekitar Anda. Pengurus RT akan membantu menindaklanjutinya.')
 
 @section('warga-content')
 <div x-data="{ 
@@ -50,6 +49,9 @@
                     <h2 class="text-lg sm:text-xl font-black text-[#122A1E] mt-0.5">
                         Informasi Permasalahan
                     </h2>
+                    <p class="text-xs sm:text-sm text-[#55695D] mt-1 leading-relaxed">
+                        Ceritakan masalah di sekitar Anda. Pengurus RT akan membantu menindaklanjutinya.
+                    </p>
                 </div>
 
                 <!-- Validation Errors Alert (if any) -->

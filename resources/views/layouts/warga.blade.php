@@ -143,8 +143,8 @@
                     <span>Peta Lingkungan</span>
                 </a>
 
-                <a href="{{ route('warga.dashboard') }}#pengumuman" class="neu-nav-item px-4 py-3 flex items-center gap-3 font-semibold text-sm">
-                    <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <a href="{{ route('warga.pengumuman.index') }}" class="{{ request()->routeIs('warga.pengumuman.index') ? 'clay-nav-active' : 'neu-nav-item' }} px-4 py-3 flex items-center gap-3 font-semibold text-sm">
+                    <svg class="w-4 h-4 {{ request()->routeIs('warga.pengumuman.index') ? '' : 'text-[#52665B]' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     <span>Pengumuman</span>
@@ -261,8 +261,8 @@
                 </a>
 
                 <!-- Pengumuman -->
-                <a href="{{ route('warga.dashboard') }}#pengumuman" class="neu-nav-item px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center gap-3 font-semibold text-xs xl:text-sm">
-                    <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <a href="{{ route('warga.pengumuman.index') }}" class="{{ request()->routeIs('warga.pengumuman.index') ? 'clay-nav-active' : 'neu-nav-item' }} px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center gap-3 font-semibold text-xs xl:text-sm">
+                    <svg class="w-4 h-4 {{ request()->routeIs('warga.pengumuman.index') ? '' : 'text-[#52665B]' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     <span>Pengumuman</span>
@@ -567,8 +567,8 @@
         </a>
 
         <!-- Pengumuman -->
-        <a href="{{ route('warga.dashboard') }}#pengumuman" class="flex flex-col items-center gap-0.5">
-            <svg class="w-5 h-5 text-[#52665B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <a href="{{ route('warga.pengumuman.index') }}" class="flex flex-col items-center gap-0.5 {{ request()->routeIs('warga.pengumuman.index') ? 'text-[#1B4332] font-black' : '' }}">
+            <svg class="w-5 h-5 {{ request()->routeIs('warga.pengumuman.index') ? 'text-[#1B4332]' : 'text-[#52665B]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             <span class="text-[10px]">Warta</span>

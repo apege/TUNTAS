@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/warga/laporan', [ReportController::class, 'store'])->name('warga.laporan.store');
     Route::post('/warga/laporan/{report}/konfirmasi', [ReportController::class, 'confirmResolution'])->name('warga.laporan.confirm');
     Route::get('/warga/peta', [ReportController::class, 'peta'])->name('warga.peta.index');
+    Route::get('/warga/pengumuman', [PengumumanController::class, 'index'])->name('warga.pengumuman.index');
     Route::get('/admin-rt/dashboard', [DashboardController::class, 'adminRt'])->name('admin-rt.dashboard');
     Route::get('/admin-rw/dashboard', [DashboardController::class, 'adminRw'])->name('admin-rw.dashboard');
     Route::get('/petugas/dashboard', [DashboardController::class, 'petugas'])->name('petugas.dashboard');

@@ -368,9 +368,6 @@
                             @if (!empty($search))
                                 <a href="@yield('search-action', route('warga.dashboard'))" class="text-xs text-[#798D82] hover:text-[#122A1E] mr-1.5" title="Hapus pencarian">✕</a>
                             @endif
-                            <kbd class="hidden xl:inline-flex items-center px-1.5 py-0.5 text-[9px] font-semibold text-[#6A7F73] bg-[#DFDAD0] rounded border border-white/60 shadow-inner">
-                                ⌘K
-                            </kbd>
                         </div>
                     </form>
 
@@ -735,17 +732,6 @@
             }
         }).catch(err => console.error(err));
     }
-
-    document.addEventListener('keydown', function(e) {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-            e.preventDefault();
-            const searchInput = document.getElementById('dashboard-search');
-            if (searchInput) {
-                searchInput.focus();
-                searchInput.select();
-            }
-        }
-    });
 
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', function() {

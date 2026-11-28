@@ -441,47 +441,62 @@
                     Bantu kami memahami masalah yang Anda temukan.
                 </p>
 
-                <!-- 4 Step Interactive Guide -->
+                <!-- 4 Step Interactive Guide (1-to-1 dengan field form) -->
                 <div class="mt-5 space-y-3">
-                    <!-- Step 1 -->
+                    <!-- Step 1: Kategori -->
                     <div class="flex items-start gap-3">
                         <div id="guide-step-1-badge" class="w-6 h-6 rounded-full bg-[#2D6A4F] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs border border-white/60 transition-colors">
                             ✓
                         </div>
-                        <p class="text-xs text-[#142D21] leading-snug pt-0.5 font-semibold">
+                        <p id="guide-step-1-text" class="text-xs text-[#142D21] leading-snug pt-0.5 font-semibold">
                             Pilih kategori yang paling sesuai
                         </p>
                     </div>
 
-                    <!-- Step 2 -->
+                    <!-- Step 2: Judul -->
                     <div class="flex items-start gap-3">
                         <div id="guide-step-2-badge" class="w-6 h-6 rounded-full bg-[#E5DFD4] text-[#142D21] font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs border border-white/60 transition-colors">
                             2
                         </div>
-                        <p class="text-xs text-[#30483C] leading-snug pt-0.5 font-medium">
-                            Tulis judul & patokan lokasi dengan jelas
+                        <p id="guide-step-2-text" class="text-xs text-[#30483C] leading-snug pt-0.5 font-medium">
+                            Tulis judul laporan yang jelas
                         </p>
                     </div>
 
-                    <!-- Step 3 -->
+                    <!-- Step 3: Lokasi -->
                     <div class="flex items-start gap-3">
                         <div id="guide-step-3-badge" class="w-6 h-6 rounded-full bg-[#E5DFD4] text-[#142D21] font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs border border-white/60 transition-colors">
                             3
                         </div>
-                        <p class="text-xs text-[#30483C] leading-snug pt-0.5 font-medium">
-                            Jelaskan kondisi secara singkat dan objektif
+                        <p id="guide-step-3-text" class="text-xs text-[#30483C] leading-snug pt-0.5 font-medium">
+                            Tulis lokasi dan patokan dengan jelas
                         </p>
                     </div>
 
-                    <!-- Step 4 -->
+                    <!-- Step 4: Uraian -->
                     <div class="flex items-start gap-3">
                         <div id="guide-step-4-badge" class="w-6 h-6 rounded-full bg-[#E5DFD4] text-[#142D21] font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs border border-white/60 transition-colors">
                             4
                         </div>
-                        <p class="text-xs text-[#30483C] leading-snug pt-0.5 font-medium">
-                            Hindari data pribadi pada foto atau uraian
-                        </p>
+                        <div class="pt-0.5">
+                            <p id="guide-step-4-text" class="text-xs text-[#30483C] leading-snug font-medium">
+                                Jelaskan kondisi secara singkat &amp; objektif
+                            </p>
+                            <span id="guide-step-4-sub" class="block text-[10px] text-[#718579] mt-0.5">
+                                Minimal 20 karakter
+                            </span>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Privacy Reminder / Live Sensitive-Data Check -->
+                <div id="privacy-guard-box" class="clay-sunken-note p-3 mt-4 flex items-start gap-2 text-[11px] text-[#4E6457]">
+                    <svg id="privacy-guard-icon" class="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span id="privacy-guard-text" class="leading-relaxed">
+                        Hindari mencantumkan data pribadi (NIK / No. HP) pada foto atau uraian.
+                    </span>
                 </div>
             </div>
 
@@ -689,33 +704,90 @@
             lokasiInput.addEventListener('input', updateChecklist);
         }
 
-        // 5. Right-panel live checklist updater
-        function setBadgeDone(badgeEl, numberLabel, done) {
-            if (!badgeEl) return;
-            if (done) {
-                badgeEl.textContent = '✓';
-                badgeEl.classList.remove('bg-[#E5DFD4]', 'text-[#142D21]');
-                badgeEl.classList.add('bg-[#2D6A4F]', 'text-white');
-            } else {
-                badgeEl.textContent = String(numberLabel);
-                badgeEl.classList.remove('bg-[#2D6A4F]', 'text-white');
-                badgeEl.classList.add('bg-[#E5DFD4]', 'text-[#142D21]');
+        // 5. Right-panel live checklist updater + sensitive data guard
+        function setStepState(stepNum, done) {
+            const badgeEl = document.getElementById('guide-step-' + stepNum + '-badge');
+            const textEl = document.getElementById('guide-step-' + stepNum + '-text');
+
+            if (badgeEl) {
+                if (done) {
+                    badgeEl.textContent = '✓';
+                    badgeEl.classList.remove('bg-[#E5DFD4]', 'text-[#142D21]');
+                    badgeEl.classList.add('bg-[#2D6A4F]', 'text-white');
+                } else {
+                    badgeEl.textContent = String(stepNum);
+                    badgeEl.classList.remove('bg-[#2D6A4F]', 'text-white');
+                    badgeEl.classList.add('bg-[#E5DFD4]', 'text-[#142D21]');
+                }
+            }
+
+            if (textEl) {
+                if (done) {
+                    textEl.classList.remove('text-[#30483C]', 'font-medium');
+                    textEl.classList.add('text-[#142D21]', 'font-semibold');
+                } else {
+                    textEl.classList.remove('text-[#142D21]', 'font-semibold');
+                    textEl.classList.add('text-[#30483C]', 'font-medium');
+                }
             }
         }
 
         function updateChecklist() {
             const hasKategori = Boolean(kategoriInput && kategoriInput.value);
-            const hasJudulAndLokasi = Boolean(
-                judulInput && judulInput.value.trim().length > 0 &&
-                lokasiInput && lokasiInput.value.trim().length > 0
-            );
-            const hasUraian = Boolean(uraianInput && uraianInput.value.trim().length >= 20);
-            const hasPhoto = Boolean(fotoInput && fotoInput.files && fotoInput.files.length > 0);
+            const hasJudul = Boolean(judulInput && judulInput.value.trim().length > 0);
+            const hasLokasi = Boolean(lokasiInput && lokasiInput.value.trim().length > 0);
+            const uraianTrimLen = uraianInput ? uraianInput.value.trim().length : 0;
+            const hasUraian = uraianTrimLen >= 20;
 
-            setBadgeDone(document.getElementById('guide-step-1-badge'), 1, hasKategori);
-            setBadgeDone(document.getElementById('guide-step-2-badge'), 2, hasJudulAndLokasi);
-            setBadgeDone(document.getElementById('guide-step-3-badge'), 3, hasUraian);
-            setBadgeDone(document.getElementById('guide-step-4-badge'), 4, hasPhoto);
+            setStepState(1, hasKategori);
+            setStepState(2, hasJudul);
+            setStepState(3, hasLokasi);
+            setStepState(4, hasUraian);
+
+            const step4Sub = document.getElementById('guide-step-4-sub');
+            if (step4Sub) {
+                if (hasUraian) {
+                    step4Sub.textContent = '✓ Panjang uraian memadai';
+                    step4Sub.className = 'block text-[10px] font-bold text-[#1B4332] mt-0.5';
+                } else if (uraianTrimLen > 0) {
+                    step4Sub.textContent = 'Kurang ' + (20 - uraianTrimLen) + ' karakter lagi';
+                    step4Sub.className = 'block text-[10px] font-semibold text-[#A07040] mt-0.5';
+                } else {
+                    step4Sub.textContent = 'Minimal 20 karakter';
+                    step4Sub.className = 'block text-[10px] text-[#718579] mt-0.5';
+                }
+            }
+
+            // Live sensitive-data check (NIK 16 digit / No. HP 08xx)
+            const privacyBox = document.getElementById('privacy-guard-box');
+            const privacyIcon = document.getElementById('privacy-guard-icon');
+            const privacyText = document.getElementById('privacy-guard-text');
+            if (privacyBox && privacyText) {
+                const combinedText = [
+                    judulInput ? judulInput.value : '',
+                    lokasiInput ? lokasiInput.value : '',
+                    uraianInput ? uraianInput.value : ''
+                ].join(' ');
+
+                const hasSensitiveDigits = /\b\d{16}\b/.test(combinedText) || /\b(?:\+62|62|0)8[1-9][0-9]{7,10}\b/.test(combinedText);
+                if (hasSensitiveDigits) {
+                    privacyBox.classList.add('border', 'border-amber-300', 'bg-amber-50/80', 'text-amber-900');
+                    privacyBox.classList.remove('text-[#4E6457]');
+                    if (privacyIcon) {
+                        privacyIcon.classList.remove('text-[#2D6A4F]');
+                        privacyIcon.classList.add('text-amber-600');
+                    }
+                    privacyText.textContent = 'Terdeteksi angka menyerupai NIK atau nomor HP. Sebaiknya hapus data pribadi sebelum mengirim.';
+                } else {
+                    privacyBox.classList.remove('border', 'border-amber-300', 'bg-amber-50/80', 'text-amber-900');
+                    privacyBox.classList.add('text-[#4E6457]');
+                    if (privacyIcon) {
+                        privacyIcon.classList.add('text-[#2D6A4F]');
+                        privacyIcon.classList.remove('text-amber-600');
+                    }
+                    privacyText.textContent = 'Hindari mencantumkan data pribadi (NIK / No. HP) pada foto atau uraian.';
+                }
+            }
         }
 
         // 6. Photo Upload & Drag-n-Drop Preview

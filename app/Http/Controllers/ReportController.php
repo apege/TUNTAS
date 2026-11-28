@@ -24,6 +24,13 @@ use Illuminate\View\View;
 class ReportController extends Controller
 {
     /**
+     * Titik pusat geografis default lingkungan (Area Jl. Curug Candung, Bandung Kidul).
+     */
+    protected const DEFAULT_CENTER_LAT = -6.95839;
+
+    protected const DEFAULT_CENTER_LNG = 107.61025;
+
+    /**
      * Tampilkan halaman daftar & pelacakan laporan milik Warga (Laporan Saya).
      *
      * Logika modular untuk presentasi:
@@ -289,13 +296,12 @@ class ReportController extends Controller
             ->take(40)
             ->get();
 
-        // Hitung koordinat relatif & payload modal detail untuk setiap titik
+        // Hitung koordinat geografis dunia nyata (lat/lng) & payload modal detail untuk setiap titik
         $mapMarkers = [];
         $reportDetailMap = [];
-        $gpsBounds = $this->computeGpsBounds($laporans);
 
         foreach ($laporans as $lap) {
-            $coords = $this->resolveMapCoordinates($lap, $gpsBounds);
+            $coords = $this->resolveRealWorldCoordinates($lap);
             $katMeta = $kategoris->firstWhere('id', $lap->kategori_id);
 
             $mapMarkers[] = [
@@ -313,12 +319,15 @@ class ReportController extends Controller
                 'urgensi' => $lap->urgensi,
                 'is_priority' => in_array($lap->urgensi, ['tinggi', 'mendesak'], true),
                 'waktu' => $lap->created_at->diffForHumans(),
-                'x' => $coords['x'],
-                'y' => $coords['y'],
+                'lat' => $coords['lat'],
+                'lng' => $coords['lng'],
+                'has_exact_gps' => $coords['has_exact_gps'],
             ];
 
             $reportDetailMap[$lap->id] = $this->buildReportDetailPayload($lap, $kategoris);
         }
+
+        $mapCenter = $this->resolveMapCenter($laporans);
 
         $totalLaporanSaya = $user ? Report::where('pelapor_id', $user->id)->count() : 0;
         $notifikasiData = $this->getNotifikasiWarga($user, limit: 8);
@@ -333,6 +342,7 @@ class ReportController extends Controller
             'search' => $search,
             'areaNames' => $areaNames,
             'mapMarkers' => $mapMarkers,
+            'mapCenter' => $mapCenter,
             'reportDetailMap' => $reportDetailMap,
             'totalLaporanSaya' => $totalLaporanSaya,
             'notifikasis' => $notifikasiData['list'],
@@ -378,6 +388,10 @@ class ReportController extends Controller
             'kategoris' => $kategoris,
             'daftarArea' => $daftarArea,
             'daftarLokasi' => $daftarLokasi,
+            'defaultCenter' => [
+                'lat' => self::DEFAULT_CENTER_LAT,
+                'lng' => self::DEFAULT_CENTER_LNG,
+            ],
             'totalLaporanSaya' => $totalLaporanSaya,
             'notifikasis' => $notifikasiData['list'],
             'unreadNotifikasiCount' => $notifikasiData['unread_count'],
@@ -414,6 +428,8 @@ class ReportController extends Controller
                 'uraian' => $validated['uraian'],
                 'lokasi_detail' => $validated['lokasi_detail'],
                 'blok' => filled($validated['blok'] ?? null) ? trim((string) $validated['blok']) : null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
                 'dampak' => $validated['dampak'],
                 'urgensi' => $validated['urgensi'],
                 'status_penerimaan' => 'baru',
@@ -899,84 +915,50 @@ class ReportController extends Controller
     }
 
     /**
-     * Hitung batas minimum/maksimum koordinat GPS jika ada laporan yang memiliki lat/lng.
+     * Hitung titik tengah peta dunia nyata berdasarkan laporan dengan GPS aktif atau koordinat default wilayah.
      *
-     * @return array{minLat: float, maxLat: float, minLng: float, maxLng: float}|null
+     * @return array{lat: float, lng: float}
      */
-    protected function computeGpsBounds(Collection $reports): ?array
+    protected function resolveMapCenter(Collection $reports): array
     {
         $withCoords = $reports->filter(fn (Report $r): bool => $r->latitude !== null && $r->longitude !== null);
         if ($withCoords->isEmpty()) {
-            return null;
+            return [
+                'lat' => self::DEFAULT_CENTER_LAT,
+                'lng' => self::DEFAULT_CENTER_LNG,
+            ];
         }
 
         return [
-            'minLat' => (float) $withCoords->min('latitude'),
-            'maxLat' => (float) $withCoords->max('latitude'),
-            'minLng' => (float) $withCoords->min('longitude'),
-            'maxLng' => (float) $withCoords->max('longitude'),
+            'lat' => round((float) $withCoords->avg('latitude'), 6),
+            'lng' => round((float) $withCoords->avg('longitude'), 6),
         ];
     }
 
     /**
-     * Tentukan posisi persentase (x%, y%) pin laporan di atas denah peta lingkungan.
+     * Resolusi koordinat latitude/longitude asli laporan untuk peta Leaflet dunia nyata.
      *
-     * @param  array{minLat: float, maxLat: float, minLng: float, maxLng: float}|null  $gpsBounds
-     * @return array{x: float, y: float}
+     * @return array{lat: float, lng: float, has_exact_gps: bool}
      */
-    protected function resolveMapCoordinates(Report $report, ?array $gpsBounds): array
+    protected function resolveRealWorldCoordinates(Report $report): array
     {
-        if ($report->latitude !== null && $report->longitude !== null && $gpsBounds !== null) {
-            $latSpan = $gpsBounds['maxLat'] - $gpsBounds['minLat'];
-            $lngSpan = $gpsBounds['maxLng'] - $gpsBounds['minLng'];
-
-            $normX = $lngSpan > 0.0001
-                ? (((float) $report->longitude - $gpsBounds['minLng']) / $lngSpan)
-                : 0.5;
-            $normY = $latSpan > 0.0001
-                ? (1 - (((float) $report->latitude - $gpsBounds['minLat']) / $latSpan))
-                : 0.5;
-
+        if ($report->latitude !== null && $report->longitude !== null) {
             return [
-                'x' => round(16 + ($normX * 68), 2),
-                'y' => round(18 + ($normY * 62), 2),
+                'lat' => (float) $report->latitude,
+                'lng' => (float) $report->longitude,
+                'has_exact_gps' => true,
             ];
         }
 
-        // Zona skematis lingkungan (Barat-Utara, Tengah-Utara, Taman, Barat-Selatan, Pos Ronda, Kali/Selatan)
-        $zones = [
-            0 => ['x' => 23, 'y' => 24],
-            1 => ['x' => 48, 'y' => 23],
-            2 => ['x' => 72, 'y' => 27],
-            3 => ['x' => 24, 'y' => 58],
-            4 => ['x' => 49, 'y' => 55],
-            5 => ['x' => 74, 'y' => 63],
-        ];
-
-        $text = strtolower(trim(($report->blok ?? '').' '.$report->lokasi_detail));
-        $zoneIndex = abs(crc32($report->id)) % count($zones);
-
-        if (str_contains($text, 'blok a') || str_contains($text, 'utama') || str_contains($text, 'mawar')) {
-            $zoneIndex = 0;
-        } elseif (str_contains($text, 'gang 1') || str_contains($text, 'musala') || str_contains($text, 'kenanga')) {
-            $zoneIndex = 1;
-        } elseif (str_contains($text, 'taman') || str_contains($text, 'tps') || str_contains($text, 'lapangan')) {
-            $zoneIndex = 2;
-        } elseif (str_contains($text, 'gang 2') || str_contains($text, 'timur') || str_contains($text, 'barat')) {
-            $zoneIndex = 3;
-        } elseif (str_contains($text, 'pos') || str_contains($text, 'blok b') || str_contains($text, 'melati')) {
-            $zoneIndex = 4;
-        } elseif (str_contains($text, 'kali') || str_contains($text, 'jembatan') || str_contains($text, 'blok c') || str_contains($text, 'saluran')) {
-            $zoneIndex = 5;
-        }
-
+        // Sebaran mikro ~40-180m di sekitar pusat wilayah bila pelapor tidak menyematkan titik GPS spesifik
         $hash = abs(crc32($report->id.$report->kode));
-        $jitterX = (($hash % 13) - 6);
-        $jitterY = ((($hash >> 4) % 11) - 5);
+        $offsetLat = ((($hash % 21) - 10) * 0.00014);
+        $offsetLng = (((($hash >> 5) % 21) - 10) * 0.00016);
 
         return [
-            'x' => max(14, min(84, $zones[$zoneIndex]['x'] + $jitterX)),
-            'y' => max(16, min(78, $zones[$zoneIndex]['y'] + $jitterY)),
+            'lat' => round(self::DEFAULT_CENTER_LAT + $offsetLat, 6),
+            'lng' => round(self::DEFAULT_CENTER_LNG + $offsetLng, 6),
+            'has_exact_gps' => false,
         ];
     }
 

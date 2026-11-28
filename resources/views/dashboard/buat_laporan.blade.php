@@ -2,6 +2,15 @@
 
 @section('header-title', 'Buat Laporan')
 
+@push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <style>
+        #picker-leaflet-map .leaflet-tile-pane {
+            filter: sepia(0.08) saturate(0.94) brightness(1.01);
+        }
+    </style>
+@endpush
+
 @section('warga-content')
 @php
     $selectedKategoriId = old('kategori_id', $kategoris->first()->id ?? '');
@@ -301,6 +310,56 @@
                             <!-- Floating Custom Autocomplete Panel (Area Lingkungan) -->
                             <div id="blok-autocomplete-menu"
                                  class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-60 overflow-y-auto custom-scrollbar space-y-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= FIELD 3B: TITIK PETA GPS (OPSIONAL & RINGKAS) ================= -->
+                    <div class="space-y-2.5">
+                        <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
+                        <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="font-bold text-[#142D21]">Titik Peta (GPS):</span>
+                                <span id="gps-coords-status" class="text-[11px] font-medium {{ old('latitude') && old('longitude') ? 'text-[#1B4332] font-bold' : 'text-[#6A7F73]' }}">
+                                    @if (old('latitude') && old('longitude'))
+                                        ✓ {{ number_format((float) old('latitude'), 5) }}, {{ number_format((float) old('longitude'), 5) }}
+                                    @else
+                                        Opsional — bantu petugas temukan titik tepat
+                                    @endif
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                        id="btn-clear-gps"
+                                        onclick="clearMapPin()"
+                                        class="{{ old('latitude') ? '' : 'hidden' }} text-[11px] font-bold text-[#9E2A2B] hover:underline cursor-pointer">
+                                    Hapus Titik
+                                </button>
+                                <button type="button"
+                                        onclick="useCurrentGpsForReport()"
+                                        class="clay-pill px-3 py-1.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#1B4332] cursor-pointer">
+                                    <span>📍 Pakai GPS Saya</span>
+                                </button>
+                                <button type="button"
+                                        onclick="toggleMapPicker()"
+                                        class="clay-pill px-3 py-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-[#1B4332] cursor-pointer">
+                                    <span id="btn-map-picker-text">Tandai di Peta</span>
+                                    <svg id="map-picker-chevron" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible Compact Leaflet Picker -->
+                        <div id="map-picker-container" class="{{ old('latitude') && old('longitude') ? '' : 'hidden' }} rounded-2xl overflow-hidden border-2 border-white shadow-sm bg-[#EAE5DB]">
+                            <div id="picker-leaflet-map" class="w-full h-56 z-10"></div>
+                            <div class="px-3.5 py-2 bg-[#FAF8F4] border-t border-[#E3DDD1] flex items-center justify-between text-[10px] text-[#52645B]">
+                                <span>Klik pada peta atau geser pin hijau untuk menandai lokasi kejadian.</span>
+                                <span class="font-bold text-[#1B4332]">OpenStreetMap</span>
                             </div>
                         </div>
                     </div>
@@ -1611,3 +1670,152 @@
     })();
 </script>
 @endsection
+
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+    (function () {
+        const defaultCenter = @json($defaultCenter ?? ['lat' => -6.95839, 'lng' => 107.61025]);
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+        const statusEl = document.getElementById('gps-coords-status');
+        const clearBtn = document.getElementById('btn-clear-gps');
+        const container = document.getElementById('map-picker-container');
+        const pickerText = document.getElementById('btn-map-picker-text');
+        const pickerChevron = document.getElementById('map-picker-chevron');
+        const lokasiInput = document.getElementById('lokasi_detail');
+
+        let pickerMap = null;
+        let pickerMarker = null;
+
+        function setPinCoordinates(lat, lng, shouldCenter = true) {
+            const fixedLat = Number(lat).toFixed(6);
+            const fixedLng = Number(lng).toFixed(6);
+
+            if (latInput) latInput.value = fixedLat;
+            if (lngInput) lngInput.value = fixedLng;
+
+            if (statusEl) {
+                statusEl.textContent = '✓ ' + Number(lat).toFixed(5) + ', ' + Number(lng).toFixed(5);
+                statusEl.className = 'text-[11px] font-bold text-[#1B4332]';
+            }
+            if (clearBtn) clearBtn.classList.remove('hidden');
+
+            if (pickerMap) {
+                if (pickerMarker) {
+                    pickerMarker.setLatLng([lat, lng]);
+                } else {
+                    pickerMarker = L.marker([lat, lng], { draggable: true })
+                        .addTo(pickerMap)
+                        .on('dragend', function (e) {
+                            const pos = e.target.getLatLng();
+                            setPinCoordinates(pos.lat, pos.lng, false);
+                        });
+                }
+                if (shouldCenter) {
+                    pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 17));
+                }
+            }
+        }
+
+        function ensurePickerMap() {
+            if (pickerMap || typeof L === 'undefined') return;
+            const startLat = latInput && latInput.value ? parseFloat(latInput.value) : defaultCenter.lat;
+            const startLng = lngInput && lngInput.value ? parseFloat(lngInput.value) : defaultCenter.lng;
+
+            pickerMap = L.map('picker-leaflet-map', {
+                center: [startLat, startLng],
+                zoom: 17
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(pickerMap);
+
+            if (latInput && latInput.value && lngInput && lngInput.value) {
+                setPinCoordinates(startLat, startLng, true);
+            }
+
+            pickerMap.on('click', function (e) {
+                setPinCoordinates(e.latlng.lat, e.latlng.lng, false);
+            });
+        }
+
+        window.toggleMapPicker = function (forceOpen = null) {
+            if (!container) return;
+            const willOpen = forceOpen !== null ? forceOpen : container.classList.contains('hidden');
+            container.classList.toggle('hidden', !willOpen);
+            if (pickerText) pickerText.textContent = willOpen ? 'Tutup Peta' : 'Tandai di Peta';
+            if (pickerChevron) pickerChevron.classList.toggle('rotate-180', willOpen);
+
+            if (willOpen) {
+                ensurePickerMap();
+                setTimeout(function () {
+                    if (pickerMap) pickerMap.invalidateSize();
+                }, 120);
+            }
+        };
+
+        window.clearMapPin = function () {
+            if (latInput) latInput.value = '';
+            if (lngInput) lngInput.value = '';
+            if (statusEl) {
+                statusEl.textContent = 'Opsional — bantu petugas temukan titik tepat';
+                statusEl.className = 'text-[11px] font-medium text-[#6A7F73]';
+            }
+            if (clearBtn) clearBtn.classList.add('hidden');
+            if (pickerMarker && pickerMap) {
+                pickerMap.removeLayer(pickerMarker);
+                pickerMarker = null;
+            }
+        };
+
+        window.useCurrentGpsForReport = function () {
+            if (!navigator.geolocation) {
+                alert('Perangkat atau browser Anda tidak mendukung pelacakan GPS.');
+                return;
+            }
+            if (statusEl) {
+                statusEl.textContent = 'Mengambil koordinat GPS...';
+                statusEl.className = 'text-[11px] font-semibold text-[#B45309]';
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    window.toggleMapPicker(true);
+                    setPinCoordinates(pos.coords.latitude, pos.coords.longitude, true);
+
+                    // Reverse-geocode opsional via OpenStreetMap Nominatim bila lokasi_detail masih kosong
+                    if (lokasiInput && lokasiInput.value.trim() === '') {
+                        fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.address && lokasiInput.value.trim() === '') {
+                                    const road = data.address.road || data.address.neighbourhood || data.address.suburb;
+                                    if (road) {
+                                        lokasiInput.value = road;
+                                        lokasiInput.dispatchEvent(new Event('input'));
+                                    }
+                                }
+                            })
+                            .catch(() => {});
+                    }
+                },
+                function () {
+                    if (statusEl) {
+                        statusEl.textContent = 'Izin GPS ditolak — Anda bisa menandai titik manual di peta.';
+                        statusEl.className = 'text-[11px] font-semibold text-[#B45309]';
+                    }
+                    window.toggleMapPicker(true);
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
+            );
+        };
+
+        if (latInput && latInput.value && lngInput && lngInput.value) {
+            ensurePickerMap();
+        }
+    })();
+</script>
+@endpush

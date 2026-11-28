@@ -3,6 +3,20 @@
 @section('header-title', 'Peta Lingkungan')
 @section('search-action', route('warga.peta.index'))
 
+@push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <style>
+        /* Harmonize OpenStreetMap tiles gently with TUNTAS warm clay aesthetic */
+        #leaflet-map .leaflet-tile-pane {
+            filter: sepia(0.08) saturate(0.94) brightness(1.01);
+        }
+        .tuntas-pin-wrapper {
+            background: transparent;
+            border: none;
+        }
+    </style>
+@endpush
+
 @section('warga-content')
 @php
     $selectedKatObj = $activeKategori !== 'semua' ? $kategoris->firstWhere('id', $activeKategori) : null;
@@ -17,15 +31,6 @@
     ];
     $activeStatusLabel = $statusLabels[$activeStatus] ?? 'Semua Status';
 
-    // Label zona skematis dinamis dari database AreaLingkungan RT (dengan fallback aman)
-    $zoneNames = [
-        0 => $areaNames[0] ?? 'Area Barat / Jalan Utama',
-        1 => $areaNames[1] ?? 'Gang 1 / Area Tengah',
-        2 => $areaNames[2] ?? ('Taman RT ' . ($rtNomor ?? '02')),
-        3 => $areaNames[3] ?? 'Gang 2 / Sisi Timur',
-        4 => $areaNames[4] ?? ('Sekitar Pos Ronda RT ' . ($rtNomor ?? '02')),
-    ];
-
     $kategoriCounts = collect($mapMarkers)->countBy('kategori_id');
 @endphp
 
@@ -34,7 +39,7 @@
     <!-- ================= TOP BAR: SUBTITLE + SCOPE & FILTERS + CTA ================= -->
     <section class="flex flex-col xl:flex-row xl:items-center justify-between gap-3.5">
         <p class="text-xs sm:text-sm text-[#4E6457] leading-relaxed">
-            Kenali sebaran masalah dan area yang membutuhkan perhatian di lingkungan Anda.
+            Pantau sebaran laporan warga di peta geografis nyata untuk penanganan yang cepat dan tepat sasaran.
         </p>
 
         <div class="flex flex-wrap items-center gap-2.5 shrink-0">
@@ -62,7 +67,7 @@
                 </button>
 
                 <div id="peta-filter-kategori-menu"
-                     class="clay-dropdown-panel hidden absolute right-0 sm:left-0 mt-2 w-52 p-2 z-40 space-y-1">
+                     class="clay-dropdown-panel hidden absolute right-0 sm:left-0 mt-2 w-52 p-2 z-[1000] space-y-1">
                     <a href="{{ route('warga.peta.index', array_filter(['scope' => $scope !== 'rt' ? $scope : null, 'status' => $activeStatus !== 'semua' ? $activeStatus : null, 'q' => $search !== '' ? $search : null])) }}"
                        class="clay-dropdown-option px-3 py-2 flex items-center justify-between text-xs font-bold text-[#142D21] {{ $activeKategori === 'semua' ? 'is-selected' : '' }}">
                         <span>Semua Kategori</span>
@@ -97,7 +102,7 @@
                 </button>
 
                 <div id="peta-filter-status-menu"
-                     class="clay-dropdown-panel hidden absolute right-0 mt-2 w-52 p-2 z-40 space-y-1">
+                     class="clay-dropdown-panel hidden absolute right-0 mt-2 w-52 p-2 z-[1000] space-y-1">
                     @foreach ($statusLabels as $sKey => $sLabel)
                         <a href="{{ route('warga.peta.index', array_filter(['scope' => $scope !== 'rt' ? $scope : null, 'kategori' => $activeKategori !== 'semua' ? $activeKategori : null, 'status' => $sKey !== 'semua' ? $sKey : null, 'q' => $search !== '' ? $search : null])) }}"
                            class="clay-dropdown-option px-3 py-2 flex items-center justify-between text-xs font-semibold text-[#142D21] {{ $activeStatus === $sKey ? 'is-selected' : '' }}">
@@ -121,14 +126,14 @@
         </div>
     </section>
 
-    <!-- ================= MAIN MAP & SIDE LIST CLAY PANEL ================= -->
+    <!-- ================= MAIN REAL-WORLD MAP & SIDE LIST CLAY PANEL ================= -->
     <section class="clay-card-content p-5 sm:p-6 space-y-4">
         
         <!-- Card Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-[#E3DDD1]">
             <div>
                 <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
-                    KELURAHAN {{ strtoupper($kelurahan ?? 'Sukamaju') }}
+                    KELURAHAN {{ strtoupper($kelurahan ?? 'Sukamaju') }} • OPENSTREETMAP REAL-TIME
                 </span>
                 <div class="flex items-center gap-2.5 mt-0.5">
                     <h3 class="text-base sm:text-lg font-black text-[#122A1E]">
@@ -152,104 +157,16 @@
         <!-- 2-Column Interactive Split View -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             
-            <!-- Left Column: Interactive Neighborhood Map Canvas (7/12 Cols) -->
+            <!-- Left Column: Real OpenStreetMap Leaflet Viewport (7/12 or 8/12 Cols) -->
             <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
-                <div id="map-viewport"
-                     class="relative w-full h-[420px] sm:h-[480px] xl:h-[520px] rounded-3xl bg-[#F5F2EA] border-2 border-white/90 shadow-inner overflow-hidden select-none cursor-grab">
+                <div class="relative w-full h-[430px] sm:h-[490px] xl:h-[530px] rounded-3xl border-2 border-white/90 shadow-inner overflow-hidden bg-[#EAE5DB]">
                     
-                    <!-- Transformable Canvas (Pan & Zoom) -->
-                    <div id="map-canvas"
-                         class="absolute inset-0 origin-center transition-transform duration-150 ease-out">
-                        
-                        <!-- Schematic Neighborhood Streets, Parks & Drainage SVG -->
-                        <svg class="w-full h-full" viewBox="0 0 800 540" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Soft Base Ground -->
-                            <rect width="800" height="540" fill="#F2EFE6" />
+                    <!-- Leaflet Map Mount -->
+                    <div id="leaflet-map" class="w-full h-full z-10"></div>
 
-                            <!-- Dashed RT Perimeter Border -->
-                            <rect x="34" y="28" width="732" height="484" rx="22" fill="none" stroke="#B7C8BC" stroke-width="1.5" stroke-dasharray="6 6" />
-
-                            <!-- Neighborhood Blocks / Clusters (Soft Sage Plots) -->
-                            <g fill="#E3EAE1">
-                                <rect x="64" y="54" width="96" height="84" rx="14" />
-                                <rect x="208" y="54" width="110" height="84" rx="14" />
-                                <rect x="364" y="54" width="110" height="84" rx="14" />
-                                <rect x="644" y="54" width="94" height="84" rx="14" />
-
-                                <rect x="64" y="196" width="96" height="92" rx="14" />
-                                <rect x="208" y="196" width="110" height="92" rx="14" />
-                                <rect x="364" y="196" width="110" height="92" rx="14" />
-                                <rect x="644" y="196" width="94" height="92" rx="14" />
-
-                                <rect x="64" y="346" width="96" height="92" rx="14" />
-                                <rect x="208" y="346" width="110" height="92" rx="14" />
-                                <rect x="364" y="346" width="110" height="92" rx="14" />
-                                <rect x="644" y="346" width="94" height="92" rx="14" />
-                            </g>
-
-                            <!-- Main Horizontal Streets -->
-                            <rect x="0" y="154" width="800" height="28" fill="#FAF8F4" />
-                            <rect x="0" y="304" width="800" height="28" fill="#FAF8F4" />
-                            <!-- Vertical Streets & Alleys -->
-                            <rect x="172" y="0" width="24" height="540" fill="#FAF8F4" />
-                            <rect x="330" y="0" width="22" height="540" fill="#FAF8F4" />
-                            <rect x="490" y="0" width="22" height="540" fill="#FAF8F4" />
-                            <rect x="608" y="0" width="24" height="540" fill="#FAF8F4" />
-
-                            <!-- Central Park / Taman RT -->
-                            <rect x="518" y="102" width="84" height="106" rx="18" fill="#C4DBC8" stroke="#FFFFFF" stroke-width="2" />
-
-                            <!-- Drainage Canal / River Curve (Bottom) -->
-                            <path d="M 0 436 Q 210 398, 420 452 T 800 442" fill="none" stroke="#B6D3E3" stroke-width="18" stroke-linecap="round" opacity="0.85" />
-
-                            <!-- Dynamic Area Labels from Database (AreaLingkungan) -->
-                            <g font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#63796E">
-                                <text x="112" y="100" text-anchor="middle">{{ \Illuminate\Support\Str::limit($zoneNames[0], 20) }}</text>
-                                <text x="419" y="172" text-anchor="middle" fill="#4E6457">{{ \Illuminate\Support\Str::limit($zoneNames[1], 24) }}</text>
-                                <text x="560" y="159" text-anchor="middle" fill="#1B4332" font-weight="800">{{ \Illuminate\Support\Str::limit($zoneNames[2], 18) }}</text>
-                                <text x="263" y="322" text-anchor="middle" fill="#4E6457">{{ \Illuminate\Support\Str::limit($zoneNames[3], 24) }}</text>
-                                <text x="419" y="246" text-anchor="middle">{{ \Illuminate\Support\Str::limit($zoneNames[4], 20) }}</text>
-                            </g>
-                        </svg>
-
-                        <!-- Interactive Plot Marker Pins -->
-                        @foreach ($mapMarkers as $marker)
-                            <button type="button"
-                                    data-map-marker
-                                    data-marker-id="{{ $marker['id'] }}"
-                                    data-kategori-id="{{ $marker['kategori_id'] }}"
-                                    onclick="selectMapMarker('{{ $marker['id'] }}', event)"
-                                    style="left: {{ $marker['x'] }}%; top: {{ $marker['y'] }}%;"
-                                    class="group absolute -translate-x-1/2 -translate-y-1/2 z-10 focus:outline-none cursor-pointer"
-                                    aria-label="Titik laporan {{ $marker['kode'] }}: {{ $marker['judul'] }}">
-                                
-                                @if ($marker['is_priority'])
-                                    <span class="absolute inset-0 -m-1.5 rounded-full animate-ping opacity-35" style="background-color: {{ $marker['warna'] }}"></span>
-                                @endif
-
-                                <!-- Pin Body -->
-                                <span data-pin-body
-                                      class="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-white shadow-md flex items-center justify-center transition-transform duration-200 group-hover:scale-125"
-                                      style="background-color: {{ $marker['warna'] }}">
-                                    <span class="w-2 h-2 rounded-full bg-white"></span>
-                                </span>
-
-                                <!-- Hover Tooltip -->
-                                <span class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-xl bg-[#122A1E] text-white text-[10px] font-bold whitespace-nowrap shadow-lg z-30">
-                                    {{ $marker['kode'] }} • {{ \Illuminate\Support\Str::limit($marker['judul'], 28) }}
-                                </span>
-                            </button>
-                        @endforeach
-                    </div>
-
-                    <!-- Top-Left Compass Badge -->
-                    <div class="absolute top-3 left-3 z-20 clay-pill w-8 h-8 flex items-center justify-center text-[11px] font-black text-[#1B4332]" title="Utara">
-                        U
-                    </div>
-
-                    <!-- Floating Selected Marker Card (Shown on Marker/List Click) -->
+                    <!-- Floating Selected Marker Card -->
                     <div id="map-selected-card"
-                         class="hidden absolute top-3 left-14 right-3 sm:right-auto sm:w-80 z-30 clay-dropdown-panel p-3.5 space-y-2">
+                         class="hidden absolute top-3 left-3 right-14 sm:right-auto sm:w-80 z-[500] clay-dropdown-panel p-3.5 space-y-2">
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span id="selected-pin-kode" class="text-[10px] font-black font-mono text-[#1E3A2B] bg-[#EFECE5] px-2 py-0.5 rounded-md"></span>
@@ -267,50 +184,59 @@
 
                         <p id="selected-pin-lokasi" class="text-[11px] text-[#52645B] truncate"></p>
 
-                        <div class="pt-1.5 border-t border-[#E3DDD1] flex items-center justify-between gap-2">
-                            <span id="selected-pin-waktu" class="text-[10px] font-medium text-[#6A7F73]"></span>
+                        <div class="flex items-center justify-between gap-2 text-[10px]">
+                            <span id="selected-pin-gps-badge" class="font-semibold text-[#2D6A4F]"></span>
+                            <span id="selected-pin-waktu" class="font-medium text-[#6A7F73]"></span>
+                        </div>
+
+                        <div class="pt-1.5 border-t border-[#E3DDD1] flex justify-end">
                             <button type="button"
                                     id="selected-pin-detail-btn"
-                                    class="clay-btn-green px-3 py-1 text-[11px] font-bold text-white cursor-pointer">
+                                    class="clay-btn-green px-3.5 py-1.5 text-[11px] font-bold text-white cursor-pointer">
                                 Detail &amp; Linimasa →
                             </button>
                         </div>
                     </div>
 
-                    <!-- Bottom-Left Disclaimer Pill -->
-                    <div class="absolute bottom-3 left-3 z-20 px-3 py-1 rounded-full bg-white/80 backdrop-blur-xs border border-white text-[10px] font-semibold text-[#60776C] shadow-xs pointer-events-none">
-                        Denah skematis lingkungan • Klik titik untuk detail
-                    </div>
-
-                    <!-- Bottom-Right Zoom & Reset Controls -->
-                    <div class="absolute bottom-3 right-3 z-20 flex flex-col gap-1.5">
+                    <!-- Custom Clay Controls (Bottom-Right: GPS, Zoom+, Zoom-, Fit Bounds) -->
+                    <div class="absolute bottom-7 right-3 z-[500] flex flex-col gap-1.5">
                         <button type="button"
-                                onclick="zoomMap(0.2)"
-                                class="clay-pill w-8 h-8 flex items-center justify-center text-sm font-black text-[#1B4332] cursor-pointer"
+                                onclick="centerOnUserGps()"
+                                class="clay-pill w-9 h-9 flex items-center justify-center text-[#1B4332] cursor-pointer"
+                                title="Pusatkan ke Lokasi Saya (GPS)"
+                                aria-label="Pusatkan ke Lokasi Saya">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2"/>
+                            </svg>
+                        </button>
+                        <button type="button"
+                                onclick="zoomLeaflet(1)"
+                                class="clay-pill w-9 h-9 flex items-center justify-center text-sm font-black text-[#1B4332] cursor-pointer"
                                 title="Perbesar peta"
                                 aria-label="Perbesar peta">
                             +
                         </button>
                         <button type="button"
-                                onclick="zoomMap(-0.2)"
-                                class="clay-pill w-8 h-8 flex items-center justify-center text-sm font-black text-[#1B4332] cursor-pointer"
+                                onclick="zoomLeaflet(-1)"
+                                class="clay-pill w-9 h-9 flex items-center justify-center text-sm font-black text-[#1B4332] cursor-pointer"
                                 title="Perkecil peta"
                                 aria-label="Perkecil peta">
                             −
                         </button>
                         <button type="button"
-                                onclick="resetMapView()"
-                                class="clay-pill w-8 h-8 flex items-center justify-center text-xs font-black text-[#1B4332] cursor-pointer"
-                                title="Reset posisi peta"
-                                aria-label="Reset posisi peta">
+                                onclick="resetLeafletView()"
+                                class="clay-pill w-9 h-9 flex items-center justify-center text-xs font-black text-[#1B4332] cursor-pointer"
+                                title="Tampilkan semua titik"
+                                aria-label="Tampilkan semua titik">
                             ↻
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Synchronized Scrollable Area Report List (5/12 Cols) -->
-            <div class="lg:col-span-5 xl:col-span-4 flex flex-col h-[420px] sm:h-[480px] xl:h-[520px] bg-[#FAF8F4]/70 rounded-3xl p-4 border border-white/80 shadow-inner">
+            <!-- Right Column: Synchronized Scrollable Area Report List (5/12 or 4/12 Cols) -->
+            <div class="lg:col-span-5 xl:col-span-4 flex flex-col h-[430px] sm:h-[490px] xl:h-[530px] bg-[#FAF8F4]/70 rounded-3xl p-4 border border-white/80 shadow-inner">
                 <div class="pb-3 border-b border-[#E3DDD1] shrink-0">
                     <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
                         LAPORAN DI WILAYAH ANDA
@@ -388,17 +314,17 @@
                 @endforeach
             </div>
             <span class="text-[10px] text-[#6A7F73] font-medium">
-                Klik kategori pada legenda untuk memfilter titik di peta
+                Klik titik di peta atau item di sebelah kanan untuk meninjau detail
             </span>
         </div>
     </section>
 </div>
 
 <!-- =========================================================================
-     DETAIL & TIMELINE MODAL (Shared Interactive Experience)
+     DETAIL & TIMELINE MODAL
      ========================================================================= -->
 <div id="report-detail-modal"
-     class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 bg-[#122A1E]/45 backdrop-blur-xs"
+     class="fixed inset-0 z-[1200] hidden items-center justify-center p-3 sm:p-6 bg-[#122A1E]/45 backdrop-blur-xs"
      role="dialog"
      aria-modal="true"
      aria-labelledby="modal-report-title"
@@ -406,7 +332,6 @@
     <div class="clay-card-content w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
          onclick="event.stopPropagation()">
         
-        <!-- Modal Header -->
         <div class="p-5 sm:p-6 pb-4 border-b border-[#E3DDD1] flex items-start justify-between gap-4 shrink-0">
             <div class="min-w-0 space-y-1.5">
                 <div class="flex flex-wrap items-center gap-2">
@@ -426,7 +351,6 @@
             </button>
         </div>
 
-        <!-- Modal Body -->
         <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar space-y-5 flex-1">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="clay-sunken-note p-3">
@@ -461,16 +385,20 @@
         </div>
     </div>
 </div>
+@endsection
 
-<!-- =========================================================================
-     VANILLA JS FOR INTERACTIVE MAP (ZOOM, PAN, MARKERS, FILTER, MODAL)
-     ========================================================================= -->
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
     (function () {
         const markersList = @json($mapMarkers ?? []);
         const reportDetails = @json($reportDetailMap ?? []);
+        const mapCenter = @json($mapCenter ?? ['lat' => -6.95839, 'lng' => 107.61025]);
 
         const markerMap = {};
+        const leafletMarkers = {};
+        let userGpsMarker = null;
+
         markersList.forEach(function (m) {
             markerMap[m.id] = m;
         });
@@ -505,83 +433,142 @@
             });
         });
 
-        // 2. Map Pan & Zoom Engine
-        const viewport = document.getElementById('map-viewport');
-        const canvas = document.getElementById('map-canvas');
-        let scale = 1;
-        let panX = 0;
-        let panY = 0;
-        let isDragging = false;
-        let startX = 0;
-        let startY = 0;
+        // 2. Initialize Real-World Leaflet + OpenStreetMap Map
+        const mapEl = document.getElementById('leaflet-map');
+        let map = null;
+        let boundsGroup = null;
 
-        function applyMapTransform() {
-            if (!canvas) return;
-            canvas.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + scale + ')';
+        function buildPinHtml(marker, isSelected) {
+            const scaleClass = isSelected ? 'scale-125 ring-4 ring-[#1B4332]/40' : '';
+            const pulse = marker.is_priority
+                ? '<span class="absolute inset-0 -m-1.5 rounded-full animate-ping opacity-35" style="background-color:' + marker.warna + '"></span>'
+                : '';
+
+            return '<div class="relative flex items-center justify-center w-8 h-8">' +
+                pulse +
+                '<span class="relative w-7 h-7 rounded-full border-2 border-white shadow-md flex items-center justify-center transition-transform duration-200 ' + scaleClass + '" style="background-color:' + marker.warna + '">' +
+                '<span class="w-2 h-2 rounded-full bg-white"></span>' +
+                '</span></div>';
         }
 
-        window.zoomMap = function (delta) {
-            scale = Math.max(1, Math.min(2.2, Number((scale + delta).toFixed(2))));
-            if (scale === 1) {
-                panX = 0;
-                panY = 0;
+        if (mapEl && typeof L !== 'undefined') {
+            map = L.map('leaflet-map', {
+                center: [mapCenter.lat, mapCenter.lng],
+                zoom: 17,
+                zoomControl: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+            }).addTo(map);
+
+            boundsGroup = L.featureGroup().addTo(map);
+
+            markersList.forEach(function (marker) {
+                const icon = L.divIcon({
+                    className: 'tuntas-pin-wrapper',
+                    html: buildPinHtml(marker, false),
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                const lMarker = L.marker([marker.lat, marker.lng], { icon: icon })
+                    .bindTooltip(marker.kode + ' • ' + marker.judul, {
+                        direction: 'top',
+                        offset: [0, -12]
+                    })
+                    .on('click', function () {
+                        window.selectMapMarker(marker.id);
+                    });
+
+                lMarker.addTo(boundsGroup);
+                leafletMarkers[marker.id] = lMarker;
+            });
+
+            if (markersList.length > 1) {
+                map.fitBounds(boundsGroup.getBounds().pad(0.25), { maxZoom: 17 });
+            } else if (markersList.length === 1) {
+                map.setView([markersList[0].lat, markersList[0].lng], 17);
             }
-            applyMapTransform();
-        };
 
-        window.resetMapView = function () {
-            scale = 1;
-            panX = 0;
-            panY = 0;
-            applyMapTransform();
-            window.clearSelectedMarker();
-        };
-
-        if (viewport) {
-            viewport.addEventListener('mousedown', function (e) {
-                if (e.target.closest('button')) return;
-                isDragging = true;
-                startX = e.clientX - panX;
-                startY = e.clientY - panY;
-                viewport.classList.add('cursor-grabbing');
-                viewport.classList.remove('cursor-grab');
-            });
-
-            window.addEventListener('mousemove', function (e) {
-                if (!isDragging) return;
-                const maxPan = (scale - 1) * 200 + 40;
-                panX = Math.max(-maxPan, Math.min(maxPan, e.clientX - startX));
-                panY = Math.max(-maxPan, Math.min(maxPan, e.clientY - startY));
-                applyMapTransform();
-            });
-
-            window.addEventListener('mouseup', function () {
-                if (!isDragging) return;
-                isDragging = false;
-                viewport.classList.remove('cursor-grabbing');
-                viewport.classList.add('cursor-grab');
+            map.on('click', function () {
+                window.clearSelectedMarker();
             });
         }
 
-        // 3. Select Map Marker & Highlight Synchronized Side Card
+        window.zoomLeaflet = function (delta) {
+            if (!map) return;
+            if (delta > 0) map.zoomIn();
+            else map.zoomOut();
+        };
+
+        window.resetLeafletView = function () {
+            window.clearSelectedMarker();
+            if (!map) return;
+            if (boundsGroup && markersList.length > 1) {
+                map.fitBounds(boundsGroup.getBounds().pad(0.25), { maxZoom: 17 });
+            } else if (markersList.length === 1) {
+                map.flyTo([markersList[0].lat, markersList[0].lng], 17);
+            } else {
+                map.flyTo([mapCenter.lat, mapCenter.lng], 17);
+            }
+        };
+
+        window.centerOnUserGps = function () {
+            if (!map || !navigator.geolocation) {
+                alert('Perangkat atau browser Anda tidak mendukung pelacakan GPS.');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    map.flyTo([lat, lng], 18);
+
+                    if (userGpsMarker) {
+                        userGpsMarker.setLatLng([lat, lng]);
+                    } else {
+                        const myIcon = L.divIcon({
+                            className: 'tuntas-pin-wrapper',
+                            html: '<div class="relative flex items-center justify-center w-6 h-6"><span class="absolute inset-0 rounded-full bg-sky-500/30 animate-ping"></span><span class="relative w-4 h-4 rounded-full bg-sky-600 border-2 border-white shadow-md"></span></div>',
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        });
+                        userGpsMarker = L.marker([lat, lng], { icon: myIcon })
+                            .bindTooltip('Lokasi Anda Saat Ini', { direction: 'top', offset: [0, -10] })
+                            .addTo(map);
+                    }
+                },
+                function () {
+                    alert('Tidak dapat mengakses lokasi GPS Anda. Pastikan izin lokasi browser telah diaktifkan.');
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
+            );
+        };
+
+        // 3. Select Marker & Fly To Coordinate
         window.selectMapMarker = function (markerId, event) {
             if (event) event.stopPropagation();
             const marker = markerMap[markerId];
             if (!marker) return;
 
-            // Highlight Pin
-            document.querySelectorAll('[data-map-marker]').forEach(function (el) {
-                const body = el.querySelector('[data-pin-body]');
-                const isTarget = el.dataset.markerId === String(markerId);
-                if (body) {
-                    body.classList.toggle('scale-125', isTarget);
-                    body.classList.toggle('ring-4', isTarget);
-                    body.classList.toggle('ring-[#1B4332]/40', isTarget);
-                }
-                el.style.zIndex = isTarget ? '25' : '10';
+            if (map && leafletMarkers[markerId]) {
+                map.flyTo([marker.lat, marker.lng], Math.max(map.getZoom(), 18), { duration: 0.5 });
+            }
+
+            Object.keys(leafletMarkers).forEach(function (id) {
+                const m = markerMap[id];
+                const isTarget = String(id) === String(markerId);
+                leafletMarkers[id].setIcon(L.divIcon({
+                    className: 'tuntas-pin-wrapper',
+                    html: buildPinHtml(m, isTarget),
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                }));
+                leafletMarkers[id].setZIndexOffset(isTarget ? 500 : 0);
             });
 
-            // Highlight Side Card
             document.querySelectorAll('[data-side-card]').forEach(function (card) {
                 const isTarget = card.dataset.markerId === String(markerId);
                 card.classList.toggle('ring-2', isTarget);
@@ -591,13 +578,15 @@
                 }
             });
 
-            // Populate Floating Map Card
             const card = document.getElementById('map-selected-card');
             if (card) {
                 document.getElementById('selected-pin-kode').textContent = marker.kode || '';
                 document.getElementById('selected-pin-judul').textContent = marker.judul || '';
                 document.getElementById('selected-pin-lokasi').textContent = marker.lokasi_detail + (marker.blok ? ' • ' + marker.blok : '');
                 document.getElementById('selected-pin-waktu').textContent = marker.waktu || '';
+                document.getElementById('selected-pin-gps-badge').textContent = marker.has_exact_gps
+                    ? '📍 Koordinat GPS Akurat'
+                    : '📍 Perkiraan Area RT ' + (marker.rt_nomor || '');
 
                 const statusEl = document.getElementById('selected-pin-status');
                 if (statusEl && marker.status_badge) {
@@ -626,12 +615,15 @@
             const card = document.getElementById('map-selected-card');
             if (card) card.classList.add('hidden');
 
-            document.querySelectorAll('[data-map-marker]').forEach(function (el) {
-                const body = el.querySelector('[data-pin-body]');
-                if (body) {
-                    body.classList.remove('scale-125', 'ring-4', 'ring-[#1B4332]/40');
-                }
-                el.style.zIndex = '10';
+            Object.keys(leafletMarkers).forEach(function (id) {
+                const m = markerMap[id];
+                leafletMarkers[id].setIcon(L.divIcon({
+                    className: 'tuntas-pin-wrapper',
+                    html: buildPinHtml(m, false),
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                }));
+                leafletMarkers[id].setZIndexOffset(0);
             });
 
             document.querySelectorAll('[data-side-card]').forEach(function (el) {
@@ -759,4 +751,4 @@
         });
     })();
 </script>
-@endsection
+@endpush

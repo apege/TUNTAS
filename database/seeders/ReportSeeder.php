@@ -71,10 +71,9 @@ class ReportSeeder extends Seeder
 
         // 3. Laporan Warga Siti Aminah
         // Laporan 1: Sedang Ditangani
-        Report::firstOrCreate(
+        Report::updateOrCreate(
             ['kode' => 'LAP-202611-0001'],
             [
-                'id' => (string) Str::uuid(),
                 'pelapor_id' => $wargaSiti->id,
                 'wilayah_id' => $wargaSiti->wilayah_id,
                 'kategori_id' => $katSampah?->id ?? Kategori::first()->id,
@@ -83,6 +82,8 @@ class ReportSeeder extends Seeder
                 'uraian' => 'Sampah rumah tangga mulai menumpuk hingga ke bahu jalan dan menimbulkan bau tidak sedap. Dikhawatirkan mengundang lalat dan penyakit.',
                 'lokasi_detail' => 'Jl. Mawar No. 10 dekat gardu pos ronda',
                 'blok' => 'Blok B-3',
+                'latitude' => -6.95839000,
+                'longitude' => 107.61025000,
                 'dampak' => 'sedang',
                 'urgensi' => 'tinggi',
                 'status_penerimaan' => 'diverifikasi',
@@ -91,10 +92,9 @@ class ReportSeeder extends Seeder
         );
 
         // Laporan 2: Menunggu Verifikasi (Baru)
-        Report::firstOrCreate(
+        Report::updateOrCreate(
             ['kode' => 'LAP-202611-0002'],
             [
-                'id' => (string) Str::uuid(),
                 'pelapor_id' => $wargaSiti->id,
                 'wilayah_id' => $wargaSiti->wilayah_id,
                 'kategori_id' => $katDrainase?->id ?? Kategori::first()->id,
@@ -103,6 +103,8 @@ class ReportSeeder extends Seeder
                 'uraian' => 'Saluran air tersumbat endapan lumpur dan sampah daun, air meluap ke halaman saat hujan deras kemarin sore.',
                 'lokasi_detail' => 'Jl. Mawar No. 08 depan rumah',
                 'blok' => 'Blok B-2',
+                'latitude' => -6.95785000,
+                'longitude' => 107.61110000,
                 'dampak' => 'sedang',
                 'urgensi' => 'sedang',
                 'status_penerimaan' => 'baru',
@@ -111,10 +113,9 @@ class ReportSeeder extends Seeder
         );
 
         // Laporan 3: Selesai
-        Report::firstOrCreate(
+        Report::updateOrCreate(
             ['kode' => 'LAP-202611-0003'],
             [
-                'id' => (string) Str::uuid(),
                 'pelapor_id' => $wargaSiti->id,
                 'wilayah_id' => $wargaSiti->wilayah_id,
                 'kategori_id' => $katPJU?->id ?? Kategori::first()->id,
@@ -123,6 +124,8 @@ class ReportSeeder extends Seeder
                 'uraian' => 'Lampu jalan tiang nomor 4 sudah 3 malam mati total membuat jalanan gelap dan rawan.',
                 'lokasi_detail' => 'Tiang PJU No. 4, Tikungan Mawar Barat',
                 'blok' => 'Blok A-1',
+                'latitude' => -6.95905000,
+                'longitude' => 107.60960000,
                 'dampak' => 'rendah',
                 'urgensi' => 'sedang',
                 'status_penerimaan' => 'diverifikasi',

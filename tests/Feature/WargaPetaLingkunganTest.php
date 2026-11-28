@@ -121,6 +121,8 @@ class WargaPetaLingkunganTest extends TestCase
             'judul' => 'Sampah Liar di Tikungan',
             'uraian' => 'Tumpukan sampah plastik di sudut jalan.',
             'lokasi_detail' => 'Jl. Curug Candung No. 4',
+            'latitude' => -6.95839000,
+            'longitude' => 107.61025000,
             'dampak' => 'sedang',
             'urgensi' => 'tinggi',
             'status_penerimaan' => 'baru',
@@ -160,6 +162,8 @@ class WargaPetaLingkunganTest extends TestCase
         $rtResponse->assertViewIs('dashboard.peta_lingkungan');
         $rtResponse->assertSee('Jl. Curug Candung');
         $rtResponse->assertSee('Sampah Liar di Tikungan');
+        $rtResponse->assertSee('-6.95839');
+        $rtResponse->assertSee('107.61025');
         $rtResponse->assertSee('1 titik');
         $rtResponse->assertDontSee('Laporan Ditolak Tidak Tampil');
         $rtResponse->assertDontSee('Drainase Mampet RT 02');

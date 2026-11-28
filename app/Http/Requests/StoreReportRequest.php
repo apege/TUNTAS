@@ -28,6 +28,8 @@ class StoreReportRequest extends FormRequest
             'judul' => ['required', 'string', 'min:5', 'max:150'],
             'lokasi_detail' => ['required', 'string', 'min:5', 'max:255'],
             'blok' => ['nullable', 'string', 'max:50'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'dampak' => ['required', 'string', 'in:rendah,sedang,tinggi'],
             'urgensi' => ['required', 'string', 'in:rendah,sedang,tinggi,mendesak'],
             'uraian' => ['required', 'string', 'min:20', 'max:1500'],

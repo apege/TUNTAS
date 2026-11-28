@@ -8,11 +8,11 @@
 @section('warga-content')
 @php
     $filterJenisTabs = [
-        'semua' => ['label' => 'Semua', 'count' => $tabCounts['semua'] ?? 0, 'dot' => 'bg-[#215E3C]'],
-        'darurat' => ['label' => 'Darurat', 'count' => $tabCounts['darurat'] ?? 0, 'dot' => 'bg-red-500'],
-        'informasi' => ['label' => 'Informasi', 'count' => $tabCounts['informasi'] ?? 0, 'dot' => 'bg-emerald-500'],
-        'kegiatan' => ['label' => 'Kegiatan', 'count' => $tabCounts['kegiatan'] ?? 0, 'dot' => 'bg-amber-500'],
-        'imbauan' => ['label' => 'Imbauan', 'count' => $tabCounts['imbauan'] ?? 0, 'dot' => 'bg-sky-500'],
+        'semua' => ['label' => 'Semua', 'count' => $tabCounts['semua'] ?? 0, 'dot' => null],
+        'darurat' => ['label' => 'Darurat', 'count' => $tabCounts['darurat'] ?? 0, 'dot' => 'bg-[#DC2626]'],
+        'informasi' => ['label' => 'Informasi', 'count' => $tabCounts['informasi'] ?? 0, 'dot' => 'bg-[#2D6A4F]'],
+        'kegiatan' => ['label' => 'Kegiatan', 'count' => $tabCounts['kegiatan'] ?? 0, 'dot' => 'bg-[#D97706]'],
+        'imbauan' => ['label' => 'Imbauan', 'count' => $tabCounts['imbauan'] ?? 0, 'dot' => 'bg-[#0284C7]'],
     ];
 
     $scopeTabs = [
@@ -23,18 +23,17 @@
 @endphp
 
 <div class="space-y-5">
-    {{-- Subheader & Scope Switcher --}}
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5">
-        <div>
-            <p class="text-sm text-[#4F6358] leading-relaxed">
-                Informasi, imbauan, kegiatan, dan peringatan darurat resmi dari pengurus
-                <span class="font-semibold text-[#1B4B30]">RT {{ $rtNomor }} / RW {{ $rwNomor }}</span>
-                ({{ $kelurahan }}).
-            </p>
-        </div>
 
-        <div class="clay-sunken-note p-1.5 rounded-2xl inline-flex items-center gap-1 self-start lg:self-auto" role="group" aria-label="Filter cakupan wilayah pengumuman">
-            @foreach($scopeTabs as $scopeKey => $scopeLabel)
+    <!-- ================= TOP BAR: SUBTITLE + SCOPE SWITCHER ================= -->
+    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+        <p class="text-xs sm:text-sm text-[#4E6457] leading-relaxed">
+            Informasi, imbauan, kegiatan, dan peringatan resmi dari pengurus
+            <span class="font-bold text-[#1B4332]">RT {{ $rtNomor }} / RW {{ $rwNomor }}</span>
+            ({{ $kelurahan }}).
+        </p>
+
+        <div class="clay-sunken-note p-1 inline-flex items-center gap-1 rounded-2xl shrink-0 self-start lg:self-auto" role="group" aria-label="Filter cakupan wilayah pengumuman">
+            @foreach ($scopeTabs as $scopeKey => $scopeLabel)
                 @php
                     $isScopeActive = $scope === $scopeKey;
                     $scopeUrl = route('warga.pengumuman.index', array_filter([
@@ -43,18 +42,42 @@
                         'q' => $search !== '' ? $search : null,
                     ]));
                 @endphp
-                <a
-                    href="{{ $scopeUrl }}"
-                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap {{ $isScopeActive ? 'bg-[#1D5436] text-white shadow-sm' : 'text-[#4F6358] hover:text-[#14251B] hover:bg-white/60' }}"
-                >
+                <a href="{{ $scopeUrl }}"
+                   class="px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap {{ $isScopeActive ? 'clay-nav-active shadow-xs' : 'text-[#44594D] hover:text-[#122A1E]' }}">
                     {{ $scopeLabel }}
                 </a>
             @endforeach
         </div>
-    </div>
+    </section>
 
-    {{-- Urgent Notification Banner --}}
-    @if(($tabCounts['darurat'] ?? 0) > 0 && $activeJenis !== 'darurat')
+    <!-- ================= SINGLE-ROW CLAY CATEGORY TABS RAIL ================= -->
+    <section aria-label="Filter kategori pengumuman">
+        <div class="clay-sunken-note p-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            @foreach ($filterJenisTabs as $jenisKey => $tabMeta)
+                @php
+                    $isActiveTab = $activeJenis === $jenisKey;
+                    $tabUrl = route('warga.pengumuman.index', array_filter([
+                        'scope' => $scope !== 'semua' ? $scope : null,
+                        'jenis' => $jenisKey !== 'semua' ? $jenisKey : null,
+                        'q' => $search !== '' ? $search : null,
+                    ]));
+                @endphp
+                <a href="{{ $tabUrl }}"
+                   class="shrink-0 px-3.5 py-2 rounded-2xl inline-flex items-center gap-2 text-xs font-bold transition-all {{ $isActiveTab ? 'clay-nav-active shadow-sm' : 'text-[#44594D] hover:text-[#122A1E] hover:bg-white/50' }}">
+                    @if ($tabMeta['dot'])
+                        <span class="w-2 h-2 rounded-full {{ $isActiveTab ? 'bg-white/90' : $tabMeta['dot'] }}"></span>
+                    @endif
+                    <span>{{ $tabMeta['label'] }}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold leading-none {{ $isActiveTab ? 'bg-white/20 text-white' : ($jenisKey === 'darurat' && $tabMeta['count'] > 0 ? 'bg-[#FEE2E2] text-[#991B1B]' : 'bg-[#EAE4D8] text-[#142D21]') }}">
+                        {{ $tabMeta['count'] }}
+                    </span>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
+    <!-- ================= CALLOUT BANNER: PERINGATAN DARURAT ================= -->
+    @if (($tabCounts['darurat'] ?? 0) > 0 && $activeJenis !== 'darurat')
         @php
             $daruratFilterUrl = route('warga.pengumuman.index', array_filter([
                 'scope' => $scope !== 'semua' ? $scope : null,
@@ -62,270 +85,244 @@
                 'q' => $search !== '' ? $search : null,
             ]));
         @endphp
-        <div class="rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50 via-[#FFF5F5] to-white px-4 py-3.5 shadow-[6px_8px_20px_rgba(185,28,28,0.06),inset_1px_1px_0_rgba(255,255,255,0.9)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="flex items-start sm:items-center gap-3">
-                <span class="w-9 h-9 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-inner">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <section class="clay-helper-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="clay-icon-badge w-10 h-10 bg-gradient-to-br from-[#FFF5F5] to-[#FEE2E2] text-[#B91C1C] flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                     </svg>
-                </span>
+                </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-red-700">
-                            <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-                            Peringatan Darurat Aktif
-                        </span>
-                    </div>
-                    <p class="text-xs sm:text-sm font-medium text-[#4A1C1C] mt-0.5">
-                        Terdapat <span class="font-bold">{{ $tabCounts['darurat'] }} pengumuman darurat</span> di wilayah Anda yang memerlukan perhatian segera.
+                    <h3 class="text-xs sm:text-sm font-extrabold text-[#122A1E]">
+                        {{ $tabCounts['darurat'] }} pengumuman darurat aktif di wilayah Anda
+                    </h3>
+                    <p class="text-[11px] sm:text-xs text-[#4E6457]">
+                        Terdapat informasi penting yang memerlukan perhatian segera dari seluruh warga.
                     </p>
                 </div>
             </div>
-            <a href="{{ $daruratFilterUrl }}" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition-colors shrink-0">
-                <span>Lihat Darurat</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
+            <a href="{{ $daruratFilterUrl }}"
+               class="clay-pill px-4 py-2 text-xs font-bold text-[#991B1B] shrink-0 self-start sm:self-auto">
+                Lihat Darurat →
             </a>
-        </div>
+        </section>
     @endif
 
-    {{-- Category Filter Tabs & Active Search Info --}}
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div class="clay-sunken-note p-1.5 rounded-2xl flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            @foreach($filterJenisTabs as $jenisKey => $tab)
-                @php
-                    $isActive = $activeJenis === $jenisKey;
-                    $tabUrl = route('warga.pengumuman.index', array_filter([
-                        'scope' => $scope !== 'semua' ? $scope : null,
-                        'jenis' => $jenisKey !== 'semua' ? $jenisKey : null,
-                        'q' => $search !== '' ? $search : null,
-                    ]));
-                @endphp
-                <a
-                    href="{{ $tabUrl }}"
-                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all {{ $isActive ? 'bg-white text-[#14251B] shadow-[3px_4px_10px_rgba(20,37,27,0.08)] ring-1 ring-[#1D5436]/15' : 'text-[#52665B] hover:text-[#14251B] hover:bg-white/50' }}"
-                >
-                    @if($jenisKey !== 'semua')
-                        <span class="w-2 h-2 rounded-full {{ $tab['dot'] }}"></span>
+    <!-- ================= MAIN ANNOUNCEMENT LIST PANEL ================= -->
+    <section class="clay-card-content p-5 sm:p-6">
+        <!-- Panel Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E3DDD1] mb-5">
+            <div>
+                <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">
+                    KABAR LINGKUNGAN RT {{ $rtNomor }} / RW {{ $rwNomor }}
+                </span>
+                <h3 class="text-base sm:text-lg font-black text-[#122A1E] mt-0.5">
+                    {{ $pengumumans->total() }} Pengumuman Ditemukan
+                    @if ($search !== '')
+                        <span class="text-xs font-bold text-[#4E6457]">• "{{ $search }}"</span>
                     @endif
-                    <span>{{ $tab['label'] }}</span>
-                    <span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold {{ $isActive ? ($jenisKey === 'darurat' ? 'bg-red-100 text-red-700' : 'bg-[#E5F2EA] text-[#1D5436]') : 'bg-[#E9EFEA] text-[#5B6E64]' }}">
-                        {{ $tab['count'] }}
-                    </span>
-                </a>
-            @endforeach
-        </div>
-
-        @if($search !== '')
-            @php
-                $clearSearchUrl = route('warga.pengumuman.index', array_filter([
-                    'scope' => $scope !== 'semua' ? $scope : null,
-                    'jenis' => $activeJenis !== 'semua' ? $activeJenis : null,
-                ]));
-            @endphp
-            <div class="inline-flex items-center gap-2 self-start md:self-auto px-3 py-1.5 rounded-xl bg-white/80 border border-[#D4E2D9] text-xs text-[#3C4F44]">
-                <span>Pencarian: <strong class="text-[#14251B]">"{{ $search }}"</strong></span>
-                <a href="{{ $clearSearchUrl }}" class="text-[#1D5436] hover:text-[#14251B] font-bold underline underline-offset-2">
-                    Hapus
-                </a>
+                </h3>
             </div>
-        @endif
-    </div>
 
-    {{-- Announcement Grid --}}
-    @if($pengumumans->isEmpty())
-        <div class="clay-card-content p-10 sm:p-14 text-center">
-            <div class="w-14 h-14 mx-auto rounded-2xl clay-icon-mint flex items-center justify-center text-[#1D5436] mb-4">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
-                </svg>
-            </div>
-            <h2 class="text-base sm:text-lg font-extrabold text-[#14251B]">Belum ada pengumuman yang sesuai</h2>
-            <p class="text-xs sm:text-sm text-[#5B6E64] mt-1.5 max-w-md mx-auto">
-                @if($search !== '' || $activeJenis !== 'semua' || $scope !== 'semua')
-                    Tidak ditemukan pengumuman untuk kombinasi filter atau kata kunci saat ini.
-                @else
-                    Pengurus RT {{ $rtNomor }} maupun RW {{ $rwNomor }} belum menerbitkan pengumuman baru.
-                @endif
-            </p>
-            @if($search !== '' || $activeJenis !== 'semua' || $scope !== 'semua')
-                <div class="mt-5">
-                    <a href="{{ route('warga.pengumuman.index') }}" class="clay-btn-green inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold">
-                        <span>Tampilkan Semua Pengumuman</span>
-                    </a>
-                </div>
+            @if ($activeJenis !== 'semua' || $scope !== 'semua' || $search !== '')
+                <a href="{{ route('warga.pengumuman.index') }}"
+                   class="clay-pill px-3.5 py-1.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#1B4332] self-start sm:self-auto">
+                    <span>Reset Filter</span>
+                    <span>✕</span>
+                </a>
             @endif
         </div>
-    @else
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            @foreach($pengumumans as $item)
-                @php
-                    $badge = $item->jenis_badge;
-                    $detail = $pengumumanDetailMap[$item->id] ?? null;
-                    $pembuatNama = $item->pembuat?->nama ?? 'Pengurus Lingkungan';
-                    $pembuatWords = preg_split('/\s+/', trim($pembuatNama)) ?: [];
-                    $pembuatInitials = count($pembuatWords) >= 2
-                        ? strtoupper(substr($pembuatWords[0], 0, 1) . substr($pembuatWords[1], 0, 1))
-                        : strtoupper(substr($pembuatNama, 0, 2));
-                    $isDarurat = $item->jenis === 'darurat';
-                @endphp
 
-                <article class="clay-item-card p-5 sm:p-6 flex flex-col justify-between gap-4 {{ $isDarurat ? 'ring-2 ring-red-200/90 bg-gradient-to-br from-[#FFF9F9] via-white to-[#F7FAF7]' : '' }}">
-                    <div class="space-y-3">
-                        {{-- Meta Tags --}}
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold {{ $badge['bg'] }} {{ $badge['text'] }}">
-                                    @if($isDarurat)
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                                    @endif
-                                    {{ $badge['label'] }}
-                                </span>
+        @if ($pengumumans->isNotEmpty())
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                @foreach ($pengumumans as $item)
+                    @php
+                        $badge = $item->jenis_badge;
+                        $detail = $pengumumanDetailMap[$item->id] ?? null;
+                        $pembuatNama = $item->pembuat?->nama ?? 'Pengurus Lingkungan';
+                        $pembuatWords = preg_split('/\s+/', trim($pembuatNama)) ?: [];
+                        $pembuatInitials = count($pembuatWords) >= 2
+                            ? strtoupper(substr($pembuatWords[0], 0, 1) . substr($pembuatWords[1], 0, 1))
+                            : strtoupper(substr($pembuatNama, 0, 2));
+                        $isDarurat = $item->jenis === 'darurat';
+                    @endphp
 
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#EDF4EF] text-[#1D5436]">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                                    </svg>
-                                    {{ $detail['wilayah_label'] ?? 'Lingkungan' }}
-                                </span>
+                    <article class="clay-item-card p-4 sm:p-5 flex flex-col justify-between gap-4 {{ $isDarurat ? 'ring-1 ring-[#F3BABA]' : '' }}">
+                        <div class="space-y-2.5">
+                            <!-- Top Meta Row -->
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold {{ $badge['bg'] }} {{ $badge['text'] }}">
+                                        @if ($isDarurat)
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#DC2626] animate-pulse"></span>
+                                        @endif
+                                        <span>{{ $badge['label'] }}</span>
+                                    </span>
+
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/80 text-[#30483C] border border-[#E3DDD1]">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#2D6A4F]"></span>
+                                        <span>{{ $detail['wilayah_label'] ?? 'Lingkungan' }}</span>
+                                    </span>
+                                </div>
+
+                                <time class="text-[11px] font-semibold text-[#60776C]" datetime="{{ $item->terbit_at?->toIso8601String() }}">
+                                    {{ $detail['waktu_relatif'] ?? '-' }}
+                                </time>
                             </div>
 
-                            <time class="text-[11px] font-semibold text-[#64786D]" datetime="{{ $item->terbit_at?->toIso8601String() }}">
-                                {{ $detail['waktu_relatif'] ?? '-' }}
-                            </time>
+                            <!-- Title & Excerpt -->
+                            <div>
+                                <h4 class="text-sm sm:text-base font-extrabold text-[#122A1E] leading-snug">
+                                    {{ $item->judul }}
+                                </h4>
+                                <p class="text-xs sm:text-[13px] text-[#52645B] mt-1.5 line-clamp-3 leading-relaxed">
+                                    {{ \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($item->isi))), 185) }}
+                                </p>
+                            </div>
                         </div>
 
-                        {{-- Title & Excerpt --}}
-                        <div>
-                            <h2 class="text-base sm:text-[17px] font-extrabold text-[#14251B] leading-snug">
-                                {{ $item->judul }}
-                            </h2>
-                            <p class="mt-2 text-xs sm:text-sm text-[#4F6358] leading-relaxed line-clamp-3">
-                                {{ \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($item->isi))), 185) }}
-                            </p>
+                        <!-- Bottom Meta & Action -->
+                        <div class="flex items-center justify-between gap-3 pt-3 border-t border-[#E3DDD1]/80">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-xl bg-[#EFECE5] border border-white/80 text-[#1B4332] font-black text-[11px] flex items-center justify-center shrink-0">
+                                    {{ $pembuatInitials }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-[#142D21] truncate">{{ $pembuatNama }}</p>
+                                    <p class="text-[10px] sm:text-[11px] text-[#60776C] truncate">{{ $detail['tanggal_lengkap'] ?? '-' }}</p>
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                    data-open-pengumuman="{{ $item->id }}"
+                                    class="clay-pill px-4 py-2 text-xs font-bold {{ $isDarurat ? 'text-[#991B1B]' : 'text-[#1B4332]' }} inline-flex items-center gap-1.5 shrink-0 cursor-pointer">
+                                <span>Baca Detail</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
                         </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <!-- Pagination -->
+            @if ($pengumumans->hasPages())
+                <div class="mt-6 pt-4 border-t border-[#E3DDD1] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p class="text-xs text-[#60776C]">
+                        Menampilkan <span class="font-bold text-[#122A1E]">{{ $pengumumans->firstItem() }}–{{ $pengumumans->lastItem() }}</span>
+                        dari <span class="font-bold text-[#122A1E]">{{ $pengumumans->total() }}</span> pengumuman
+                    </p>
+                    <div class="flex items-center gap-2">
+                        @if ($pengumumans->onFirstPage())
+                            <span class="px-3.5 py-1.5 rounded-full text-xs font-bold text-[#8A9C92] bg-[#EAE4D8] cursor-not-allowed">Sebelumnya</span>
+                        @else
+                            <a href="{{ $pengumumans->previousPageUrl() }}" class="clay-pill px-4 py-1.5 text-xs font-bold text-[#1B4332]">Sebelumnya</a>
+                        @endif
+
+                        @if ($pengumumans->hasMorePages())
+                            <a href="{{ $pengumumans->nextPageUrl() }}" class="clay-btn-green px-4 py-1.5 text-xs font-bold text-white">Berikutnya</a>
+                        @else
+                            <span class="px-3.5 py-1.5 rounded-full text-xs font-bold text-[#8A9C92] bg-[#EAE4D8] cursor-not-allowed">Berikutnya</span>
+                        @endif
                     </div>
-
-                    {{-- Card Footer --}}
-                    <div class="pt-3.5 border-t border-[#E6EFE9] flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-8 h-8 rounded-xl bg-[#E5F2EA] text-[#1D5436] font-extrabold text-[11px] flex items-center justify-center shrink-0">
-                                {{ $pembuatInitials }}
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-xs font-bold text-[#14251B] truncate">{{ $pembuatNama }}</p>
-                                <p class="text-[11px] text-[#64786D] truncate">{{ $detail['tanggal_lengkap'] ?? '-' }}</p>
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            data-open-pengumuman="{{ $item->id }}"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 {{ $isDarurat ? 'bg-red-600 hover:bg-red-700 text-white shadow-sm' : 'bg-[#EDF5F0] hover:bg-[#1D5436] text-[#1D5436] hover:text-white' }}"
-                        >
-                            <span>Baca</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                            </svg>
-                        </button>
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        @if($pengumumans->hasPages())
-            <div class="clay-card-content px-5 py-3.5 flex items-center justify-between">
-                <p class="text-xs text-[#5B6E64]">
-                    Menampilkan <span class="font-bold text-[#14251B]">{{ $pengumumans->firstItem() }}–{{ $pengumumans->lastItem() }}</span>
-                    dari <span class="font-bold text-[#14251B]">{{ $pengumumans->total() }}</span> pengumuman
-                </p>
-                <div class="flex items-center gap-2">
-                    @if($pengumumans->onFirstPage())
-                        <span class="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#9CB0A5] bg-[#F1F5F2] cursor-not-allowed">Sebelumnya</span>
-                    @else
-                        <a href="{{ $pengumumans->previousPageUrl() }}" class="px-3 py-1.5 rounded-xl text-xs font-bold text-[#1D5436] bg-[#EDF5F0] hover:bg-[#DFEDE4] transition-colors">Sebelumnya</a>
-                    @endif
-
-                    @if($pengumumans->hasMorePages())
-                        <a href="{{ $pengumumans->nextPageUrl() }}" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#1D5436] hover:bg-[#16422A] transition-colors">Berikutnya</a>
-                    @else
-                        <span class="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#9CB0A5] bg-[#F1F5F2] cursor-not-allowed">Berikutnya</span>
-                    @endif
                 </div>
+            @endif
+        @else
+            <!-- Clean Claymorphic Empty State -->
+            <div class="py-12 px-4 flex flex-col items-center justify-center text-center">
+                <div class="clay-icon-mint w-16 h-16 flex items-center justify-center text-[#2D6A4F] mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </div>
+
+                @if ($search !== '' || $activeJenis !== 'semua' || $scope !== 'semua')
+                    <h4 class="font-extrabold text-base text-[#153425]">
+                        Tidak ada pengumuman yang cocok dengan filter.
+                    </h4>
+                    <p class="text-xs sm:text-sm text-[#6B8074] mt-1 max-w-sm">
+                        Coba ubah tab kategori, pilih cakupan RT/RW lain, atau hapus kata kunci pencarian Anda.
+                    </p>
+                    <a href="{{ route('warga.pengumuman.index') }}"
+                       class="clay-pill px-5 py-2.5 mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#1B4332]">
+                        <span>Tampilkan Semua Pengumuman</span>
+                    </a>
+                @else
+                    <h4 class="font-extrabold text-base text-[#153425]">
+                        Belum ada pengumuman yang diterbitkan.
+                    </h4>
+                    <p class="text-xs sm:text-sm text-[#6B8074] mt-1 max-w-sm">
+                        Pengurus RT {{ $rtNomor }} maupun RW {{ $rwNomor }} belum menerbitkan informasi terbaru untuk warga.
+                    </p>
+                @endif
             </div>
         @endif
-    @endif
+    </section>
 </div>
 
-{{-- Interactive Claymorphism Reader Modal --}}
-<div
-    id="pengumuman-detail-modal"
-    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-[#0F1F16]/45 backdrop-blur-sm"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modal-pengumuman-judul"
->
-    <div class="clay-card-content w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden bg-[#F9FBF9] shadow-[0_24px_60px_rgba(15,31,22,0.28)]">
-        {{-- Modal Header --}}
-        <div class="px-6 py-4 border-b border-[#E5EEE8] flex items-center justify-between gap-3 bg-white/70">
-            <div class="flex flex-wrap items-center gap-2">
-                <span id="modal-pengumuman-badge" class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-extrabold"></span>
-                <span id="modal-pengumuman-wilayah" class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#EDF4EF] text-[#1D5436]"></span>
+<!-- =========================================================================
+     INTERACTIVE ANNOUNCEMENT READER MODAL (CLAYMORPHISM)
+     ========================================================================= -->
+<div id="pengumuman-detail-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 bg-[#122A1E]/45 backdrop-blur-xs"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="modal-pengumuman-judul">
+    <div class="clay-card-content w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+
+        <!-- Modal Header -->
+        <div class="p-5 sm:p-6 pb-4 border-b border-[#E3DDD1] flex items-start justify-between gap-4 shrink-0">
+            <div class="min-w-0 space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span id="modal-pengumuman-badge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold"></span>
+                    <span id="modal-pengumuman-wilayah" class="text-[11px] font-bold text-[#30483C] bg-white px-2.5 py-0.5 rounded-full border border-[#E3DDD1]"></span>
+                </div>
+                <h3 id="modal-pengumuman-judul" class="text-base sm:text-xl font-black text-[#122A1E] leading-snug"></h3>
+                <p id="modal-pengumuman-waktu" class="text-[11px] text-[#60776C] font-medium"></p>
             </div>
 
-            <button
-                type="button"
-                data-close-pengumuman
-                class="w-8 h-8 rounded-xl bg-[#EEF3EF] hover:bg-[#DFEAE3] text-[#45594E] flex items-center justify-center transition-colors"
-                aria-label="Tutup detail pengumuman"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+            <button type="button"
+                    data-close-pengumuman
+                    class="clay-pill w-9 h-9 flex items-center justify-center text-[#52665B] hover:text-[#122A1E] shrink-0 cursor-pointer"
+                    aria-label="Tutup detail pengumuman">
+                ✕
             </button>
         </div>
 
-        {{-- Modal Body --}}
-        <div class="p-6 overflow-y-auto space-y-5">
-            <div>
-                <h3 id="modal-pengumuman-judul" class="text-xl font-extrabold text-[#14251B] leading-snug"></h3>
-                <p id="modal-pengumuman-waktu" class="text-xs font-semibold text-[#64786D] mt-1.5"></p>
+        <!-- Modal Scrollable Body -->
+        <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar space-y-5 flex-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="clay-sunken-note p-3">
+                    <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">Diterbitkan Oleh</span>
+                    <span id="modal-pengumuman-pembuat" class="block text-xs font-bold text-[#142D21] mt-0.5"></span>
+                </div>
+                <div class="clay-sunken-note p-3">
+                    <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#63796E]">Waktu Terbit</span>
+                    <span id="modal-pengumuman-tanggal" class="block text-xs font-bold text-[#142D21] mt-0.5"></span>
+                </div>
             </div>
 
-            <div id="modal-pengumuman-isi" class="space-y-3 text-sm text-[#2F4237] leading-relaxed"></div>
-
-            <div class="clay-sunken-note p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-[#64786D]">Diterbitkan Oleh</p>
-                    <p id="modal-pengumuman-pembuat" class="text-sm font-bold text-[#14251B] mt-0.5"></p>
-                </div>
-                <div class="sm:text-right">
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-[#64786D]">Waktu Terbit</p>
-                    <p id="modal-pengumuman-tanggal" class="text-xs font-semibold text-[#3C4F44] mt-0.5"></p>
-                </div>
+            <div>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#63796E] mb-2">Isi Pengumuman</h4>
+                <div id="modal-pengumuman-isi" class="space-y-3 text-xs sm:text-sm text-[#30483C] leading-relaxed"></div>
             </div>
         </div>
 
-        {{-- Modal Footer --}}
-        <div class="px-6 py-4 border-t border-[#E5EEE8] bg-white/70 flex flex-wrap items-center justify-between gap-3">
-            <button
-                type="button"
-                id="btn-salin-pengumuman"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#EDF5F0] hover:bg-[#DFEDE4] text-[#1D5436] text-xs font-bold transition-colors"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <!-- Modal Footer -->
+        <div class="px-5 sm:px-6 py-4 border-t border-[#E3DDD1] flex flex-wrap items-center justify-between gap-3 shrink-0">
+            <button type="button"
+                    id="btn-salin-pengumuman"
+                    class="clay-pill px-4 py-2 text-xs font-bold text-[#1B4332] inline-flex items-center gap-2 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
                 <span id="btn-salin-label">Salin Teks Pengumuman</span>
             </button>
 
-            <button
-                type="button"
-                data-close-pengumuman
-                class="clay-btn-green px-5 py-2 text-xs font-bold"
-            >
+            <button type="button"
+                    data-close-pengumuman
+                    class="clay-btn-green px-5 py-2 text-xs font-bold text-white cursor-pointer">
                 Tutup
             </button>
         </div>
@@ -370,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentAnnouncement = item;
 
-        badgeEl.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-extrabold ' + (item.jenis_badge?.bg || 'bg-slate-100') + ' ' + (item.jenis_badge?.text || 'text-slate-700');
+        badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ' + (item.jenis_badge?.bg || 'bg-[#EFECE5]') + ' ' + (item.jenis_badge?.text || 'text-[#30483C]');
         badgeEl.textContent = item.jenis_badge?.label || item.jenis;
 
         wilayahEl.textContent = item.wilayah_label || 'Lingkungan';

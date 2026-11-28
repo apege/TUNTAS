@@ -430,7 +430,7 @@
                 </div>
             </div>
             <div class="shrink-0">
-                <a href="#peta" class="clay-pill px-5 py-2.5 inline-flex items-center gap-2 text-xs font-bold text-[#153425] hover:text-[#245640] transition-transform">
+                <a href="{{ route('warga.peta.index') }}" class="clay-pill px-5 py-2.5 inline-flex items-center gap-2 text-xs font-bold text-[#153425] hover:text-[#245640] transition-transform">
                     <span>Lihat peta</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>

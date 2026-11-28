@@ -136,8 +136,8 @@
                     <span class="{{ request()->routeIs('warga.laporan.index') ? 'bg-white/20 text-white' : 'neu-pill-tag text-[#142D21]' }} px-2 py-0.5 text-xs font-bold rounded-full">{{ $stats['total'] ?? $totalLaporanSaya ?? 0 }}</span>
                 </a>
 
-                <a href="{{ route('warga.dashboard') }}#peta" class="neu-nav-item px-4 py-3 flex items-center gap-3 font-semibold text-sm">
-                    <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <a href="{{ route('warga.peta.index') }}" class="{{ request()->routeIs('warga.peta.index') ? 'clay-nav-active' : 'neu-nav-item' }} px-4 py-3 flex items-center gap-3 font-semibold text-sm">
+                    <svg class="w-4 h-4 {{ request()->routeIs('warga.peta.index') ? '' : 'text-[#52665B]' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
                     <span>Peta Lingkungan</span>
@@ -253,8 +253,8 @@
                 </a>
 
                 <!-- Peta Lingkungan -->
-                <a href="{{ route('warga.dashboard') }}#peta" class="neu-nav-item px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center gap-3 font-semibold text-xs xl:text-sm">
-                    <svg class="w-4 h-4 text-[#52665B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <a href="{{ route('warga.peta.index') }}" class="{{ request()->routeIs('warga.peta.index') ? 'clay-nav-active' : 'neu-nav-item' }} px-3.5 py-2 xl:px-4 xl:py-2.5 flex items-center gap-3 font-semibold text-xs xl:text-sm">
+                    <svg class="w-4 h-4 {{ request()->routeIs('warga.peta.index') ? '' : 'text-[#52665B]' }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
                     <span>Peta Lingkungan</span>

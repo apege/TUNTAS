@@ -202,6 +202,145 @@ class ReportController extends Controller
     }
 
     /**
+     * Tampilkan Peta Sebaran Masalah Lingkungan (Dinamis per RT atau satu RW).
+     *
+     * Logika modular:
+     * 1. Resolusi wilayah target berdasarkan lingkup (RT warga atau seluruh RW)
+     * 2. Pengambilan daftar area lingkungan (jalan/gang/patokan) sebagai label zona peta
+     * 3. Query laporan aktif (tidak ditolak) dengan filter kategori, status, dan pencarian
+     * 4. Pemetaan titik koordinat peta (GPS asli jika ada, atau zona area deterministik)
+     */
+    public function peta(Request $request): View
+    {
+        $user = Auth::user();
+        if ($user) {
+            $user->loadMissing(['wilayah.parent']);
+        }
+
+        $profil = $this->resolveProfilWarga($user);
+        $kategoris = $this->getFormattedKategoris();
+
+        $scope = (string) $request->query('scope', 'rt');
+        if (! in_array($scope, ['rt', 'rw'], true)) {
+            $scope = 'rt';
+        }
+
+        $activeKategori = (string) $request->query('kategori', 'semua');
+        $activeStatus = (string) $request->query('status', 'semua');
+        if (! in_array($activeStatus, ['semua', 'menunggu', 'diproses', 'konfirmasi', 'selesai'], true)) {
+            $activeStatus = 'semua';
+        }
+        $search = trim((string) $request->query('q', ''));
+
+        $rtWilayahId = $this->resolveRtWilayahId($user);
+        $rwWilayahId = $user?->wilayah?->tingkat === 'rw'
+            ? $user->wilayah->id
+            : ($user?->wilayah?->parent_id ?? Wilayah::where('tingkat', 'rw')->value('id'));
+
+        $targetWilayahIds = [];
+        if ($scope === 'rw' && $rwWilayahId) {
+            $targetWilayahIds = Wilayah::where('parent_id', $rwWilayahId)
+                ->where('tingkat', 'rt')
+                ->pluck('id')
+                ->all();
+        } elseif ($rtWilayahId) {
+            $targetWilayahIds = [$rtWilayahId];
+        }
+
+        // Ambil area lingkungan dinamis dari database untuk label zona di denah peta
+        $areaNames = ! empty($targetWilayahIds)
+            ? AreaLingkungan::whereIn('wilayah_id', $targetWilayahIds)
+                ->where('aktif', true)
+                ->orderBy('created_at')
+                ->pluck('nama')
+                ->unique()
+                ->values()
+                ->all()
+            : [];
+
+        // Query laporan di wilayah target (kecuali yang ditolak)
+        $laporans = Report::query()
+            ->when(! empty($targetWilayahIds), fn (Builder $q): Builder => $q->whereIn('wilayah_id', $targetWilayahIds))
+            ->where('status_penerimaan', '!=', 'ditolak')
+            ->with([
+                'kategori',
+                'wilayah',
+                'lampirans',
+                'pelapor',
+                'reviews.pemeriksa',
+                'kasus.koordinator',
+                'kasus.penugasans.petugas',
+                'kasus.penugasans.progres.pencatat',
+                'kasus.reviews.pemeriksa',
+            ])
+            ->when($activeStatus !== 'semua', fn (Builder $q): Builder => $q->filterStatus($activeStatus))
+            ->when($activeKategori !== 'semua' && Str::isUuid($activeKategori), function (Builder $q) use ($activeKategori): void {
+                $q->where('kategori_id', $activeKategori);
+            })
+            ->when($search !== '', function (Builder $q) use ($search): void {
+                $q->where(function (Builder $inner) use ($search): void {
+                    $inner->where('judul', 'like', "%{$search}%")
+                        ->orWhere('kode', 'like', "%{$search}%")
+                        ->orWhere('lokasi_detail', 'like', "%{$search}%")
+                        ->orWhere('blok', 'like', "%{$search}%");
+                });
+            })
+            ->latest('created_at')
+            ->take(40)
+            ->get();
+
+        // Hitung koordinat relatif & payload modal detail untuk setiap titik
+        $mapMarkers = [];
+        $reportDetailMap = [];
+        $gpsBounds = $this->computeGpsBounds($laporans);
+
+        foreach ($laporans as $lap) {
+            $coords = $this->resolveMapCoordinates($lap, $gpsBounds);
+            $katMeta = $kategoris->firstWhere('id', $lap->kategori_id);
+
+            $mapMarkers[] = [
+                'id' => $lap->id,
+                'kode' => $lap->kode,
+                'judul' => $lap->judul,
+                'lokasi_detail' => $lap->lokasi_detail,
+                'blok' => $lap->blok,
+                'rt_nomor' => $lap->wilayah?->nomor ?? $profil['rtNomor'],
+                'kategori_id' => $lap->kategori_id,
+                'kategori_nama' => $katMeta?->short_name ?? ($lap->kategori?->nama ?? 'Umum'),
+                'warna' => $lap->kategori?->warna_peta ?? '#2D6A4F',
+                'status_label' => $lap->status_label,
+                'status_badge' => $lap->status_badge,
+                'urgensi' => $lap->urgensi,
+                'is_priority' => in_array($lap->urgensi, ['tinggi', 'mendesak'], true),
+                'waktu' => $lap->created_at->diffForHumans(),
+                'x' => $coords['x'],
+                'y' => $coords['y'],
+            ];
+
+            $reportDetailMap[$lap->id] = $this->buildReportDetailPayload($lap, $kategoris);
+        }
+
+        $totalLaporanSaya = $user ? Report::where('pelapor_id', $user->id)->count() : 0;
+        $notifikasiData = $this->getNotifikasiWarga($user, limit: 8);
+
+        return view('dashboard.peta_lingkungan', array_merge($profil, [
+            'user' => $user,
+            'laporans' => $laporans,
+            'kategoris' => $kategoris,
+            'scope' => $scope,
+            'activeKategori' => $activeKategori,
+            'activeStatus' => $activeStatus,
+            'search' => $search,
+            'areaNames' => $areaNames,
+            'mapMarkers' => $mapMarkers,
+            'reportDetailMap' => $reportDetailMap,
+            'totalLaporanSaya' => $totalLaporanSaya,
+            'notifikasis' => $notifikasiData['list'],
+            'unreadNotifikasiCount' => $notifikasiData['unread_count'],
+        ]));
+    }
+
+    /**
      * Tampilkan formulir pembuatan laporan baru untuk Warga.
      *
      * Data dimuat secara dinamis dari database:
@@ -756,6 +895,88 @@ class ReportController extends Controller
             'confirm_url' => route('warga.laporan.confirm', $report),
             'photos' => $photos,
             'timeline' => $timeline,
+        ];
+    }
+
+    /**
+     * Hitung batas minimum/maksimum koordinat GPS jika ada laporan yang memiliki lat/lng.
+     *
+     * @return array{minLat: float, maxLat: float, minLng: float, maxLng: float}|null
+     */
+    protected function computeGpsBounds(Collection $reports): ?array
+    {
+        $withCoords = $reports->filter(fn (Report $r): bool => $r->latitude !== null && $r->longitude !== null);
+        if ($withCoords->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'minLat' => (float) $withCoords->min('latitude'),
+            'maxLat' => (float) $withCoords->max('latitude'),
+            'minLng' => (float) $withCoords->min('longitude'),
+            'maxLng' => (float) $withCoords->max('longitude'),
+        ];
+    }
+
+    /**
+     * Tentukan posisi persentase (x%, y%) pin laporan di atas denah peta lingkungan.
+     *
+     * @param  array{minLat: float, maxLat: float, minLng: float, maxLng: float}|null  $gpsBounds
+     * @return array{x: float, y: float}
+     */
+    protected function resolveMapCoordinates(Report $report, ?array $gpsBounds): array
+    {
+        if ($report->latitude !== null && $report->longitude !== null && $gpsBounds !== null) {
+            $latSpan = $gpsBounds['maxLat'] - $gpsBounds['minLat'];
+            $lngSpan = $gpsBounds['maxLng'] - $gpsBounds['minLng'];
+
+            $normX = $lngSpan > 0.0001
+                ? (((float) $report->longitude - $gpsBounds['minLng']) / $lngSpan)
+                : 0.5;
+            $normY = $latSpan > 0.0001
+                ? (1 - (((float) $report->latitude - $gpsBounds['minLat']) / $latSpan))
+                : 0.5;
+
+            return [
+                'x' => round(16 + ($normX * 68), 2),
+                'y' => round(18 + ($normY * 62), 2),
+            ];
+        }
+
+        // Zona skematis lingkungan (Barat-Utara, Tengah-Utara, Taman, Barat-Selatan, Pos Ronda, Kali/Selatan)
+        $zones = [
+            0 => ['x' => 23, 'y' => 24],
+            1 => ['x' => 48, 'y' => 23],
+            2 => ['x' => 72, 'y' => 27],
+            3 => ['x' => 24, 'y' => 58],
+            4 => ['x' => 49, 'y' => 55],
+            5 => ['x' => 74, 'y' => 63],
+        ];
+
+        $text = strtolower(trim(($report->blok ?? '').' '.$report->lokasi_detail));
+        $zoneIndex = abs(crc32($report->id)) % count($zones);
+
+        if (str_contains($text, 'blok a') || str_contains($text, 'utama') || str_contains($text, 'mawar')) {
+            $zoneIndex = 0;
+        } elseif (str_contains($text, 'gang 1') || str_contains($text, 'musala') || str_contains($text, 'kenanga')) {
+            $zoneIndex = 1;
+        } elseif (str_contains($text, 'taman') || str_contains($text, 'tps') || str_contains($text, 'lapangan')) {
+            $zoneIndex = 2;
+        } elseif (str_contains($text, 'gang 2') || str_contains($text, 'timur') || str_contains($text, 'barat')) {
+            $zoneIndex = 3;
+        } elseif (str_contains($text, 'pos') || str_contains($text, 'blok b') || str_contains($text, 'melati')) {
+            $zoneIndex = 4;
+        } elseif (str_contains($text, 'kali') || str_contains($text, 'jembatan') || str_contains($text, 'blok c') || str_contains($text, 'saluran')) {
+            $zoneIndex = 5;
+        }
+
+        $hash = abs(crc32($report->id.$report->kode));
+        $jitterX = (($hash % 13) - 6);
+        $jitterY = ((($hash >> 4) % 11) - 5);
+
+        return [
+            'x' => max(14, min(84, $zones[$zoneIndex]['x'] + $jitterX)),
+            'y' => max(16, min(78, $zones[$zoneIndex]['y'] + $jitterY)),
         ];
     }
 

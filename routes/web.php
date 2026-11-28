@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/warga/laporan/buat', [ReportController::class, 'create'])->name('warga.laporan.create');
     Route::post('/warga/laporan', [ReportController::class, 'store'])->name('warga.laporan.store');
     Route::post('/warga/laporan/{report}/konfirmasi', [ReportController::class, 'confirmResolution'])->name('warga.laporan.confirm');
+    Route::get('/warga/peta', [ReportController::class, 'peta'])->name('warga.peta.index');
     Route::get('/admin-rt/dashboard', [DashboardController::class, 'adminRt'])->name('admin-rt.dashboard');
     Route::get('/admin-rw/dashboard', [DashboardController::class, 'adminRw'])->name('admin-rw.dashboard');
     Route::get('/petugas/dashboard', [DashboardController::class, 'petugas'])->name('petugas.dashboard');

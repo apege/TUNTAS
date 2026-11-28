@@ -229,8 +229,8 @@ class WargaCreateReportTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeInOrder(['Sampah', 'Drainase', 'Jalan', 'Fasilitas Umum', 'Penerangan']);
-        $response->assertSee('Panduan Kategori');
-        $response->assertSee('Saran judul cepat:');
+        $response->assertSee('Sebutkan jenis');
+        $response->assertSee('Butuh contoh judul?');
     }
 
     public function test_area_lingkungan_diambil_dinamis_dari_database_per_rt_dan_menerima_input_bebas(): void

@@ -8,23 +8,22 @@
     $initialKategori = $kategoris->firstWhere('id', $selectedKategoriId) ?? $kategoris->first();
 
     $dampakOptions = [
-        'rendah' => ['label' => 'Ringan', 'desc' => 'Tidak mengganggu aktivitas utama', 'dot' => '#16A34A'],
-        'sedang' => ['label' => 'Sedang', 'desc' => 'Akses / kenyamanan terganggu', 'dot' => '#D97706'],
-        'tinggi' => ['label' => 'Berat', 'desc' => 'Membahayakan keselamatan / aktivitas terhenti', 'dot' => '#DC2626'],
+        'rendah' => ['label' => 'Ringan', 'short' => 'Dampak minimal', 'desc' => 'Tidak mengganggu aktivitas utama', 'dot' => '#16A34A'],
+        'sedang' => ['label' => 'Sedang', 'short' => 'Akses terganggu', 'desc' => 'Akses / kenyamanan terganggu', 'dot' => '#D97706'],
+        'tinggi' => ['label' => 'Berat', 'short' => 'Bahaya / darurat', 'desc' => 'Membahayakan keselamatan / aktivitas terhenti', 'dot' => '#DC2626'],
     ];
 
     $urgensiOptions = [
-        'rendah' => ['label' => 'Rendah', 'desc' => 'Penanganan berkala / fleksibel', 'dot' => '#64748B'],
-        'sedang' => ['label' => 'Sedang', 'desc' => 'Perlu segera ditangani pengurus', 'dot' => '#0284C7'],
-        'tinggi' => ['label' => 'Tinggi', 'desc' => 'Butuh penanganan cepat', 'dot' => '#EA580C'],
-        'mendesak' => ['label' => 'Darurat', 'desc' => 'Butuh tindakan langsung di lapangan', 'dot' => '#DC2626'],
+        'rendah' => ['label' => 'Rendah', 'short' => 'Fleksibel', 'desc' => 'Penanganan berkala / fleksibel', 'dot' => '#64748B'],
+        'sedang' => ['label' => 'Sedang', 'short' => 'Segera ditangani', 'desc' => 'Perlu segera ditangani pengurus', 'dot' => '#0284C7'],
+        'tinggi' => ['label' => 'Tinggi', 'short' => 'Butuh cepat', 'desc' => 'Butuh penanganan cepat', 'dot' => '#EA580C'],
+        'mendesak' => ['label' => 'Darurat', 'short' => 'Tindakan langsung', 'desc' => 'Butuh tindakan langsung di lapangan', 'dot' => '#DC2626'],
     ];
 
     $selectedDampak = old('dampak', 'sedang');
     $selectedUrgensi = old('urgensi', 'sedang');
     $activeDampak = $dampakOptions[$selectedDampak] ?? $dampakOptions['sedang'];
     $activeUrgensi = $urgensiOptions[$selectedUrgensi] ?? $urgensiOptions['sedang'];
-    $quickAreaChips = collect($daftarArea ?? [])->where('is_master', true)->take(4)->values();
 @endphp
 
 <div>
@@ -170,48 +169,39 @@
                             @endforeach
                         </div>
 
-                        <!-- Smart Contextual Assistant for Selected Category -->
+                        <!-- Ringkas 1-baris Tips Kategori (Tanpa kotak berat) -->
                         @if ($initialKategori)
-                            <div id="kategori-assistant" class="clay-sunken-note p-3.5 sm:p-4 mt-3.5 space-y-2.5">
-                                <div class="flex items-start gap-2.5">
-                                    <div class="w-6 h-6 rounded-lg bg-[#D8ECE0] text-[#1B4332] flex items-center justify-center shrink-0 mt-0.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <span class="block text-[10px] font-extrabold uppercase tracking-wider text-[#2D6A4F]">
-                                            Panduan Kategori <span id="assistant-category-title">{{ $initialKategori->short_name }}</span>
-                                        </span>
-                                        <p id="assistant-tips" class="text-xs text-[#385244] mt-0.5 leading-relaxed">
-                                            {{ $initialKategori->tips }}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Quick Title Preset Chips -->
-                                <div class="pt-2 border-t border-[#DCD6C8] flex flex-wrap items-center gap-1.5">
-                                    <span class="text-[10px] font-bold text-[#60776C] mr-1">Saran judul cepat:</span>
-                                    <div id="contoh-judul-chips" class="flex flex-wrap gap-1.5">
-                                        @foreach ($initialKategori->contoh_judul ?? [] as $contoh)
-                                            <button type="button"
-                                                    onclick="applyJudulChip(this)"
-                                                    data-judul="{{ $contoh }}"
-                                                    class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#C6D4CA] text-[11px] font-semibold transition-all shadow-2xs cursor-pointer">
-                                                + {{ $contoh }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="mt-2.5 flex items-start gap-2 text-[11px] sm:text-xs text-[#4E6457] leading-relaxed px-0.5">
+                                <svg class="w-3.5 h-3.5 text-[#2D6A4F] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>
+                                    <strong class="font-bold text-[#1B4332]">Tips <span id="assistant-category-title">{{ $initialKategori->short_name }}</span>:</strong>
+                                    <span id="assistant-tips">{{ $initialKategori->tips }}</span>
+                                </span>
+                            </p>
                         @endif
                     </div>
 
                     <!-- ================= FIELD 2: JUDUL LAPORAN ================= -->
-                    <div>
-                        <label for="judul" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
-                            Judul laporan <span class="text-red-500">*</span>
-                        </label>
+                    <div class="relative" id="judul-preset-wrap">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <label for="judul" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
+                                Judul laporan <span class="text-red-500">*</span>
+                            </label>
+                            @if ($initialKategori)
+                                <button type="button"
+                                        id="btn-toggle-contoh-judul"
+                                        onclick="toggleContohJudul(event)"
+                                        class="inline-flex items-center gap-1 text-[11px] font-bold text-[#2D6A4F] hover:text-[#142D21] transition-colors cursor-pointer">
+                                    <span>Butuh contoh judul?</span>
+                                    <svg id="contoh-judul-chevron" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                            @endif
+                        </div>
+
                         <input type="text" 
                                name="judul" 
                                id="judul" 
@@ -219,112 +209,109 @@
                                placeholder="{{ $initialKategori->placeholder_judul ?? 'Contoh: Saluran air tersumbat di Gang 2' }}"
                                required
                                class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+
+                        <!-- Optional Popover: Saran Judul Cepat (Tertutup rapi sampai diklik) -->
+                        @if ($initialKategori)
+                            <div id="contoh-judul-popover"
+                                 class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2.5 z-30 space-y-1">
+                                <span class="block px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#6A7F73]">
+                                    Pilih salah satu contoh judul
+                                </span>
+                                <div id="contoh-judul-chips" class="space-y-1">
+                                    @foreach ($initialKategori->contoh_judul ?? [] as $contoh)
+                                        <button type="button"
+                                                onclick="applyJudulChip(this)"
+                                                data-judul="{{ $contoh }}"
+                                                class="clay-dropdown-option w-full px-3 py-2 text-left text-xs font-semibold text-[#142D21] flex items-center justify-between gap-2">
+                                            <span>{{ $contoh }}</span>
+                                            <span class="text-[10px] font-bold text-[#2D6A4F] shrink-0">Pakai</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- ================= FIELD 3: LOKASI & AREA LINGKUNGAN (2 COLS WITH CUSTOM AUTOCOMPLETE) ================= -->
-                    <div class="space-y-2.5">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Lokasi Masalah with Custom Autocomplete -->
-                            <div class="relative" id="lokasi-autocomplete-wrap">
-                                <label for="lokasi_detail" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
-                                    Lokasi masalah <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <input type="text" 
-                                           name="lokasi_detail" 
-                                           id="lokasi_detail" 
-                                           autocomplete="off"
-                                           value="{{ old('lokasi_detail') }}"
-                                           placeholder="Nama jalan, gang, atau patokan"
-                                           required
-                                           class="clay-input w-full pl-4 pr-9 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
-                                    <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#798D82]">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                    </span>
-                                </div>
-
-                                <!-- Floating Custom Autocomplete Panel (Lokasi) -->
-                                <div id="lokasi-autocomplete-menu"
-                                     class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-56 overflow-y-auto custom-scrollbar space-y-1">
-                                </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Lokasi Masalah with Custom Autocomplete -->
+                        <div class="relative" id="lokasi-autocomplete-wrap">
+                            <label for="lokasi_detail" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
+                                Lokasi masalah <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" 
+                                       name="lokasi_detail" 
+                                       id="lokasi_detail" 
+                                       autocomplete="off"
+                                       value="{{ old('lokasi_detail') }}"
+                                       placeholder="Nama jalan, gang, atau patokan"
+                                       required
+                                       class="clay-input w-full pl-4 pr-9 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#798D82]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </span>
                             </div>
 
-                            <!-- Area Lingkungan with Custom Clay Autocomplete Combo -->
-                            <div class="relative" id="blok-autocomplete-wrap">
-                                <label for="blok" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
-                                    Area lingkungan <span class="text-[11px] font-normal text-[#6B8074]">(opsional)</span>
-                                </label>
-                                <div class="relative">
-                                    <input type="text" 
-                                           name="blok" 
-                                           id="blok" 
-                                           autocomplete="off"
-                                           maxlength="50"
-                                           value="{{ old('blok') }}"
-                                           placeholder="Ketik atau pilih gang / jalan / blok"
-                                           class="clay-input w-full pl-4 pr-14 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
-                                    <div class="absolute inset-y-0 right-2.5 flex items-center gap-1">
-                                        <button type="button"
-                                                id="blok-clear-btn"
-                                                onclick="clearBlokInput()"
-                                                class="hidden w-6 h-6 rounded-full hover:bg-black/5 text-[#6A7F73] hover:text-[#142D21] flex items-center justify-center text-xs font-bold transition-colors"
-                                                title="Kosongkan area"
-                                                aria-label="Kosongkan area">
-                                            ✕
-                                        </button>
-                                        <button type="button"
-                                                id="blok-toggle-btn"
-                                                onclick="toggleBlokAutocomplete()"
-                                                class="w-6 h-6 rounded-full hover:bg-black/5 text-[#52665B] flex items-center justify-center transition-transform"
-                                                title="Lihat daftar area RT"
-                                                aria-label="Lihat daftar area RT">
-                                            <svg id="blok-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Floating Custom Autocomplete Panel (Area Lingkungan) -->
-                                <div id="blok-autocomplete-menu"
-                                     class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-60 overflow-y-auto custom-scrollbar space-y-1">
-                                </div>
+                            <!-- Floating Custom Autocomplete Panel (Lokasi) -->
+                            <div id="lokasi-autocomplete-menu"
+                                 class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-56 overflow-y-auto custom-scrollbar space-y-1">
                             </div>
                         </div>
 
-                        @if ($quickAreaChips->isNotEmpty())
-                            <div class="flex flex-wrap items-center gap-1.5 px-0.5">
-                                <span class="text-[10px] font-bold text-[#60776C] mr-0.5">
-                                    Saran cepat RT {{ $rtNomor ?? '02' }}:
-                                </span>
-                                @foreach ($quickAreaChips as $chip)
+                        <!-- Area Lingkungan with Custom Clay Autocomplete Combo -->
+                        <div class="relative" id="blok-autocomplete-wrap">
+                            <label for="blok" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
+                                Area lingkungan <span class="text-[11px] font-normal text-[#6B8074]">(opsional)</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" 
+                                       name="blok" 
+                                       id="blok" 
+                                       autocomplete="off"
+                                       maxlength="50"
+                                       value="{{ old('blok') }}"
+                                       placeholder="Pilih atau ketik area / gang"
+                                       class="clay-input w-full pl-4 pr-14 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                                <div class="absolute inset-y-0 right-2.5 flex items-center gap-1">
                                     <button type="button"
-                                            data-area-chip
-                                            data-area="{{ $chip['nama'] }}"
-                                            onclick="applyAreaChip(this)"
-                                            class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#C6D4CA] text-[11px] font-semibold transition-all shadow-2xs cursor-pointer">
-                                        {{ $chip['nama'] }}
+                                            id="blok-clear-btn"
+                                            onclick="clearBlokInput()"
+                                            class="hidden w-6 h-6 rounded-full hover:bg-black/5 text-[#6A7F73] hover:text-[#142D21] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                                            title="Kosongkan area"
+                                            aria-label="Kosongkan area">
+                                        ✕
                                     </button>
-                                @endforeach
+                                    <button type="button"
+                                            id="blok-toggle-btn"
+                                            onclick="toggleBlokAutocomplete()"
+                                            class="w-6 h-6 rounded-full hover:bg-black/5 text-[#52665B] flex items-center justify-center transition-transform cursor-pointer"
+                                            title="Lihat daftar area RT"
+                                            aria-label="Lihat daftar area RT">
+                                        <svg id="blok-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                        @endif
+
+                            <!-- Floating Custom Autocomplete Panel (Area Lingkungan) -->
+                            <div id="blok-autocomplete-menu"
+                                 class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-60 overflow-y-auto custom-scrollbar space-y-1">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- ================= FIELD 4: DAMPAK & URGENSI (CUSTOM CLAY DROPDOWNS) ================= -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Custom Dropdown 1: Dampak bagi warga -->
                         <div class="relative" id="custom-select-dampak">
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                                <label id="dampak-label" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
-                                    Dampak bagi warga <span class="text-red-500">*</span>
-                                </label>
-                                <span id="dampak-auto-badge" class="hidden text-[10px] font-bold text-[#2D6A4F] bg-[#E8F1EC] px-2 py-0.5 rounded-full">
-                                    Rekomendasi
-                                </span>
-                            </div>
+                            <label id="dampak-label" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
+                                Dampak bagi warga <span class="text-red-500">*</span>
+                            </label>
 
                             <input type="hidden" name="dampak" id="dampak" value="{{ $selectedDampak }}" required>
 
@@ -340,7 +327,7 @@
                                     <div class="min-w-0 flex-1 truncate text-xs sm:text-sm">
                                         <span id="dampak-trigger-label" class="font-extrabold text-[#122A1E]">{{ $activeDampak['label'] }}</span>
                                         <span class="text-[#798D82] mx-1">—</span>
-                                        <span id="dampak-trigger-desc" class="text-[#4E6457] font-medium">{{ $activeDampak['desc'] }}</span>
+                                        <span id="dampak-trigger-desc" class="text-[#4E6457] font-medium">{{ $activeDampak['short'] }}</span>
                                     </div>
                                 </div>
                                 <svg id="dampak-chevron" class="w-4 h-4 text-[#52665B] shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -358,7 +345,7 @@
                                             data-select-option="dampak"
                                             data-value="{{ $optValue }}"
                                             data-label="{{ $optMeta['label'] }}"
-                                            data-desc="{{ $optMeta['desc'] }}"
+                                            data-short="{{ $optMeta['short'] }}"
                                             data-dot="{{ $optMeta['dot'] }}"
                                             onclick="selectCustomOption('dampak', '{{ $optValue }}')"
                                             class="clay-dropdown-option w-full p-2.5 sm:p-3 flex items-start justify-between gap-2.5 text-left {{ $selectedDampak === $optValue ? 'is-selected' : '' }}">
@@ -379,14 +366,9 @@
 
                         <!-- Custom Dropdown 2: Urgensi penanganan -->
                         <div class="relative" id="custom-select-urgensi">
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                                <label id="urgensi-label" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
-                                    Urgensi penanganan <span class="text-red-500">*</span>
-                                </label>
-                                <span id="urgensi-auto-badge" class="hidden text-[10px] font-bold text-[#2D6A4F] bg-[#E8F1EC] px-2 py-0.5 rounded-full">
-                                    Rekomendasi
-                                </span>
-                            </div>
+                            <label id="urgensi-label" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
+                                Urgensi penanganan <span class="text-red-500">*</span>
+                            </label>
 
                             <input type="hidden" name="urgensi" id="urgensi" value="{{ $selectedUrgensi }}" required>
 
@@ -402,7 +384,7 @@
                                     <div class="min-w-0 flex-1 truncate text-xs sm:text-sm">
                                         <span id="urgensi-trigger-label" class="font-extrabold text-[#122A1E]">{{ $activeUrgensi['label'] }}</span>
                                         <span class="text-[#798D82] mx-1">—</span>
-                                        <span id="urgensi-trigger-desc" class="text-[#4E6457] font-medium">{{ $activeUrgensi['desc'] }}</span>
+                                        <span id="urgensi-trigger-desc" class="text-[#4E6457] font-medium">{{ $activeUrgensi['short'] }}</span>
                                     </div>
                                 </div>
                                 <svg id="urgensi-chevron" class="w-4 h-4 text-[#52665B] shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -420,7 +402,7 @@
                                             data-select-option="urgensi"
                                             data-value="{{ $optValue }}"
                                             data-label="{{ $optMeta['label'] }}"
-                                            data-desc="{{ $optMeta['desc'] }}"
+                                            data-short="{{ $optMeta['short'] }}"
                                             data-dot="{{ $optMeta['dot'] }}"
                                             onclick="selectCustomOption('urgensi', '{{ $optValue }}')"
                                             class="clay-dropdown-option w-full p-2.5 sm:p-3 flex items-start justify-between gap-2.5 text-left {{ $selectedUrgensi === $optValue ? 'is-selected' : '' }}">
@@ -774,6 +756,7 @@
         window.toggleCustomSelect = function (field, event) {
             if (event) event.stopPropagation();
             closeAllAutocompletes();
+            closeContohJudul();
             closeAllCustomSelects(field);
 
             const menu = document.getElementById(field + '-menu');
@@ -812,18 +795,14 @@
                 const descEl = document.getElementById(field + '-trigger-desc');
                 if (dotEl && chosenOption.dataset.dot) dotEl.style.backgroundColor = chosenOption.dataset.dot;
                 if (labelEl) labelEl.textContent = chosenOption.dataset.label || '';
-                if (descEl) descEl.textContent = chosenOption.dataset.desc || '';
+                if (descEl) descEl.textContent = chosenOption.dataset.short || '';
             }
 
             if (isManual) {
                 if (field === 'dampak') {
                     userModifiedDampak = true;
-                    const badge = document.getElementById('dampak-auto-badge');
-                    if (badge) badge.classList.add('hidden');
                 } else if (field === 'urgensi') {
                     userModifiedUrgensi = true;
-                    const badge = document.getElementById('urgensi-auto-badge');
-                    if (badge) badge.classList.add('hidden');
                 }
                 closeAllCustomSelects();
             }
@@ -901,7 +880,7 @@
                 uraianInput.placeholder = activeCard.dataset.placeholderUraian;
             }
 
-            // Rebuild quick title chips
+            // Rebuild quick title chips inside optional popover
             if (chipsContainer && activeCard.dataset.contohJudul) {
                 try {
                     const examples = JSON.parse(activeCard.dataset.contohJudul);
@@ -913,8 +892,16 @@
                         btn.onclick = function () {
                             window.applyJudulChip(btn);
                         };
-                        btn.className = 'px-2.5 py-1 rounded-full bg-white/80 hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#C6D4CA] text-[11px] font-semibold transition-all shadow-2xs cursor-pointer';
-                        btn.textContent = '+ ' + contoh;
+                        btn.className = 'clay-dropdown-option w-full px-3 py-2 text-left text-xs font-semibold text-[#142D21] flex items-center justify-between gap-2';
+
+                        const labelSpan = document.createElement('span');
+                        labelSpan.textContent = contoh;
+                        const actionSpan = document.createElement('span');
+                        actionSpan.className = 'text-[10px] font-bold text-[#2D6A4F] shrink-0';
+                        actionSpan.textContent = 'Pakai';
+
+                        btn.appendChild(labelSpan);
+                        btn.appendChild(actionSpan);
                         chipsContainer.appendChild(btn);
                     });
                 } catch (err) {
@@ -926,24 +913,39 @@
             if (applySuggestions) {
                 if (dampakInput && !userModifiedDampak && activeCard.dataset.suggestedDampak) {
                     window.selectCustomOption('dampak', activeCard.dataset.suggestedDampak, false);
-                    const badge = document.getElementById('dampak-auto-badge');
-                    if (badge) badge.classList.remove('hidden');
                 }
                 if (urgensiInput && !userModifiedUrgensi && activeCard.dataset.suggestedUrgensi) {
                     window.selectCustomOption('urgensi', activeCard.dataset.suggestedUrgensi, false);
-                    const badge = document.getElementById('urgensi-auto-badge');
-                    if (badge) badge.classList.remove('hidden');
                 }
             }
 
             updateChecklist();
         };
 
-        // 3. Apply Quick Title Chip
+        // 3. Optional Quick Title Popover & Chip Applier
+        const contohPopover = document.getElementById('contoh-judul-popover');
+        const contohChevron = document.getElementById('contoh-judul-chevron');
+
+        function closeContohJudul() {
+            if (contohPopover) contohPopover.classList.add('hidden');
+            if (contohChevron) contohChevron.classList.remove('rotate-180');
+        }
+
+        window.toggleContohJudul = function (event) {
+            if (event) event.stopPropagation();
+            closeAllCustomSelects();
+            closeAllAutocompletes();
+            if (!contohPopover) return;
+            const isHidden = contohPopover.classList.contains('hidden');
+            contohPopover.classList.toggle('hidden');
+            if (contohChevron) contohChevron.classList.toggle('rotate-180', isHidden);
+        };
+
         window.applyJudulChip = function (buttonEl) {
             if (!judulInput || !buttonEl) return;
             const suggested = buttonEl.dataset.judul || '';
             judulInput.value = suggested;
+            closeContohJudul();
             judulInput.focus();
             judulInput.classList.add('ring-2', 'ring-[#2D6A4F]/50');
             setTimeout(function () {
@@ -1241,6 +1243,7 @@
             const urgensiWrap = document.getElementById('custom-select-urgensi');
             const blokWrap = document.getElementById('blok-autocomplete-wrap');
             const lokasiWrap = document.getElementById('lokasi-autocomplete-wrap');
+            const judulWrap = document.getElementById('judul-preset-wrap');
 
             if ((!dampakWrap || !dampakWrap.contains(e.target)) && (!urgensiWrap || !urgensiWrap.contains(e.target))) {
                 closeAllCustomSelects();
@@ -1248,12 +1251,16 @@
             if ((!blokWrap || !blokWrap.contains(e.target)) && (!lokasiWrap || !lokasiWrap.contains(e.target))) {
                 closeAllAutocompletes();
             }
+            if (!judulWrap || !judulWrap.contains(e.target)) {
+                closeContohJudul();
+            }
         });
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 closeAllCustomSelects();
                 closeAllAutocompletes();
+                closeContohJudul();
             }
         });
 

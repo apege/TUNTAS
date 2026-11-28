@@ -203,41 +203,57 @@
                     </div>
 
                     <!-- ================= FIELD 3: LOKASI & AREA LINGKUNGAN (2 COLS) ================= -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="lokasi_detail" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
-                                Lokasi masalah <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="lokasi_detail" 
-                                   id="lokasi_detail" 
-                                   value="{{ old('lokasi_detail') }}"
-                                   placeholder="Nama jalan, gang, atau patokan"
-                                   required
-                                   class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
-                        </div>
+                    <div class="space-y-2.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="lokasi_detail" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
+                                    Lokasi masalah <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       name="lokasi_detail" 
+                                       id="lokasi_detail" 
+                                       value="{{ old('lokasi_detail') }}"
+                                       placeholder="Nama jalan, gang, atau patokan"
+                                       required
+                                       class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                            </div>
 
-                        <div>
-                            <label for="blok" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
-                                Area lingkungan
-                            </label>
-                            <div class="relative">
-                                <select name="blok" 
-                                        id="blok" 
-                                        class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0">
-                                    @foreach ($daftarBlok as $blokOption)
-                                        <option value="{{ $blokOption }}" {{ old('blok', 'Blok A') === $blokOption ? 'selected' : '' }}>
-                                            {{ $blokOption }}
-                                        </option>
+                            <div>
+                                <label for="blok" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
+                                    Area lingkungan <span class="text-[11px] font-normal text-[#6B8074]">(opsional)</span>
+                                </label>
+                                <input type="text" 
+                                       name="blok" 
+                                       id="blok" 
+                                       list="area-lingkungan-list"
+                                       maxlength="50"
+                                       value="{{ old('blok') }}"
+                                       placeholder="Ketik atau pilih gang / jalan / blok"
+                                       class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                                <datalist id="area-lingkungan-list">
+                                    @foreach ($daftarArea as $areaOption)
+                                        <option value="{{ $areaOption }}"></option>
                                     @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#52665B]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </div>
+                                </datalist>
                             </div>
                         </div>
+
+                        @if (! empty($daftarArea))
+                            <div class="flex flex-wrap items-center gap-1.5 px-0.5">
+                                <span class="text-[10px] font-bold text-[#60776C] mr-0.5">
+                                    Area RT {{ $rtNomor ?? '02' }}:
+                                </span>
+                                @foreach ($daftarArea as $areaOption)
+                                    <button type="button"
+                                            data-area-chip
+                                            data-area="{{ $areaOption }}"
+                                            onclick="applyAreaChip(this)"
+                                            class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#C6D4CA] text-[11px] font-semibold transition-all shadow-2xs cursor-pointer">
+                                        {{ $areaOption }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     <!-- ================= FIELD 4: DAMPAK & URGENSI (2 COLS) ================= -->
@@ -255,7 +271,7 @@
                                 <select name="dampak" 
                                         id="dampak" 
                                         required
-                                        class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0">
+                                        class="clay-input w-full pl-4 pr-10 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0 truncate">
                                     <option value="rendah" {{ old('dampak') === 'rendah' ? 'selected' : '' }}>
                                         Ringan — tidak mengganggu aktivitas utama
                                     </option>
@@ -266,7 +282,7 @@
                                         Berat — membahayakan keselamatan / menghentikan aktivitas
                                     </option>
                                 </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#52665B]">
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-[#52665B]">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                                     </svg>
@@ -287,7 +303,7 @@
                                 <select name="urgensi" 
                                         id="urgensi" 
                                         required
-                                        class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0">
+                                        class="clay-input w-full pl-4 pr-10 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0 truncate">
                                     <option value="rendah" {{ old('urgensi') === 'rendah' ? 'selected' : '' }}>
                                         Rendah — penanganan berkala / fleksibel
                                     </option>
@@ -671,6 +687,45 @@
             }, 600);
             updateChecklist();
         };
+
+        // 3b. Apply & sync Area Lingkungan Quick Chips
+        const blokInput = document.getElementById('blok');
+
+        function syncAreaChips() {
+            if (!blokInput) return;
+            const currentVal = blokInput.value.trim().toLowerCase();
+            document.querySelectorAll('[data-area-chip]').forEach(function (chip) {
+                const isActive = currentVal !== '' && (chip.dataset.area || '').trim().toLowerCase() === currentVal;
+                if (isActive) {
+                    chip.classList.remove('bg-white/80', 'text-[#1B4332]', 'border-[#C6D4CA]');
+                    chip.classList.add('bg-[#1B4332]', 'text-white', 'border-[#1B4332]');
+                } else {
+                    chip.classList.remove('bg-[#1B4332]', 'text-white', 'border-[#1B4332]');
+                    chip.classList.add('bg-white/80', 'text-[#1B4332]', 'border-[#C6D4CA]');
+                }
+            });
+        }
+
+        window.applyAreaChip = function (buttonEl) {
+            if (!blokInput || !buttonEl) return;
+            const areaName = buttonEl.dataset.area || '';
+            // Toggle off jika chip yang sama diklik ulang
+            if (blokInput.value.trim().toLowerCase() === areaName.trim().toLowerCase()) {
+                blokInput.value = '';
+            } else {
+                blokInput.value = areaName;
+                blokInput.classList.add('ring-2', 'ring-[#2D6A4F]/50');
+                setTimeout(function () {
+                    blokInput.classList.remove('ring-2', 'ring-[#2D6A4F]/50');
+                }, 500);
+            }
+            syncAreaChips();
+        };
+
+        if (blokInput) {
+            blokInput.addEventListener('input', syncAreaChips);
+            syncAreaChips();
+        }
 
         // 4. Uraian character counter & readiness
         function updateUraianCounter() {

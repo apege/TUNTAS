@@ -78,4 +78,12 @@ class Wilayah extends Model
     {
         return $this->hasMany(Pengumuman::class, 'wilayah_id');
     }
+
+    /**
+     * Relasi ke daftar Area Lingkungan (jalan/gang/blok/patokan) di RT ini.
+     */
+    public function areaLingkungans(): HasMany
+    {
+        return $this->hasMany(AreaLingkungan::class, 'wilayah_id');
+    }
 }

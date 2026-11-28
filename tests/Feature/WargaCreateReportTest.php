@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AreaLingkungan;
 use App\Models\Kategori;
 use App\Models\Lampiran;
 use App\Models\Notifikasi;
@@ -230,5 +231,54 @@ class WargaCreateReportTest extends TestCase
         $response->assertSeeInOrder(['Sampah', 'Drainase', 'Jalan', 'Fasilitas Umum', 'Penerangan']);
         $response->assertSee('Panduan Kategori');
         $response->assertSee('Saran judul cepat:');
+    }
+
+    public function test_area_lingkungan_diambil_dinamis_dari_database_per_rt_dan_menerima_input_bebas(): void
+    {
+        AreaLingkungan::create([
+            'id' => (string) Str::uuid(),
+            'wilayah_id' => $this->rt->id,
+            'nama' => 'Jl. Curug Candung (Jalan Utama)',
+            'jenis' => 'jalan',
+            'aktif' => true,
+        ]);
+
+        Report::create([
+            'id' => (string) Str::uuid(),
+            'kode' => 'LAP-202611-9001',
+            'pelapor_id' => $this->wargaUser->id,
+            'wilayah_id' => $this->rt->id,
+            'kategori_id' => $this->kategoriSampah->id,
+            'judul' => 'Sampah di Gang Buntu',
+            'uraian' => 'Tumpukan sampah belum diangkut di sekitar area gang buntu warga.',
+            'lokasi_detail' => 'Jl. Curug Candung Gang H. Umar',
+            'blok' => 'Gang H. Umar',
+            'dampak' => 'sedang',
+            'urgensi' => 'sedang',
+            'status_penerimaan' => 'baru',
+        ]);
+
+        $createResponse = $this->actingAs($this->wargaUser)->get(route('warga.laporan.create'));
+
+        $createResponse->assertOk();
+        $createResponse->assertSee('Jl. Curug Candung (Jalan Utama)');
+        $createResponse->assertSee('Gang H. Umar');
+
+        // Warga mengetik area bebas non-komplek baru
+        $submitResponse = $this->actingAs($this->wargaUser)->post(route('warga.laporan.store'), [
+            'kategori_id' => $this->kategoriSampah->id,
+            'judul' => 'Saluran Air Tersumbat di Pertigaan Warung',
+            'lokasi_detail' => 'Depan warung Ibu Sari Jl. Curug Candung',
+            'blok' => 'Gang Masjid Al-Ikhlas',
+            'dampak' => 'sedang',
+            'urgensi' => 'tinggi',
+            'uraian' => 'Saluran air di pertigaan warung Ibu Sari meluap saat hujan deras karena tersumbat sampah.',
+        ]);
+
+        $submitResponse->assertRedirect(route('warga.dashboard'));
+        $this->assertDatabaseHas('reports', [
+            'pelapor_id' => $this->wargaUser->id,
+            'blok' => 'Gang Masjid Al-Ikhlas',
+        ]);
     }
 }

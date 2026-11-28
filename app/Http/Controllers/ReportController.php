@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReportRequest;
+use App\Models\AreaLingkungan;
 use App\Models\Kategori;
 use App\Models\Lampiran;
 use App\Models\Notifikasi;
@@ -58,14 +59,8 @@ class ReportController extends Controller
             ->sortBy('sort_order')
             ->values();
 
-        // 3. Pilihan Area Lingkungan / Blok
-        $daftarBlok = [
-            'Blok A',
-            'Blok B',
-            'Blok C',
-            'Blok D',
-            'Lainnya / Luar Blok',
-        ];
+        // 3. Pilihan Area Lingkungan Dinamis dari Database (Master Area RT + Riwayat Area Laporan Warga)
+        $daftarArea = $this->resolveAreaLingkungan($user);
 
         // 4. Jumlah Laporan Pengguna (untuk badge sidebar)
         $totalLaporanSaya = $user ? Report::where('pelapor_id', $user->id)->count() : 0;
@@ -76,7 +71,7 @@ class ReportController extends Controller
         return view('dashboard.buat_laporan', array_merge($profil, [
             'user' => $user,
             'kategoris' => $kategoris,
-            'daftarBlok' => $daftarBlok,
+            'daftarArea' => $daftarArea,
             'totalLaporanSaya' => $totalLaporanSaya,
             'notifikasis' => $notifikasiData['list'],
             'unreadNotifikasiCount' => $notifikasiData['unread_count'],
@@ -112,7 +107,7 @@ class ReportController extends Controller
                 'judul' => $validated['judul'],
                 'uraian' => $validated['uraian'],
                 'lokasi_detail' => $validated['lokasi_detail'],
-                'blok' => $validated['blok'] ?? null,
+                'blok' => filled($validated['blok'] ?? null) ? trim((string) $validated['blok']) : null,
                 'dampak' => $validated['dampak'],
                 'urgensi' => $validated['urgensi'],
                 'status_penerimaan' => 'baru',
@@ -340,6 +335,54 @@ class ReportController extends Controller
             'kelurahan' => $kelurahan,
             'tanggalHariIni' => now()->locale('id')->isoFormat('dddd, D MMMM Y'),
         ];
+    }
+
+    /**
+     * Resolusi daftar area lingkungan (jalan/gang/blok/patokan) secara dinamis per RT:
+     * menggabungkan data master `area_lingkungans` dengan area historis dari laporan RT terkait.
+     *
+     * @return list<string>
+     */
+    protected function resolveAreaLingkungan(?User $user): array
+    {
+        $wilayahId = null;
+
+        if ($user && $user->wilayah) {
+            if ($user->wilayah->tingkat === 'rt') {
+                $wilayahId = $user->wilayah->id;
+            } else {
+                $wilayahId = Wilayah::where('parent_id', $user->wilayah->id)
+                    ->where('tingkat', 'rt')
+                    ->value('id');
+            }
+        }
+
+        if (! $wilayahId) {
+            $wilayahId = Wilayah::where('tingkat', 'rt')->value('id');
+        }
+
+        if (! $wilayahId) {
+            return [];
+        }
+
+        $masterAreas = AreaLingkungan::where('wilayah_id', $wilayahId)
+            ->where('aktif', true)
+            ->orderBy('created_at')
+            ->pluck('nama');
+
+        $reportedAreas = Report::where('wilayah_id', $wilayahId)
+            ->whereNotNull('blok')
+            ->where('blok', '!=', '')
+            ->distinct()
+            ->pluck('blok');
+
+        return $masterAreas
+            ->merge($reportedAreas)
+            ->map(fn (string $nama): string => trim($nama))
+            ->filter()
+            ->unique(fn (string $nama): string => strtolower($nama))
+            ->values()
+            ->all();
     }
 
     /**

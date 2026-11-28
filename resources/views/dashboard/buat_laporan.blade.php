@@ -6,6 +6,25 @@
 @php
     $selectedKategoriId = old('kategori_id', $kategoris->first()->id ?? '');
     $initialKategori = $kategoris->firstWhere('id', $selectedKategoriId) ?? $kategoris->first();
+
+    $dampakOptions = [
+        'rendah' => ['label' => 'Ringan', 'desc' => 'Tidak mengganggu aktivitas utama', 'dot' => '#16A34A'],
+        'sedang' => ['label' => 'Sedang', 'desc' => 'Akses / kenyamanan terganggu', 'dot' => '#D97706'],
+        'tinggi' => ['label' => 'Berat', 'desc' => 'Membahayakan keselamatan / aktivitas terhenti', 'dot' => '#DC2626'],
+    ];
+
+    $urgensiOptions = [
+        'rendah' => ['label' => 'Rendah', 'desc' => 'Penanganan berkala / fleksibel', 'dot' => '#64748B'],
+        'sedang' => ['label' => 'Sedang', 'desc' => 'Perlu segera ditangani pengurus', 'dot' => '#0284C7'],
+        'tinggi' => ['label' => 'Tinggi', 'desc' => 'Butuh penanganan cepat', 'dot' => '#EA580C'],
+        'mendesak' => ['label' => 'Darurat', 'desc' => 'Butuh tindakan langsung di lapangan', 'dot' => '#DC2626'],
+    ];
+
+    $selectedDampak = old('dampak', 'sedang');
+    $selectedUrgensi = old('urgensi', 'sedang');
+    $activeDampak = $dampakOptions[$selectedDampak] ?? $dampakOptions['sedang'];
+    $activeUrgensi = $urgensiOptions[$selectedUrgensi] ?? $urgensiOptions['sedang'];
+    $quickAreaChips = collect($daftarArea ?? [])->where('is_master', true)->take(4)->values();
 @endphp
 
 <div>
@@ -202,126 +221,221 @@
                                class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
                     </div>
 
-                    <!-- ================= FIELD 3: LOKASI & AREA LINGKUNGAN (2 COLS) ================= -->
+                    <!-- ================= FIELD 3: LOKASI & AREA LINGKUNGAN (2 COLS WITH CUSTOM AUTOCOMPLETE) ================= -->
                     <div class="space-y-2.5">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
+                            <!-- Lokasi Masalah with Custom Autocomplete -->
+                            <div class="relative" id="lokasi-autocomplete-wrap">
                                 <label for="lokasi_detail" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
                                     Lokasi masalah <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" 
-                                       name="lokasi_detail" 
-                                       id="lokasi_detail" 
-                                       value="{{ old('lokasi_detail') }}"
-                                       placeholder="Nama jalan, gang, atau patokan"
-                                       required
-                                       class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                                <div class="relative">
+                                    <input type="text" 
+                                           name="lokasi_detail" 
+                                           id="lokasi_detail" 
+                                           autocomplete="off"
+                                           value="{{ old('lokasi_detail') }}"
+                                           placeholder="Nama jalan, gang, atau patokan"
+                                           required
+                                           class="clay-input w-full pl-4 pr-9 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                                    <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#798D82]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+
+                                <!-- Floating Custom Autocomplete Panel (Lokasi) -->
+                                <div id="lokasi-autocomplete-menu"
+                                     class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-56 overflow-y-auto custom-scrollbar space-y-1">
+                                </div>
                             </div>
 
-                            <div>
+                            <!-- Area Lingkungan with Custom Clay Autocomplete Combo -->
+                            <div class="relative" id="blok-autocomplete-wrap">
                                 <label for="blok" class="block text-xs sm:text-sm font-extrabold text-[#142D21] mb-2">
                                     Area lingkungan <span class="text-[11px] font-normal text-[#6B8074]">(opsional)</span>
                                 </label>
-                                <input type="text" 
-                                       name="blok" 
-                                       id="blok" 
-                                       list="area-lingkungan-list"
-                                       maxlength="50"
-                                       value="{{ old('blok') }}"
-                                       placeholder="Ketik atau pilih gang / jalan / blok"
-                                       class="clay-input w-full px-4 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
-                                <datalist id="area-lingkungan-list">
-                                    @foreach ($daftarArea as $areaOption)
-                                        <option value="{{ $areaOption }}"></option>
-                                    @endforeach
-                                </datalist>
+                                <div class="relative">
+                                    <input type="text" 
+                                           name="blok" 
+                                           id="blok" 
+                                           autocomplete="off"
+                                           maxlength="50"
+                                           value="{{ old('blok') }}"
+                                           placeholder="Ketik atau pilih gang / jalan / blok"
+                                           class="clay-input w-full pl-4 pr-14 py-3 text-xs sm:text-sm text-[#142D21] placeholder-[#798D82] focus:ring-0">
+                                    <div class="absolute inset-y-0 right-2.5 flex items-center gap-1">
+                                        <button type="button"
+                                                id="blok-clear-btn"
+                                                onclick="clearBlokInput()"
+                                                class="hidden w-6 h-6 rounded-full hover:bg-black/5 text-[#6A7F73] hover:text-[#142D21] flex items-center justify-center text-xs font-bold transition-colors"
+                                                title="Kosongkan area"
+                                                aria-label="Kosongkan area">
+                                            ✕
+                                        </button>
+                                        <button type="button"
+                                                id="blok-toggle-btn"
+                                                onclick="toggleBlokAutocomplete()"
+                                                class="w-6 h-6 rounded-full hover:bg-black/5 text-[#52665B] flex items-center justify-center transition-transform"
+                                                title="Lihat daftar area RT"
+                                                aria-label="Lihat daftar area RT">
+                                            <svg id="blok-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Custom Autocomplete Panel (Area Lingkungan) -->
+                                <div id="blok-autocomplete-menu"
+                                     class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 max-h-60 overflow-y-auto custom-scrollbar space-y-1">
+                                </div>
                             </div>
                         </div>
 
-                        @if (! empty($daftarArea))
+                        @if ($quickAreaChips->isNotEmpty())
                             <div class="flex flex-wrap items-center gap-1.5 px-0.5">
                                 <span class="text-[10px] font-bold text-[#60776C] mr-0.5">
-                                    Area RT {{ $rtNomor ?? '02' }}:
+                                    Saran cepat RT {{ $rtNomor ?? '02' }}:
                                 </span>
-                                @foreach ($daftarArea as $areaOption)
+                                @foreach ($quickAreaChips as $chip)
                                     <button type="button"
                                             data-area-chip
-                                            data-area="{{ $areaOption }}"
+                                            data-area="{{ $chip['nama'] }}"
                                             onclick="applyAreaChip(this)"
                                             class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#C6D4CA] text-[11px] font-semibold transition-all shadow-2xs cursor-pointer">
-                                        {{ $areaOption }}
+                                        {{ $chip['nama'] }}
                                     </button>
                                 @endforeach
                             </div>
                         @endif
                     </div>
 
-                    <!-- ================= FIELD 4: DAMPAK & URGENSI (2 COLS) ================= -->
+                    <!-- ================= FIELD 4: DAMPAK & URGENSI (CUSTOM CLAY DROPDOWNS) ================= -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+                        <!-- Custom Dropdown 1: Dampak bagi warga -->
+                        <div class="relative" id="custom-select-dampak">
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <label for="dampak" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
+                                <label id="dampak-label" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
                                     Dampak bagi warga <span class="text-red-500">*</span>
                                 </label>
                                 <span id="dampak-auto-badge" class="hidden text-[10px] font-bold text-[#2D6A4F] bg-[#E8F1EC] px-2 py-0.5 rounded-full">
                                     Rekomendasi
                                 </span>
                             </div>
-                            <div class="relative">
-                                <select name="dampak" 
-                                        id="dampak" 
-                                        required
-                                        class="clay-input w-full pl-4 pr-10 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0 truncate">
-                                    <option value="rendah" {{ old('dampak') === 'rendah' ? 'selected' : '' }}>
-                                        Ringan — tidak mengganggu aktivitas utama
-                                    </option>
-                                    <option value="sedang" {{ old('dampak', 'sedang') === 'sedang' ? 'selected' : '' }}>
-                                        Sedang — akses / kenyamanan terganggu
-                                    </option>
-                                    <option value="tinggi" {{ old('dampak') === 'tinggi' ? 'selected' : '' }}>
-                                        Berat — membahayakan keselamatan / menghentikan aktivitas
-                                    </option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-[#52665B]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                                    </svg>
+
+                            <input type="hidden" name="dampak" id="dampak" value="{{ $selectedDampak }}" required>
+
+                            <button type="button"
+                                    id="dampak-trigger"
+                                    onclick="toggleCustomSelect('dampak', event)"
+                                    aria-haspopup="listbox"
+                                    aria-expanded="false"
+                                    aria-labelledby="dampak-label"
+                                    class="clay-select-trigger w-full px-4 py-3 flex items-center justify-between gap-2.5 text-left">
+                                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                    <span id="dampak-trigger-dot" class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: {{ $activeDampak['dot'] }}"></span>
+                                    <div class="min-w-0 flex-1 truncate text-xs sm:text-sm">
+                                        <span id="dampak-trigger-label" class="font-extrabold text-[#122A1E]">{{ $activeDampak['label'] }}</span>
+                                        <span class="text-[#798D82] mx-1">—</span>
+                                        <span id="dampak-trigger-desc" class="text-[#4E6457] font-medium">{{ $activeDampak['desc'] }}</span>
+                                    </div>
                                 </div>
+                                <svg id="dampak-chevron" class="w-4 h-4 text-[#52665B] shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <!-- Floating Clay Options Panel -->
+                            <div id="dampak-menu"
+                                 role="listbox"
+                                 class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 space-y-1">
+                                @foreach ($dampakOptions as $optValue => $optMeta)
+                                    <button type="button"
+                                            role="option"
+                                            data-select-option="dampak"
+                                            data-value="{{ $optValue }}"
+                                            data-label="{{ $optMeta['label'] }}"
+                                            data-desc="{{ $optMeta['desc'] }}"
+                                            data-dot="{{ $optMeta['dot'] }}"
+                                            onclick="selectCustomOption('dampak', '{{ $optValue }}')"
+                                            class="clay-dropdown-option w-full p-2.5 sm:p-3 flex items-start justify-between gap-2.5 text-left {{ $selectedDampak === $optValue ? 'is-selected' : '' }}">
+                                        <div class="flex items-start gap-2.5 min-w-0">
+                                            <span class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style="background-color: {{ $optMeta['dot'] }}"></span>
+                                            <div class="min-w-0">
+                                                <span class="block text-xs sm:text-sm font-extrabold text-[#122A1E] leading-tight">{{ $optMeta['label'] }}</span>
+                                                <span class="block text-[11px] text-[#52645B] mt-0.5 leading-snug">{{ $optMeta['desc'] }}</span>
+                                            </div>
+                                        </div>
+                                        <span data-opt-check class="w-5 h-5 rounded-full bg-[#1B4332] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 {{ $selectedDampak === $optValue ? '' : 'hidden' }}">
+                                            ✓
+                                        </span>
+                                    </button>
+                                @endforeach
                             </div>
                         </div>
 
-                        <div>
+                        <!-- Custom Dropdown 2: Urgensi penanganan -->
+                        <div class="relative" id="custom-select-urgensi">
                             <div class="flex items-center justify-between gap-2 mb-2">
-                                <label for="urgensi" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
+                                <label id="urgensi-label" class="block text-xs sm:text-sm font-extrabold text-[#142D21]">
                                     Urgensi penanganan <span class="text-red-500">*</span>
                                 </label>
                                 <span id="urgensi-auto-badge" class="hidden text-[10px] font-bold text-[#2D6A4F] bg-[#E8F1EC] px-2 py-0.5 rounded-full">
                                     Rekomendasi
                                 </span>
                             </div>
-                            <div class="relative">
-                                <select name="urgensi" 
-                                        id="urgensi" 
-                                        required
-                                        class="clay-input w-full pl-4 pr-10 py-3 text-xs sm:text-sm text-[#142D21] appearance-none cursor-pointer focus:ring-0 truncate">
-                                    <option value="rendah" {{ old('urgensi') === 'rendah' ? 'selected' : '' }}>
-                                        Rendah — penanganan berkala / fleksibel
-                                    </option>
-                                    <option value="sedang" {{ old('urgensi', 'sedang') === 'sedang' ? 'selected' : '' }}>
-                                        Sedang — perlu segera ditangani
-                                    </option>
-                                    <option value="tinggi" {{ old('urgensi') === 'tinggi' ? 'selected' : '' }}>
-                                        Tinggi — butuh penanganan cepat
-                                    </option>
-                                    <option value="mendesak" {{ old('urgensi') === 'mendesak' ? 'selected' : '' }}>
-                                        Darurat — butuh tindakan langsung
-                                    </option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#52665B]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                                    </svg>
+
+                            <input type="hidden" name="urgensi" id="urgensi" value="{{ $selectedUrgensi }}" required>
+
+                            <button type="button"
+                                    id="urgensi-trigger"
+                                    onclick="toggleCustomSelect('urgensi', event)"
+                                    aria-haspopup="listbox"
+                                    aria-expanded="false"
+                                    aria-labelledby="urgensi-label"
+                                    class="clay-select-trigger w-full px-4 py-3 flex items-center justify-between gap-2.5 text-left">
+                                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                    <span id="urgensi-trigger-dot" class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: {{ $activeUrgensi['dot'] }}"></span>
+                                    <div class="min-w-0 flex-1 truncate text-xs sm:text-sm">
+                                        <span id="urgensi-trigger-label" class="font-extrabold text-[#122A1E]">{{ $activeUrgensi['label'] }}</span>
+                                        <span class="text-[#798D82] mx-1">—</span>
+                                        <span id="urgensi-trigger-desc" class="text-[#4E6457] font-medium">{{ $activeUrgensi['desc'] }}</span>
+                                    </div>
                                 </div>
+                                <svg id="urgensi-chevron" class="w-4 h-4 text-[#52665B] shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <!-- Floating Clay Options Panel -->
+                            <div id="urgensi-menu"
+                                 role="listbox"
+                                 class="clay-dropdown-panel hidden absolute left-0 right-0 mt-2 p-2 z-30 space-y-1">
+                                @foreach ($urgensiOptions as $optValue => $optMeta)
+                                    <button type="button"
+                                            role="option"
+                                            data-select-option="urgensi"
+                                            data-value="{{ $optValue }}"
+                                            data-label="{{ $optMeta['label'] }}"
+                                            data-desc="{{ $optMeta['desc'] }}"
+                                            data-dot="{{ $optMeta['dot'] }}"
+                                            onclick="selectCustomOption('urgensi', '{{ $optValue }}')"
+                                            class="clay-dropdown-option w-full p-2.5 sm:p-3 flex items-start justify-between gap-2.5 text-left {{ $selectedUrgensi === $optValue ? 'is-selected' : '' }}">
+                                        <div class="flex items-start gap-2.5 min-w-0">
+                                            <span class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style="background-color: {{ $optMeta['dot'] }}"></span>
+                                            <div class="min-w-0">
+                                                <span class="block text-xs sm:text-sm font-extrabold text-[#122A1E] leading-tight">{{ $optMeta['label'] }}</span>
+                                                <span class="block text-[11px] text-[#52645B] mt-0.5 leading-snug">{{ $optMeta['desc'] }}</span>
+                                            </div>
+                                        </div>
+                                        <span data-opt-check class="w-5 h-5 rounded-full bg-[#1B4332] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 {{ $selectedUrgensi === $optValue ? '' : 'hidden' }}">
+                                            ✓
+                                        </span>
+                                    </button>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -532,38 +646,99 @@
 
 <!-- =========================================================================
      PURE VANILLA JS FOR FORM INTERACTIVITY
-     (Kategori Selection, Contextual Tips, Quick Title Chips, Character Count, Photo Upload)
+     (Kategori Selection, Custom Clay Autocomplete, Custom Clay Selects, Checklist, Photo)
      ========================================================================= -->
 <script>
     (function () {
         let userModifiedDampak = {{ old('dampak') ? 'true' : 'false' }};
         let userModifiedUrgensi = {{ old('urgensi') ? 'true' : 'false' }};
 
+        const areaDataset = @json($daftarArea ?? []);
+        const lokasiDataset = @json($daftarLokasi ?? []);
+
         const kategoriInput = document.getElementById('kategori_id');
         const judulInput = document.getElementById('judul');
         const lokasiInput = document.getElementById('lokasi_detail');
-        const dampakSelect = document.getElementById('dampak');
-        const urgensiSelect = document.getElementById('urgensi');
+        const blokInput = document.getElementById('blok');
+        const dampakInput = document.getElementById('dampak');
+        const urgensiInput = document.getElementById('urgensi');
         const uraianInput = document.getElementById('uraian');
         const fotoInput = document.getElementById('foto-input');
         const dropzone = document.getElementById('foto-dropzone');
 
-        // 1. Track manual changes to Dampak & Urgensi
-        if (dampakSelect) {
-            dampakSelect.addEventListener('change', function () {
-                userModifiedDampak = true;
-                const badge = document.getElementById('dampak-auto-badge');
-                if (badge) badge.classList.add('hidden');
+        // 1. Custom Clay Select Dropdowns (Dampak & Urgensi)
+        function closeAllCustomSelects(exceptField = null) {
+            ['dampak', 'urgensi'].forEach(function (field) {
+                if (field === exceptField) return;
+                const menu = document.getElementById(field + '-menu');
+                const trigger = document.getElementById(field + '-trigger');
+                const chevron = document.getElementById(field + '-chevron');
+                if (menu) menu.classList.add('hidden');
+                if (trigger) {
+                    trigger.classList.remove('is-open');
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+                if (chevron) chevron.classList.remove('rotate-180');
             });
         }
 
-        if (urgensiSelect) {
-            urgensiSelect.addEventListener('change', function () {
-                userModifiedUrgensi = true;
-                const badge = document.getElementById('urgensi-auto-badge');
-                if (badge) badge.classList.add('hidden');
+        window.toggleCustomSelect = function (field, event) {
+            if (event) event.stopPropagation();
+            closeAllAutocompletes();
+            closeAllCustomSelects(field);
+
+            const menu = document.getElementById(field + '-menu');
+            const trigger = document.getElementById(field + '-trigger');
+            const chevron = document.getElementById(field + '-chevron');
+            if (!menu || !trigger) return;
+
+            const isHidden = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            trigger.classList.toggle('is-open', isHidden);
+            trigger.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            if (chevron) chevron.classList.toggle('rotate-180', isHidden);
+        };
+
+        window.selectCustomOption = function (field, value, isManual = true) {
+            const hiddenInput = document.getElementById(field);
+            const options = document.querySelectorAll('[data-select-option="' + field + '"]');
+            let chosenOption = null;
+
+            options.forEach(function (opt) {
+                const checkEl = opt.querySelector('[data-opt-check]');
+                if (opt.dataset.value === String(value)) {
+                    chosenOption = opt;
+                    opt.classList.add('is-selected');
+                    if (checkEl) checkEl.classList.remove('hidden');
+                } else {
+                    opt.classList.remove('is-selected');
+                    if (checkEl) checkEl.classList.add('hidden');
+                }
             });
-        }
+
+            if (hiddenInput && chosenOption) {
+                hiddenInput.value = value;
+                const dotEl = document.getElementById(field + '-trigger-dot');
+                const labelEl = document.getElementById(field + '-trigger-label');
+                const descEl = document.getElementById(field + '-trigger-desc');
+                if (dotEl && chosenOption.dataset.dot) dotEl.style.backgroundColor = chosenOption.dataset.dot;
+                if (labelEl) labelEl.textContent = chosenOption.dataset.label || '';
+                if (descEl) descEl.textContent = chosenOption.dataset.desc || '';
+            }
+
+            if (isManual) {
+                if (field === 'dampak') {
+                    userModifiedDampak = true;
+                    const badge = document.getElementById('dampak-auto-badge');
+                    if (badge) badge.classList.add('hidden');
+                } else if (field === 'urgensi') {
+                    userModifiedUrgensi = true;
+                    const badge = document.getElementById('urgensi-auto-badge');
+                    if (badge) badge.classList.add('hidden');
+                }
+                closeAllCustomSelects();
+            }
+        };
 
         // 2. Category selection handler
         window.selectKategori = function (kategoriId, applySuggestions = true) {
@@ -658,15 +833,15 @@
                 }
             }
 
-            // Smart suggestion for Dampak & Urgensi when user hasn't manually customized them
+            // Smart suggestion for Custom Dampak & Urgensi dropdowns
             if (applySuggestions) {
-                if (dampakSelect && !userModifiedDampak && activeCard.dataset.suggestedDampak) {
-                    dampakSelect.value = activeCard.dataset.suggestedDampak;
+                if (dampakInput && !userModifiedDampak && activeCard.dataset.suggestedDampak) {
+                    window.selectCustomOption('dampak', activeCard.dataset.suggestedDampak, false);
                     const badge = document.getElementById('dampak-auto-badge');
                     if (badge) badge.classList.remove('hidden');
                 }
-                if (urgensiSelect && !userModifiedUrgensi && activeCard.dataset.suggestedUrgensi) {
-                    urgensiSelect.value = activeCard.dataset.suggestedUrgensi;
+                if (urgensiInput && !userModifiedUrgensi && activeCard.dataset.suggestedUrgensi) {
+                    window.selectCustomOption('urgensi', activeCard.dataset.suggestedUrgensi, false);
                     const badge = document.getElementById('urgensi-auto-badge');
                     if (badge) badge.classList.remove('hidden');
                 }
@@ -688,8 +863,56 @@
             updateChecklist();
         };
 
-        // 3b. Apply & sync Area Lingkungan Quick Chips
-        const blokInput = document.getElementById('blok');
+        // 3b. Reusable Custom Clay Autocomplete Engine (Area Lingkungan & Lokasi Masalah)
+        function createHighlightedSpan(text, query) {
+            const span = document.createElement('span');
+            span.className = 'truncate';
+            if (!query) {
+                span.textContent = text;
+                return span;
+            }
+            const lowerText = text.toLowerCase();
+            const idx = lowerText.indexOf(query.toLowerCase());
+            if (idx === -1) {
+                span.textContent = text;
+                return span;
+            }
+            span.appendChild(document.createTextNode(text.slice(0, idx)));
+            const strong = document.createElement('strong');
+            strong.className = 'font-black text-[#1B4332] underline decoration-[#2D6A4F]/40';
+            strong.textContent = text.slice(idx, idx + query.length);
+            span.appendChild(strong);
+            span.appendChild(document.createTextNode(text.slice(idx + query.length)));
+            return span;
+        }
+
+        const blokMenu = document.getElementById('blok-autocomplete-menu');
+        const blokChevron = document.getElementById('blok-chevron');
+        const blokClearBtn = document.getElementById('blok-clear-btn');
+        const lokasiMenu = document.getElementById('lokasi-autocomplete-menu');
+        let blokHighlightIndex = -1;
+        let lokasiHighlightIndex = -1;
+
+        function closeAllAutocompletes(except = null) {
+            if (except !== 'blok' && blokMenu) {
+                blokMenu.classList.add('hidden');
+                if (blokChevron) blokChevron.classList.remove('rotate-180');
+                blokHighlightIndex = -1;
+            }
+            if (except !== 'lokasi' && lokasiMenu) {
+                lokasiMenu.classList.add('hidden');
+                lokasiHighlightIndex = -1;
+            }
+        }
+
+        function syncBlokClearBtn() {
+            if (!blokClearBtn || !blokInput) return;
+            if (blokInput.value.trim().length > 0) {
+                blokClearBtn.classList.remove('hidden');
+            } else {
+                blokClearBtn.classList.add('hidden');
+            }
+        }
 
         function syncAreaChips() {
             if (!blokInput) return;
@@ -704,12 +927,190 @@
                     chip.classList.add('bg-white/80', 'text-[#1B4332]', 'border-[#C6D4CA]');
                 }
             });
+            syncBlokClearBtn();
         }
+
+        function renderBlokAutocomplete(showAll = false) {
+            if (!blokMenu || !blokInput) return;
+            const query = blokInput.value.trim();
+            const lowerQuery = query.toLowerCase();
+            const matches = showAll || query === ''
+                ? areaDataset
+                : areaDataset.filter(item => item.nama.toLowerCase().includes(lowerQuery));
+
+            blokMenu.innerHTML = '';
+            blokHighlightIndex = -1;
+
+            const exactMatch = areaDataset.some(item => item.nama.toLowerCase() === lowerQuery);
+
+            if (matches.length === 0 && query === '') {
+                const emptyNote = document.createElement('div');
+                emptyNote.className = 'px-3 py-2 text-xs text-[#60776C] italic';
+                emptyNote.textContent = 'Belum ada daftar area RT. Silakan ketik nama jalan atau gang secara langsung.';
+                blokMenu.appendChild(emptyNote);
+            } else {
+                matches.forEach(function (item) {
+                    const isSelected = query !== '' && item.nama.toLowerCase() === lowerQuery;
+                    const row = document.createElement('button');
+                    row.type = 'button';
+                    row.dataset.autocompleteItem = 'blok';
+                    row.className = 'clay-dropdown-option w-full px-3 py-2.5 flex items-center justify-between gap-2 text-left text-xs ' + (isSelected ? 'is-selected' : '');
+
+                    const left = document.createElement('div');
+                    left.className = 'flex items-center gap-2 min-w-0';
+                    const pin = document.createElement('span');
+                    pin.className = 'w-1.5 h-1.5 rounded-full shrink-0 ' + (item.is_master ? 'bg-[#2D6A4F]' : 'bg-[#8EA598]');
+                    left.appendChild(pin);
+                    left.appendChild(createHighlightedSpan(item.nama, showAll ? '' : query));
+
+                    const tag = document.createElement('span');
+                    tag.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ' + (item.is_master ? 'bg-[#E8F1EC] text-[#1B4332]' : 'bg-[#EFECE5] text-[#60776C]');
+                    tag.textContent = item.label || 'Area RT';
+
+                    row.appendChild(left);
+                    row.appendChild(tag);
+
+                    row.onclick = function () {
+                        blokInput.value = item.nama;
+                        syncAreaChips();
+                        closeAllAutocompletes();
+                    };
+                    blokMenu.appendChild(row);
+                });
+
+                if (query !== '' && !exactMatch) {
+                    const customBtn = document.createElement('button');
+                    customBtn.type = 'button';
+                    customBtn.dataset.autocompleteItem = 'blok';
+                    customBtn.className = 'clay-dropdown-option w-full px-3 py-2.5 flex items-center justify-between gap-2 text-left text-xs border-t border-[#E3DDD1] mt-1';
+
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'font-bold text-[#1B4332] truncate';
+                    textSpan.textContent = '+ Pakai area baru: "' + query + '"';
+
+                    const badge = document.createElement('span');
+                    badge.className = 'px-2 py-0.5 rounded-full bg-[#D8ECE0] text-[#1B4332] text-[10px] font-extrabold shrink-0';
+                    badge.textContent = 'Baru';
+
+                    customBtn.appendChild(textSpan);
+                    customBtn.appendChild(badge);
+                    customBtn.onclick = function () {
+                        blokInput.value = query;
+                        syncAreaChips();
+                        closeAllAutocompletes();
+                    };
+                    blokMenu.appendChild(customBtn);
+                }
+            }
+
+            closeAllCustomSelects();
+            closeAllAutocompletes('blok');
+            blokMenu.classList.remove('hidden');
+            if (blokChevron) blokChevron.classList.add('rotate-180');
+        }
+
+        function renderLokasiAutocomplete() {
+            if (!lokasiMenu || !lokasiInput) return;
+            const query = lokasiInput.value.trim();
+            const lowerQuery = query.toLowerCase();
+            const matches = query === ''
+                ? lokasiDataset
+                : lokasiDataset.filter(loc => loc.toLowerCase().includes(lowerQuery));
+
+            if (matches.length === 0) {
+                lokasiMenu.classList.add('hidden');
+                return;
+            }
+
+            lokasiMenu.innerHTML = '';
+            lokasiHighlightIndex = -1;
+
+            const header = document.createElement('div');
+            header.className = 'px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#6A7F73]';
+            header.textContent = query === '' ? 'Riwayat Lokasi di RT Ini' : 'Kecocokan Lokasi RT';
+            lokasiMenu.appendChild(header);
+
+            matches.forEach(function (loc) {
+                const isSelected = query !== '' && loc.toLowerCase() === lowerQuery;
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.dataset.autocompleteItem = 'lokasi';
+                row.className = 'clay-dropdown-option w-full px-3 py-2 flex items-center justify-between gap-2 text-left text-xs text-[#142D21] ' + (isSelected ? 'is-selected' : '');
+
+                const left = document.createElement('div');
+                left.className = 'flex items-center gap-2 min-w-0';
+                const dot = document.createElement('span');
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-[#2D6A4F] shrink-0';
+                left.appendChild(dot);
+                left.appendChild(createHighlightedSpan(loc, query));
+
+                row.appendChild(left);
+                row.onclick = function () {
+                    lokasiInput.value = loc;
+                    closeAllAutocompletes();
+                    updateChecklist();
+                };
+                lokasiMenu.appendChild(row);
+            });
+
+            closeAllCustomSelects();
+            closeAllAutocompletes('lokasi');
+            lokasiMenu.classList.remove('hidden');
+        }
+
+        function handleAutocompleteKeydown(e, menuEl, kind) {
+            if (!menuEl || menuEl.classList.contains('hidden')) return;
+            const items = menuEl.querySelectorAll('[data-autocomplete-item="' + kind + '"]');
+            if (items.length === 0) return;
+
+            let idx = kind === 'blok' ? blokHighlightIndex : lokasiHighlightIndex;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                idx = (idx + 1) % items.length;
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                idx = (idx - 1 + items.length) % items.length;
+            } else if (e.key === 'Enter' && idx >= 0) {
+                e.preventDefault();
+                items[idx].click();
+                return;
+            } else if (e.key === 'Escape') {
+                closeAllAutocompletes();
+                return;
+            } else {
+                return;
+            }
+
+            if (kind === 'blok') blokHighlightIndex = idx;
+            else lokasiHighlightIndex = idx;
+
+            items.forEach(function (el, i) {
+                el.classList.toggle('is-highlighted', i === idx);
+                if (i === idx) el.scrollIntoView({ block: 'nearest' });
+            });
+        }
+
+        window.toggleBlokAutocomplete = function () {
+            if (!blokMenu) return;
+            if (blokMenu.classList.contains('hidden')) {
+                renderBlokAutocomplete(true);
+                if (blokInput) blokInput.focus();
+            } else {
+                closeAllAutocompletes();
+            }
+        };
+
+        window.clearBlokInput = function () {
+            if (!blokInput) return;
+            blokInput.value = '';
+            syncAreaChips();
+            renderBlokAutocomplete(true);
+            blokInput.focus();
+        };
 
         window.applyAreaChip = function (buttonEl) {
             if (!blokInput || !buttonEl) return;
             const areaName = buttonEl.dataset.area || '';
-            // Toggle off jika chip yang sama diklik ulang
             if (blokInput.value.trim().toLowerCase() === areaName.trim().toLowerCase()) {
                 blokInput.value = '';
             } else {
@@ -720,12 +1121,52 @@
                 }, 500);
             }
             syncAreaChips();
+            closeAllAutocompletes();
         };
 
         if (blokInput) {
-            blokInput.addEventListener('input', syncAreaChips);
+            blokInput.addEventListener('focus', function () {
+                renderBlokAutocomplete(true);
+            });
+            blokInput.addEventListener('input', function () {
+                syncAreaChips();
+                renderBlokAutocomplete(false);
+            });
+            blokInput.addEventListener('keydown', function (e) {
+                handleAutocompleteKeydown(e, blokMenu, 'blok');
+            });
             syncAreaChips();
         }
+
+        if (lokasiInput) {
+            lokasiInput.addEventListener('focus', renderLokasiAutocomplete);
+            lokasiInput.addEventListener('input', renderLokasiAutocomplete);
+            lokasiInput.addEventListener('keydown', function (e) {
+                handleAutocompleteKeydown(e, lokasiMenu, 'lokasi');
+            });
+        }
+
+        // Global outside click & Escape closer
+        document.addEventListener('click', function (e) {
+            const dampakWrap = document.getElementById('custom-select-dampak');
+            const urgensiWrap = document.getElementById('custom-select-urgensi');
+            const blokWrap = document.getElementById('blok-autocomplete-wrap');
+            const lokasiWrap = document.getElementById('lokasi-autocomplete-wrap');
+
+            if ((!dampakWrap || !dampakWrap.contains(e.target)) && (!urgensiWrap || !urgensiWrap.contains(e.target))) {
+                closeAllCustomSelects();
+            }
+            if ((!blokWrap || !blokWrap.contains(e.target)) && (!lokasiWrap || !lokasiWrap.contains(e.target))) {
+                closeAllAutocompletes();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeAllCustomSelects();
+                closeAllAutocompletes();
+            }
+        });
 
         // 4. Uraian character counter & readiness
         function updateUraianCounter() {

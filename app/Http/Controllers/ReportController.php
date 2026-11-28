@@ -59,8 +59,10 @@ class ReportController extends Controller
             ->sortBy('sort_order')
             ->values();
 
-        // 3. Pilihan Area Lingkungan Dinamis dari Database (Master Area RT + Riwayat Area Laporan Warga)
-        $daftarArea = $this->resolveAreaLingkungan($user);
+        // 3. Pilihan Area Lingkungan & Saran Lokasi Dinamis dari Database per RT
+        $rtWilayahId = $this->resolveRtWilayahId($user);
+        $daftarArea = $this->resolveAreaLingkungan($rtWilayahId);
+        $daftarLokasi = $this->resolveRiwayatLokasi($rtWilayahId);
 
         // 4. Jumlah Laporan Pengguna (untuk badge sidebar)
         $totalLaporanSaya = $user ? Report::where('pelapor_id', $user->id)->count() : 0;
@@ -72,6 +74,7 @@ class ReportController extends Controller
             'user' => $user,
             'kategoris' => $kategoris,
             'daftarArea' => $daftarArea,
+            'daftarLokasi' => $daftarLokasi,
             'totalLaporanSaya' => $totalLaporanSaya,
             'notifikasis' => $notifikasiData['list'],
             'unreadNotifikasiCount' => $notifikasiData['unread_count'],
@@ -338,49 +341,95 @@ class ReportController extends Controller
     }
 
     /**
-     * Resolusi daftar area lingkungan (jalan/gang/blok/patokan) secara dinamis per RT:
-     * menggabungkan data master `area_lingkungans` dengan area historis dari laporan RT terkait.
-     *
-     * @return list<string>
+     * Resolusi ID wilayah tingkat RT milik pengguna (dengan fallback ke RT pertama).
      */
-    protected function resolveAreaLingkungan(?User $user): array
+    protected function resolveRtWilayahId(?User $user): ?string
     {
-        $wilayahId = null;
-
         if ($user && $user->wilayah) {
             if ($user->wilayah->tingkat === 'rt') {
-                $wilayahId = $user->wilayah->id;
-            } else {
-                $wilayahId = Wilayah::where('parent_id', $user->wilayah->id)
-                    ->where('tingkat', 'rt')
-                    ->value('id');
+                return $user->wilayah->id;
+            }
+
+            $childRtId = Wilayah::where('parent_id', $user->wilayah->id)
+                ->where('tingkat', 'rt')
+                ->value('id');
+
+            if ($childRtId) {
+                return $childRtId;
             }
         }
 
-        if (! $wilayahId) {
-            $wilayahId = Wilayah::where('tingkat', 'rt')->value('id');
-        }
+        return Wilayah::where('tingkat', 'rt')->value('id');
+    }
 
+    /**
+     * Resolusi daftar area lingkungan (jalan/gang/blok/patokan) secara dinamis per RT:
+     * menggabungkan data master `area_lingkungans` dengan area historis dari laporan RT terkait.
+     *
+     * @return list<array{nama: string, label: string, is_master: bool}>
+     */
+    protected function resolveAreaLingkungan(?string $wilayahId): array
+    {
         if (! $wilayahId) {
             return [];
         }
 
+        $jenisLabels = [
+            'jalan' => 'Jalan',
+            'gang' => 'Gang',
+            'blok' => 'Blok',
+            'area' => 'Area RT',
+        ];
+
         $masterAreas = AreaLingkungan::where('wilayah_id', $wilayahId)
             ->where('aktif', true)
             ->orderBy('created_at')
-            ->pluck('nama');
+            ->get(['nama', 'jenis'])
+            ->map(fn (AreaLingkungan $area): array => [
+                'nama' => trim($area->nama),
+                'label' => $jenisLabels[$area->jenis] ?? 'Area RT',
+                'is_master' => true,
+            ]);
 
         $reportedAreas = Report::where('wilayah_id', $wilayahId)
             ->whereNotNull('blok')
             ->where('blok', '!=', '')
-            ->distinct()
-            ->pluck('blok');
+            ->latest('created_at')
+            ->pluck('blok')
+            ->map(fn (string $nama): array => [
+                'nama' => trim($nama),
+                'label' => 'Riwayat',
+                'is_master' => false,
+            ]);
 
         return $masterAreas
             ->merge($reportedAreas)
-            ->map(fn (string $nama): string => trim($nama))
+            ->filter(fn (array $item): bool => $item['nama'] !== '')
+            ->unique(fn (array $item): string => strtolower($item['nama']))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Ambil daftar lokasi detail unik dari laporan terbaru RT untuk autocomplete lokasi.
+     *
+     * @return list<string>
+     */
+    protected function resolveRiwayatLokasi(?string $wilayahId): array
+    {
+        if (! $wilayahId) {
+            return [];
+        }
+
+        return Report::where('wilayah_id', $wilayahId)
+            ->whereNotNull('lokasi_detail')
+            ->where('lokasi_detail', '!=', '')
+            ->latest('created_at')
+            ->pluck('lokasi_detail')
+            ->map(fn (string $lokasi): string => trim($lokasi))
             ->filter()
-            ->unique(fn (string $nama): string => strtolower($nama))
+            ->unique(fn (string $lokasi): string => strtolower($lokasi))
+            ->take(10)
             ->values()
             ->all();
     }
